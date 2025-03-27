@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
 import * as Font from 'expo-font'; 
+import axios from 'axios';
 
 const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
-
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [admin] = useState(true); 
+  
   useEffect(() => {
     const loadFonts = async () => {
       await Font.loadAsync({
@@ -16,6 +21,24 @@ const Login = () => {
 
     loadFonts();
   }, []);
+
+  const handleCadastro = async () => {
+    try {
+      const response = await axios.post('(http://localhost:8081/api/usuario/cadastrar', {
+        nome: nome,
+        email: email,
+        senha: senha,
+        admin: admin,
+      });
+
+      if (response.status === 200) {
+        alert('Usuário cadastrado com sucesso!');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao cadastrar usuário.');
+    }
+  };
 
   if (!fontLoaded) {
     return <Text>Carregando fontes...</Text>;
@@ -35,6 +58,8 @@ const Login = () => {
         style={styles.input}
         placeholder="Nome"
         placeholderTextColor="#B8B8B8" 
+        value={nome}
+        onChangeText={setNome}
       />
 
       <TextInput
@@ -42,18 +67,22 @@ const Login = () => {
         placeholder="Email"
         keyboardType="email-address"
         placeholderTextColor="#B8B8B8" 
+        value={email}
+        onChangeText={setEmail}
       />
+      
       <TextInput
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
         placeholderTextColor="#B8B8B8" 
+        value={senha}
+        onChangeText={setSenha}
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
+      <TouchableOpacity style={styles.button} onPress={handleCadastro}>
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
-
     </View>
   );
 };
@@ -98,16 +127,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Roboto',
     textAlign: 'center',
-  },
-  registerContainer: {
-    marginTop: 20,  
-  },
-  registerText: {
-    color: '#F5F5F5',
-    fontSize: 16,
-  },
-  linkText: {
-    color: '#B8B8B8', 
   },
 });
 
