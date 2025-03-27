@@ -1,10 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Batatatinha</Text>
+      <Image
+        source={require('../assets/project_images/logotipo.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
       <StatusBar style="auto" />
     </View>
   );
@@ -13,8 +17,13 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: '#2E2E2E',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    flex: 2,
+    width: 250,
+    height: 'auto',
   },
 });
