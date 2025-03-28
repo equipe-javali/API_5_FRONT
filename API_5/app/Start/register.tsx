@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal } from 'react-native';
 import * as Font from 'expo-font'; 
-import axios from 'axios';
 
 const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [admin] = useState(true); 
+  const admin = true; 
+  const [modalMessage, setModalMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   
   useEffect(() => {
     const loadFonts = async () => {
@@ -23,25 +25,66 @@ const Login = () => {
   }, []);
 
   const handleCadastro = async () => {
+    if (!nome || !email || !senha) {
+      setModalMessage('Por favor, preencha todos os campos.');
+      setIsError(true);
+      setModalVisible(true);
+      return;
+    }
+    
+    // Valida se o email possui domínio "@pro4tech"
+    if (!email.endsWith('@pro4tech.com.br')) {
+      setModalMessage('É necessário utilizar um email com domínio "@pro4tech.com.br".');
+      setIsError(true);
+      setModalVisible(true);
+      return;
+    }
+
     try {
-      const response = await axios.post('(http://localhost:8081/api/usuario/cadastrar', {
-        nome: nome,
-        email: email,
-        senha: senha,
-        admin: admin,
+      const response = await fetch('http://localhost:8000/api/usuario/cadastrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: nome,
+          email: email,
+          senha: senha,
+          admin: admin,
+        }),
       });
 
-      if (response.status === 200) {
-        alert('Usuário cadastrado com sucesso!');
+      const data = await response.json();
+
+      if (response.ok) {
+        setModalMessage('Usuário cadastrado com sucesso!');
+        setIsError(false);        
+        setNome('');
+        setEmail('');
+        setSenha('');
+      } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {
+        // Tratamento de erro para duplicidade de email
+        setModalMessage('Usuário já cadastrado.');
+        setIsError(true);
+      } else if (data.message && data.message.toLowerCase().includes('já cadastrado')) {
+        setModalMessage('Usuário já cadastrado.');
+        setIsError(true);
+      } else {
+        setModalMessage(data.message || 'Erro ao cadastrar usuário.');
+        setIsError(true);
       }
     } catch (error) {
       console.error(error);
-      alert('Erro ao cadastrar usuário.');
+      setModalMessage('Erro na conexão com o servidor.');
+      setIsError(true);
+    } finally {
+      setModalVisible(true);
     }
   };
 
+
   if (!fontLoaded) {
-    return <Text>Carregando fontes...</Text>;
+      return <Text>Carregando fontes...</Text>;
   }
 
   return (
@@ -53,6 +96,24 @@ const Login = () => {
         style={styles.image}
         resizeMode="contain"
       />
+
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={[styles.modalText, isError ? styles.errorText : styles.successText]}>
+              {modalMessage}
+            </Text>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.buttonText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <TextInput
         style={styles.input}
@@ -96,14 +157,13 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   input: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
     fontSize: 24,
     width: '100%',
-    height: 40,
     borderColor: '#F5F5F5',
     borderWidth: 1,
     marginBottom: 12,
-    paddingLeft: 30,
     borderRadius: 5,
     color: '#111',
     backgroundColor: '#F5F5F5',
@@ -127,6 +187,47 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Roboto',
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "#000",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  modalText: {
+    fontSize: 18,
+    fontFamily: "Roboto_400Regular",
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  errorText: {
+    color: "white",
+  },
+  successText: {
+    color: "green",
+  },
+  closeButton: {
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#fff",
+    backgroundColor: "#000",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "Roboto_400Regular",
   },
 });
 
