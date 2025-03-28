@@ -1,10 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function About() {
+export default function Chat() {
   return (
     <View style={styles.container}>
-      <Text>Batatatinha</Text>
+      <Text>chatititit</Text>
       <StatusBar style="auto" />
     </View>
   );
