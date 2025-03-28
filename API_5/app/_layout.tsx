@@ -1,22 +1,34 @@
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React from 'react';
 import { Drawer } from 'expo-router/drawer';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer>
+        {/* Rota principal */}
         <Drawer.Screen
-          name="home" // This is the name of the page and must match the url from root
+          name="index"
           options={{
             drawerLabel: 'Home',
-            title: 'overview',
+            title: 'Home',
           }}
         />
+
+        {/* Rotas para login e registro */}
         <Drawer.Screen
-          name="chat" // This is the name of the page and must match the url from root
+          name="Start/login"
           options={{
-            drawerLabel: 'Chat',
-            title: 'overview',
+            drawerLabel: 'Login',
+            title: 'Login',
+          }}
+        />
+
+        <Drawer.Screen
+          name="Start/register"
+          options={{
+            drawerLabel: 'Registro',
+            title: 'Registro',
           }}
         />
       </Drawer>
