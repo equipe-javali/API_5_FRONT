@@ -60,7 +60,7 @@ const Login = () => {
         // AsyncStorage.setItem('token', data.token);
         
         // Redirecionar para o chat para usuários regulares
-        router.push('/Chat');
+        router.push('/cadastroBot/cadastrarBot');
       } else {
         const errorData = await response.json();
         setModalMessage(errorData.message || 'Credenciais inválidas');
@@ -118,6 +118,13 @@ const Login = () => {
           <Text style={styles.buttonText}>Entrar</Text>
         )}
       </TouchableOpacity>
+
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Não tem cadastro? </Text>
+        <TouchableOpacity onPress={() => router.push('/Start/register')}>
+          <Text style={styles.registerLink}>Registre-se aqui</Text>
+        </TouchableOpacity>
+      </View>
 
       <Modal
         transparent={true}
@@ -214,6 +221,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     alignItems: "center",
     minWidth: 100,
+  },
+
+  registerContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  registerText: {
+    color: '#F5F5F5',
+    fontSize: 16,
+    fontFamily: 'Roboto',
+  },
+  registerLink: {
+    color: '#B8B8B8',
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    textDecorationLine: 'underline',
   },
 });
 

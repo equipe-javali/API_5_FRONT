@@ -15,6 +15,15 @@ export default function Layout() {
           }}
         />
 
+        {/* Adicione a rota para o Chat */}
+        <Drawer.Screen
+          name="Chat/index"
+          options={{
+            drawerLabel: 'Chat',
+            title: 'Chat',
+          }}
+        />
+
         {/* Rotas para login e registro */}
         <Drawer.Screen
           name="Start/login"
@@ -31,6 +40,24 @@ export default function Layout() {
             title: 'Registro',
           }}
         />
+
+        <Drawer.Screen
+          name="cadastroBot/cadastrarBot"
+          options={{
+            drawerLabel: 'Cadastrar Bot',
+            title: 'Cadastrar Bot',
+          }}
+        />
+
+        <Drawer.Screen
+          name="cadastroUsuario/cadastrarUsuario"
+          options={{
+            drawerLabel: 'Cadastrar Usuário',
+            title: 'Cadastrar Usuário',
+          }}
+        />
+
+
       </Drawer>
     </GestureHandlerRootView>
   );

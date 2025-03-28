@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiCall } from '../../config/api';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
@@ -31,7 +32,7 @@ const SignUpScreen = () => {
         }
 
         try {
-            const response = await fetch("http://localhost:8000/api/usuario/cadastrar", {
+            const response = await apiCall('/api/usuario/cadastrar', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
