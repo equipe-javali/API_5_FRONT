@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@expo-google-fonts/roboto": "^0.2.3",
+    "@types/react": "^19.0.12",
+    "expo-font": "^13.0.4",
+    "expo-splash-screen": "^0.29.22",
+    "react": "^19.0.0",
+    "react-dom": "18.3.1",
+    "react-native-web": "~0.19.13",
+    "@expo/metro-runtime": "~4.0.1"
+  },
+  "devDependencies": {
+    "@types/react-native": "^0.72.8",
+    "typescript": "^5.3.3"
+  }
+}
