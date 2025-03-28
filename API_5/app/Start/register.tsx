@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal } from 'react-native';
 import * as Font from 'expo-font'; 
+import { apiCall } from '../../config/api';
 
 const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -32,8 +33,7 @@ const Login = () => {
       return;
     }
     
-    // Valida se o email possui domínio "@pro4tech"
-    if (!email.endsWith('@pro4tech.com.br')) {
+        if (!email.endsWith('@pro4tech.com.br')) {
       setModalMessage('É necessário utilizar um email com domínio "@pro4tech.com.br".');
       setIsError(true);
       setModalVisible(true);
@@ -41,7 +41,7 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/usuario/cadastrar', {
+      const response = await apiCall('/api/usuario/cadastrar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,8 +62,8 @@ const Login = () => {
         setNome('');
         setEmail('');
         setSenha('');
-      } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {
-        // Tratamento de erro para duplicidade de email
+      
+      } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {       
         setModalMessage('Usuário já cadastrado.');
         setIsError(true);
       } else if (data.message && data.message.toLowerCase().includes('já cadastrado')) {
