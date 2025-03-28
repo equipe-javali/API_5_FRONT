@@ -13,7 +13,7 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen
-          name="index" // This is the name of the page and must match the url from root
+          name="chat" // This is the name of the page and must match the url from root
           options={{
             drawerLabel: 'Chat',
             title: 'overview',
