@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { apiCall } from '../../config/api';
+import { apiCall } from '../../../config/api';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
@@ -74,7 +74,7 @@ const SignUpScreen = () => {
     return (
         <View style={styles.container}>
           <Image 
-                source={require('../../assets/project_images/logo.png')} 
+                source={require('../../../assets/project_images/logo.png')} 
                 style={styles.image}
             />
             <TextInput

@@ -60,7 +60,7 @@ const Login = () => {
         // AsyncStorage.setItem('token', data.token);
         
         // Redirecionar para o chat para usuários regulares
-        router.push('/cadastroBot/cadastrarBot');
+        router.push('/CadastroBot/cadastrarBot');
       } else {
         const errorData = await response.json();
         setModalMessage(errorData.message || 'Credenciais inválidas');

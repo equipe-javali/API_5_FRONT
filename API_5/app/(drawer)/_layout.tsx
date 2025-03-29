@@ -6,16 +6,14 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer>
-        {/* Rota principal */}
         <Drawer.Screen
-          name="index"
+          name="Home/index"
           options={{
             drawerLabel: 'Home',
             title: 'Home',
           }}
         />
 
-        {/* Adicione a rota para o Chat */}
         <Drawer.Screen
           name="Chat/index"
           options={{
@@ -24,25 +22,8 @@ export default function Layout() {
           }}
         />
 
-        {/* Rotas para login e registro */}
         <Drawer.Screen
-          name="Start/login"
-          options={{
-            drawerLabel: 'Login',
-            title: 'Login',
-          }}
-        />
-
-        <Drawer.Screen
-          name="Start/register"
-          options={{
-            drawerLabel: 'Registro',
-            title: 'Registro',
-          }}
-        />
-
-        <Drawer.Screen
-          name="cadastroBot/cadastrarBot"
+          name="CadastroBot/cadastrarBot"
           options={{
             drawerLabel: 'Cadastrar Bot',
             title: 'Cadastrar Bot',
@@ -50,7 +31,7 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="cadastroUsuario/cadastrarUsuario"
+          name="CadastroUsuario/cadastrarUsuario"
           options={{
             drawerLabel: 'Cadastrar Usuário',
             title: 'Cadastrar Usuário',
