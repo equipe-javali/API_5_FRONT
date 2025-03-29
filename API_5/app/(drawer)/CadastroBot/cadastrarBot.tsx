@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiCall } from "../../../config/api";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 
@@ -21,21 +23,100 @@ const CadastrarBot = () => {
     return null;
   }
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!name || !descricao) {
       setModalMessage("Por favor, preencha todos os campos.");
       setIsError(true);
       setModalVisible(true);
-    } else {
-      setModalMessage("Chatbot cadastrado com sucesso!");
-      setIsError(false);
+      return;
+    }
+  
+    try {
+      // Recuperar o token do AsyncStorage
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setModalMessage("Erro: Token de autenticação não encontrado.");
+        setIsError(true);
+        setModalVisible(true);
+        return;
+      }
+  
+      // Criar permissão
+      const permissaoResponse = await apiCall("/api/permissao/cadastrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Adiciona o token no cabeçalho
+        },
+        body: JSON.stringify({
+          nome: name,
+        }),
+      });
+  
+      const permissaoData = await permissaoResponse.json();
+  
+      if (!permissaoResponse.ok) {
+        console.error("Erro ao criar permissão:", permissaoData);
+        throw new Error(permissaoData.message || "Erro ao criar permissão.");
+      }
+  
+      console.log("Permissão criada com sucesso:", permissaoData);
+  
+      // Verificar se o ID da permissão foi retornado
+      const permissaoId = permissaoData.id;
+      if (!permissaoId) {
+        console.error("Erro: ID da permissão não retornado pelo servidor. Resposta:", permissaoData);
+        throw new Error("Erro: ID da permissão não retornado pelo servidor.");
+      }
+  
+      console.log("Permissao_id para o agente:", permissaoId);
+  
+      // Criar agente com o ID da permissão
+      const agenteResponse = await apiCall("/api/agente/cadastrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          nome: name,
+          descricao: descricao,
+          Permissao_id: permissaoId,
+        }),
+      });
+  
+      const agenteData = await agenteResponse.json();
+  
+      if (agenteResponse.ok) {
+        setModalMessage("Chatbot cadastrado com sucesso!");
+        setIsError(false);
+        setName("");
+        setDescricao("");
+
+        console.log("Chatbot cadastrado com sucesso:", {
+          nome: name,
+          descricao: descricao,
+          Permissao_id: permissaoId,
+      });
+      } else {
+        console.error("Erro ao cadastrar chatbot:", agenteData);
+        setModalMessage(agenteData.message || "Erro ao cadastrar chatbot.");
+        setIsError(true);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      setModalMessage(
+        error instanceof Error ? error.message : "Erro ao conectar com o servidor."
+      );
+      setIsError(true);
+    } finally {
       setModalVisible(true);
     }
   };
 
   return (
     <View style={styles.container}>
-        <Text style={styles.title}>Cadastrar Bot</Text>
+      <Text style={styles.title}>Cadastrar Bot</Text>
       <TextInput
         style={styles.input}
         placeholder="Nome"
@@ -93,7 +174,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 20,
     textAlign: "left",
-    alignSelf: "flex-start", // segue alinhamento do container
+    alignSelf: "flex-start",
   },
   input: {
     width: "100%",
@@ -102,9 +183,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 15,
     color: "#fff",
-    borderWidth: 1, 
+    borderWidth: 1,
     borderColor: "#fff",
-    fontFamily: "Roboto_400Regular"
+    fontFamily: "Roboto_400Regular",
   },
   button: {
     width: "100%",
@@ -119,7 +200,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
-
     fontFamily: "Roboto_400Regular",
   },
   modalOverlay: {
