@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { SafeAreaView, Text, StyleSheet, View } from "react-native";
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import { GiftedChat, IMessage, InputToolbar } from "react-native-gifted-chat";
-import { useLocalSearchParams } from "expo-router";
-import { apiCall } from "../../../config/api";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { apiCall } from "../../config/api"
+import { Ionicons } from "@expo/vector-icons";
 
 const Chat = () => {
   const params = useLocalSearchParams();
+  const router = useRouter();
   // Log everything to debug
   console.log("Received search params:", JSON.stringify(params));
   
@@ -92,13 +94,18 @@ const Chat = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => router.push('/MeusChatbots/meusChatbots')} style={styles.button}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>
           {chatbotName
             ? `${chatbotName} está online. O que deseja saber?`
             : "Chatbot está online. O que deseja saber?"}
         </Text>
-        {!chatId && <Text style={styles.connectingText}>Conectando...</Text>}
       </View>
+      
+      {!chatId && <Text style={styles.connectingText}>Conectando...</Text>}
+
       <GiftedChat
         messages={messages}
         onSend={(messages) => onSend(messages)}
@@ -119,9 +126,14 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#444",
     alignItems: "center",
+    flexDirection: "row",
   },
-  headerText: { fontSize: 18, color: "#fff", fontWeight: "bold" },
+  headerText: { fontSize: 18, color: "#fff", fontWeight: "bold", flex: 1, textAlign: "center" },
   connectingText: { fontSize: 14, color: "#aaa", marginTop: 5 },
+  button: {
+    padding: 10,
+    marginRight: 10,
+  },
 });
 
 export default Chat;

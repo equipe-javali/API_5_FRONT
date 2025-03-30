@@ -83,7 +83,7 @@ const MeusChatbots = () => {
                 
                 // Navigate with the correct agent ID
                 router.push({
-                  pathname: "/(drawer)/Chat",
+                  pathname: "/Chat",
                   params: { 
                     agenteId: String(agentId),
                     chatbotName: item.Agente_nome 
@@ -102,7 +102,7 @@ const MeusChatbots = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Meus Chatbots</Text>
+      {/* <Text style={styles.title}>Meus Chatbots</Text> */}
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
