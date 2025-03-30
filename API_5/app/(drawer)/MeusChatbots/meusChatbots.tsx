@@ -12,12 +12,15 @@ const MeusChatbots = () => {
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await apiCall("/api/modelo/listar", {
+        // Fetch model data with full agent details
+        const response = await apiCall("/api/modelo/listar-completo", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
+        
         if (response.ok) {
           const data = await response.json();
+          console.log("API Response:", data);
           setChatbots(data);
         } else {
           console.error("Erro ao buscar chatbots:", await response.text());
@@ -53,7 +56,9 @@ const MeusChatbots = () => {
           <View style={styles.itemDetails}>
             <Text style={styles.itemText}>Performance: {item.performance_score}</Text>
             <Text style={styles.itemText}>
-            <Text style={styles.itemText}>Agente ID: {item.Agente_id_id}</Text>
+              Agente ID: {item.Agente_id_id}
+            </Text>
+            <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
             {/* Dedicated "Chat" button that navigates to Chat screen */}
@@ -63,8 +68,8 @@ const MeusChatbots = () => {
                 // Add debugging to see the entire item object
                 console.log("Chatbot item:", JSON.stringify(item, null, 2));
                 
-                // Use the correct property name for agent ID
-                const agentId = item.Agente_id_id;
+                // Get the correct agent ID, using multiple fallbacks
+                const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
                 
                 console.log("Navigating with params:", {
                   agenteId: agentId,
