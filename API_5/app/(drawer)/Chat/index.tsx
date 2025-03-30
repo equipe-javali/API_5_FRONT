@@ -34,7 +34,7 @@ const Chat = () => {
     }
   };
 
- const onSend = useCallback(async (newMessages: IMessage[] = []) => {
+  const onSend = useCallback(async (newMessages: IMessage[] = []) => {
     const message = newMessages[0];
     setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessages));
 
@@ -51,51 +51,61 @@ const Chat = () => {
 
       const data = await response.json();
       // Espaço para fetch com o retorno da IA fetchIAResponse()
-      
+
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
     }
   }, [chatId]);
-  
+
   useEffect(() => {
     const usuarioId = 47;
-    const agenteId = 1; 
+    const agenteId = 1;
     fetchMessages(usuarioId, agenteId);
   }, []);
 
 
   return (
     <SafeAreaView style={styles.container}>
-      <GiftedChat
-        messages={messages}
-        onSend={(messages) => onSend(messages)}
-        user={{ _id: 1, name: "Usuário" }}
-        placeholder="Mensagem para (nome do agente)"
-        alwaysShowSend
-        renderSend={(props) => (
-          <View style={styles.sendContainer}>
-            <Ionicons name="send" size={24} color="white" onPress={() => props.onSend?.({ text: props.text }, true)} />
+      {
+        messages.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>(Nome do Agente) está online. O que deseja saber?</Text>
           </View>
-        )}
-        renderBubble={(props) => {
-          return (
-            <View
-              style={[
-                styles.bubble,
-                props.currentMessage?.user._id === 1 ? styles.bubbleRight : styles.bubbleLeft,
-              ]}
-            >
-              <Text>{props.currentMessage?.text}</Text>
+        ) : (
+          <GiftedChat
+          messages={messages}
+          onSend={(messages) => onSend(messages)}
+          user={{ _id: 1, name: "Usuário" }}
+          placeholder="Digite uma mensagem..."
+          alwaysShowSend
+          renderSend={(props) => (
+            <View style={styles.sendContainer}>
+              <Ionicons name="send" size={24} color="white" onPress={() => props.onSend?.({ text: props.text }, true)} />
             </View>
-          );
-        }}
-      />
+          )}
+          renderBubble={(props) => {
+            return (
+              <View
+                style={[
+                  styles.bubble,
+                  props.currentMessage?.user._id === 1 ? styles.bubbleRight : styles.bubbleLeft,
+                ]}
+              >
+                <Text>{props.currentMessage?.text}</Text>
+              </View>
+            );
+          }}
+        />
+        )
+      }
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#1e1e1e" },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyText: { color: "#fff", fontSize: 16, fontStyle: "italic" },
   sendContainer: { padding: 8, backgroundColor: "#222", borderRadius: 50, marginRight: 10 },
   bubble: { padding: 10, borderRadius: 8, maxWidth: "75%" },
   bubbleRight: { backgroundColor: "#fff", alignSelf: "flex-end" },
