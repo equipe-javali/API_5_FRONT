@@ -15,10 +15,18 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="Chat/index"
+          name="CadastroUsuario/cadastrarUsuario"
           options={{
-            drawerLabel: 'Chat',
-            title: 'Chat',
+            drawerLabel: 'Cadastrar Usuário',
+            title: 'Cadastrar Usuário',
+          }}
+        />
+
+        <Drawer.Screen
+          name="MeusChatbots/meusChatbots"
+          options={{
+            drawerLabel: 'Meus Chatbots',
+            title: 'Meus Chatbots',
           }}
         />
 
@@ -31,12 +39,22 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="CadastroUsuario/cadastrarUsuario"
+          name="CadastroContexto/cadastrarContexto"
           options={{
-            drawerLabel: 'Cadastrar Usuário',
-            title: 'Cadastrar Usuário',
+            drawerLabel: 'Cadastrar Contexto',
+            title: 'Cadastrar Contexto',
           }}
         />
+
+        <Drawer.Screen
+          name="TreinoBot/treinarBot"
+          options={{
+            drawerLabel: 'Treinar Bot',
+            title: 'Treinar Bot',
+          }}
+        />
+
+
 
 
       </Drawer>

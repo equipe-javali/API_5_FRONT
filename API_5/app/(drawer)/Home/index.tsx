@@ -14,10 +14,10 @@ export default function Home({ navigation }: HomeProps) {
     <View style={styles.container}>
       <View style={styles.grid}>
         {/* Quadrado 1 */}
-        <Link href="/CadastroBot/cadastrarBot" style={styles.square}>
+        <Link href="/MeusChatbots/meusChatbots" style={styles.square}>
           <View style={styles.content}>
             <Icon name="robot" size={40} color="#fff" />
-            <Text style={styles.squareText}></Text>
+            <Text style={styles.squareText}>Chatbots</Text>
           </View>
         </Link>
 
