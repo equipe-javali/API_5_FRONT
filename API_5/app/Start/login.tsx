@@ -36,11 +36,11 @@ const Login = () => {
       setLoading(true);
       
       // Verificar se é um email corporativo pro4tech
-      if (email.endsWith('@pro4tech.com.br')) {
-        // Redirecionar para a tela de registro para usuários corporativos
-        router.push('/Start/register');
-        return;
-      }
+      // if (email.endsWith('@pro4tech.com.br')) {
+      //   // Redirecionar para a tela de registro para usuários corporativos
+      //   router.push('/Start/register');
+      //   return;
+      // }
       
       // Para outros emails, tentar fazer login
       const response = await apiCall('/api/usuario/login', {

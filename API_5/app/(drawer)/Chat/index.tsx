@@ -6,7 +6,8 @@ import { apiCall } from "../../../config/api"
 
 const Chat = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [chatId, setChatId] = useState<number | null>(null);
+  // const [chatId, setChatId] = useState<number | null>(null);
+  var chatId = 1;
 
   const fetchMessages = async (usuarioId: number, agenteId: number) => {
     try {
@@ -28,7 +29,6 @@ const Chat = () => {
         setMessages(formattedMessages);
       }
 
-      setChatId(1);
     } catch (error) {
       console.error("Erro ao buscar mensagens: ", error);
     }
@@ -45,8 +45,10 @@ const Chat = () => {
         body: JSON.stringify({
           texto: message.text,
           Chat_id: chatId,
+          usuario: true
         }),
       });
+
       const data = await response.json();
       // Espaço para fetch com o retorno da IA fetchIAResponse()
       
@@ -56,7 +58,7 @@ const Chat = () => {
   }, [chatId]);
   
   useEffect(() => {
-    const usuarioId = 1;
+    const usuarioId = 47;
     const agenteId = 1; 
     fetchMessages(usuarioId, agenteId);
   }, []);
