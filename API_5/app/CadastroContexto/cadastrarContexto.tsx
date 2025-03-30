@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiCall } from "../../../config/api";
+import { apiCall } from "../../config/api";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const CadastroContexto = () => {
+  const router = useRouter();
   const [mode, setMode] = useState<"bulk" | "single">("bulk");
   // For single mode
   const [singlePergunta, setSinglePergunta] = useState("");
@@ -125,51 +128,57 @@ const CadastroContexto = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Inserir Contexto</Text>
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity onPress={() => setMode("bulk")} style={mode === "bulk" ? styles.activeToggle : styles.toggle}>
-          <Text style={styles.toggleText}>Em Massa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setMode("single")} style={mode === "single" ? styles.activeToggle : styles.toggle}>
-          <Text style={styles.toggleText}>Único</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/CadastroBot/cadastrarBot')} style={styles.btnBack}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      <View style={styles.middle}>
+        <Text style={styles.title}>Inserir Contexto</Text>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity onPress={() => setMode("bulk")} style={mode === "bulk" ? styles.activeToggle : styles.toggle}>
+            <Text style={styles.toggleText}>Em Massa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMode("single")} style={mode === "single" ? styles.activeToggle : styles.toggle}>
+            <Text style={styles.toggleText}>Único</Text>
+          </TouchableOpacity>
+        </View>
+        {mode === "bulk" ? (
+          <>
+            <TextInput
+              style={[styles.input, { height: 150 }]}
+              placeholder="Digite cada contexto em uma nova linha no formato: Pergunta || Resposta"
+              placeholderTextColor="#ccc"
+              multiline={true}
+              value={bulkText}
+              onChangeText={setBulkText}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleImportContextosBulk}>
+              <Text style={styles.buttonText}>Importar Contextos</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Pergunta"
+              placeholderTextColor="#ccc"
+              value={singlePergunta}
+              onChangeText={setSinglePergunta}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Resposta"
+              placeholderTextColor="#ccc"
+              value={singleResposta}
+              onChangeText={setSingleResposta}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleImportContextoSingle}>
+              <Text style={styles.buttonText}>Cadastrar Contexto</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
-      {mode === "bulk" ? (
-        <>
-          <TextInput
-            style={[styles.input, { height: 150 }]}
-            placeholder="Digite cada contexto em uma nova linha no formato: Pergunta || Resposta"
-            placeholderTextColor="#ccc"
-            multiline={true}
-            value={bulkText}
-            onChangeText={setBulkText}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleImportContextosBulk}>
-            <Text style={styles.buttonText}>Importar Contextos</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Pergunta"
-            placeholderTextColor="#ccc"
-            value={singlePergunta}
-            onChangeText={setSinglePergunta}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Resposta"
-            placeholderTextColor="#ccc"
-            value={singleResposta}
-            onChangeText={setSingleResposta}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleImportContextoSingle}>
-            <Text style={styles.buttonText}>Cadastrar Contexto</Text>
-          </TouchableOpacity>
-        </>
-      )}
-  
+
       <Modal
         transparent={true}
         animationType="fade"
@@ -190,9 +199,10 @@ const CadastroContexto = () => {
     </View>
   );
 };
-  
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#282828", padding: 20, justifyContent: "center" },
+  container: { flex: 1, backgroundColor: "#282828", padding: 20, justifyContent: "space-between" },
+  middle: { flex: 1, justifyContent: "center" },
   title: { fontSize: 24, color: "#fff", marginBottom: 20, textAlign: "center" },
   toggleContainer: { flexDirection: "row", justifyContent: "center", marginBottom: 20 },
   toggle: { padding: 10, backgroundColor: "#555", marginHorizontal: 5, borderRadius: 5 },
@@ -208,6 +218,7 @@ const styles = StyleSheet.create({
   successText: { color: "green" },
   closeButton: { padding: 10, borderRadius: 5, borderWidth: 1, borderColor: "#fff", backgroundColor: "#007BFF", alignItems: "center" },
   closeButtonText: { color: "#fff", fontSize: 16 },
+  btnBack: { alignItems: "flex-start" }
 });
-  
+
 export default CadastroContexto;

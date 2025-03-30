@@ -37,26 +37,6 @@ export default function Layout() {
             title: 'Cadastrar Bot',
           }}
         />
-
-        <Drawer.Screen
-          name="CadastroContexto/cadastrarContexto"
-          options={{
-            drawerLabel: 'Cadastrar Contexto',
-            title: 'Cadastrar Contexto',
-          }}
-        />
-
-        <Drawer.Screen
-          name="TreinoBot/treinarBot"
-          options={{
-            drawerLabel: 'Treinar Bot',
-            title: 'Treinar Bot',
-          }}
-        />
-
-
-
-
       </Drawer>
     </GestureHandlerRootView>
   );

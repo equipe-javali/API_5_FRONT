@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiCall } from "../../../config/api";
+import { apiCall } from "../../config/api";
 
 const TreinarBot = () => {
     const [modalVisible, setModalVisible] = useState(false);
