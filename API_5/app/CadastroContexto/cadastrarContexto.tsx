@@ -17,7 +17,7 @@ const CadastroContexto = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Novo estado de carregamento
+  const [loading, setLoading] = useState(false); // Estado para controle do carregamento
 
   useEffect(() => {
     AsyncStorage.getItem("agentId")
@@ -47,9 +47,10 @@ const CadastroContexto = () => {
         resposta: parts[1].trim()
       });
     }
-    try {
-      setIsLoading(true); // Ativar carregamento
 
+    setLoading(true); // Ativando o carregamento
+
+    try {
       const payload = {
         Agente_id: agentId,
         contextos: parsedContextos
@@ -88,8 +89,8 @@ const CadastroContexto = () => {
       setModalMessage("Erro na conexão com o servidor.");
       setIsError(true);
     } finally {
-      setIsLoading(false); // Desativar carregamento
       setModalVisible(true);
+      setLoading(false); // Desativando o carregamento
     }
   };
 
@@ -100,9 +101,10 @@ const CadastroContexto = () => {
       setModalVisible(true);
       return;
     }
-    try {
-      setIsLoading(true); // Ativar carregamento
 
+    setLoading(true); // Ativando o carregamento
+
+    try {
       const payload = {
         Agente_id: agentId,
         pergunta: singlePergunta,
@@ -128,8 +130,8 @@ const CadastroContexto = () => {
       setModalMessage("Erro na conexão com o servidor.");
       setIsError(true);
     } finally {
-      setIsLoading(false); // Desativar carregamento
       setModalVisible(true);
+      setLoading(false); // Desativando o carregamento
     }
   };
 
@@ -186,7 +188,12 @@ const CadastroContexto = () => {
         )}
       </View>
 
-      {/* Modal de sucesso ou erro */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
+
       <Modal
         transparent={true}
         animationType="fade"
@@ -204,13 +211,6 @@ const CadastroContexto = () => {
           </View>
         </View>
       </Modal>
-
-      {/* Exibindo o carregamento */}
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      )}
     </View>
   );
 };
@@ -234,11 +234,11 @@ const styles = StyleSheet.create({
   closeButton: { padding: 10, borderRadius: 5, borderWidth: 1, borderColor: "#fff", backgroundColor: "#F5F5F5", alignItems: "center" },
   closeButtonText: { color: "#212121", fontSize: 16 },
   btnBack: { alignItems: "flex-start" },
-  loadingContainer: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -25 }, { translateY: -25 }],
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
