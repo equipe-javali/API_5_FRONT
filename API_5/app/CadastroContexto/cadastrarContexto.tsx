@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiCall } from "../../config/api";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ const CadastroContexto = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Novo estado de carregamento
 
   useEffect(() => {
     AsyncStorage.getItem("agentId")
@@ -47,6 +48,8 @@ const CadastroContexto = () => {
       });
     }
     try {
+      setIsLoading(true); // Ativar carregamento
+
       const payload = {
         Agente_id: agentId,
         contextos: parsedContextos
@@ -85,6 +88,7 @@ const CadastroContexto = () => {
       setModalMessage("Erro na conexão com o servidor.");
       setIsError(true);
     } finally {
+      setIsLoading(false); // Desativar carregamento
       setModalVisible(true);
     }
   };
@@ -97,6 +101,8 @@ const CadastroContexto = () => {
       return;
     }
     try {
+      setIsLoading(true); // Ativar carregamento
+
       const payload = {
         Agente_id: agentId,
         pergunta: singlePergunta,
@@ -122,6 +128,7 @@ const CadastroContexto = () => {
       setModalMessage("Erro na conexão com o servidor.");
       setIsError(true);
     } finally {
+      setIsLoading(false); // Desativar carregamento
       setModalVisible(true);
     }
   };
@@ -179,6 +186,7 @@ const CadastroContexto = () => {
         )}
       </View>
 
+      {/* Modal de sucesso ou erro */}
       <Modal
         transparent={true}
         animationType="fade"
@@ -196,6 +204,13 @@ const CadastroContexto = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Exibindo o carregamento */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -217,8 +232,14 @@ const styles = StyleSheet.create({
   errorText: { color: "#F4F4F4" },
   successText: { color: "#F4F4F4" },
   closeButton: { padding: 10, borderRadius: 5, borderWidth: 1, borderColor: "#fff", backgroundColor: "#F5F5F5", alignItems: "center" },
-  closeButtonText: { color: "#fff", fontSize: 16 },
-  btnBack: { alignItems: "flex-start" }
+  closeButtonText: { color: "#212121", fontSize: 16 },
+  btnBack: { alignItems: "flex-start" },
+  loadingContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+  },
 });
 
 export default CadastroContexto;
