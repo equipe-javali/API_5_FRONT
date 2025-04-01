@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal } from 'react-native';
 import * as Font from 'expo-font'; 
 import { apiCall } from '../../config/api';
+import { router } from 'expo-router';
 
 const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -144,7 +145,15 @@ const Login = () => {
       <TouchableOpacity style={styles.button} onPress={handleCadastro}>
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
+
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>Já tem uma conta? </Text>
+              <TouchableOpacity onPress={() => router.push('/Start/login')}>
+                <Text style={styles.registerLink}>Entrar</Text>
+              </TouchableOpacity>
+            </View>
     </View>
+    
   );
 };
 
@@ -228,6 +237,22 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "Roboto_400Regular",
+  },
+  registerContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  registerText: {
+    color: '#F5F5F5',
+    fontSize: 16,
+    fontFamily: 'Roboto',
+  },
+  registerLink: {
+    color: '#B8B8B8',
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    textDecorationLine: 'underline',
   },
 });
 
