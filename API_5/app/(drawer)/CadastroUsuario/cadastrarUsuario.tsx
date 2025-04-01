@@ -73,21 +73,20 @@ const SignUpScreen = () => {
 
     return (
         <View style={styles.container}>
-          <Image 
-                source={require('../../../assets/project_images/logo.png')} 
-                style={styles.image}
-            />
+            <Text style={styles.text}>
+                Cadastrar usuário
+            </Text>
             <TextInput
                 style={styles.input}
                 placeholder="Nome"
-                placeholderTextColor="#2E2E2E"
+                placeholderTextColor="#B8B8B8"
                 value={name}
                 onChangeText={setName}
             />
             <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#2E2E2E"
+                placeholderTextColor="#B8B8B8"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -96,7 +95,7 @@ const SignUpScreen = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Senha"
-                placeholderTextColor="#2E2E2E"
+                placeholderTextColor="#B8B8B8"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -138,24 +137,27 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     input: {
+        padding: 15,
+        color: "#F4F4F4",
         width: "100%",
-        backgroundColor: "#F5F5F5",
-        padding: 10,
+        height: 50,
         borderRadius: 5,
-        marginBottom: 15,
-        color: "#000",
         borderWidth: 1,
-        borderColor: "#F5F5F5",
-        fontFamily: "Roboto_400Regular",
-    },
-    button: {
-        width: "100%",
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 2,
         borderColor: "#fff",
         alignItems: "center",
         backgroundColor: "#282828",
+        fontFamily: "Roboto_400Regular",
+        fontSize: 18,
+        marginBottom: 20,
+      },
+    button: {
+        width: "60%",
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: "#f4f4f4",
+        alignItems: "center",
+        backgroundColor: "#212121",
         fontFamily: "Roboto_400Regular"
     },
     buttonText: {
@@ -208,6 +210,14 @@ const styles = StyleSheet.create({
         height: 100,
         marginBottom: 20,
     },
+    text: {
+        fontSize: 25, 
+        marginBottom: 25,
+        color: '#FFFFFF', 
+        textAlign: "left", 
+        alignSelf: "flex-start" ,
+        fontFamily: "Roboto_400Regular",
+      },
 });
 
 export default SignUpScreen;

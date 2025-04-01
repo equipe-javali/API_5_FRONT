@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   itemFrases: { fontSize: 16, color: "#ccc", marginTop: 5 },
   itemDetails: { marginTop: 10, borderTopWidth: 1, borderTopColor: "#666", paddingTop: 10 },
   itemText: { fontSize: 14, color: "#ccc", marginTop: 3 },
-  emptyText: { color: "#fff", textAlign: "center", marginTop: 20 },
+  emptyText: { fontSize: 18, color: "gray", textAlign: "center", marginTop: 20 },
   chatButton: {
     flexDirection: "row",
     alignItems: "center",
