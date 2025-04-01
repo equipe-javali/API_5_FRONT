@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiCall } from "../../config/api";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ const CadastroContexto = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado para controle do carregamento
 
   useEffect(() => {
     AsyncStorage.getItem("agentId")
@@ -46,6 +47,9 @@ const CadastroContexto = () => {
         resposta: parts[1].trim()
       });
     }
+
+    setLoading(true); // Ativando o carregamento
+
     try {
       const payload = {
         Agente_id: agentId,
@@ -86,6 +90,7 @@ const CadastroContexto = () => {
       setIsError(true);
     } finally {
       setModalVisible(true);
+      setLoading(false); // Desativando o carregamento
     }
   };
 
@@ -96,6 +101,9 @@ const CadastroContexto = () => {
       setModalVisible(true);
       return;
     }
+
+    setLoading(true); // Ativando o carregamento
+
     try {
       const payload = {
         Agente_id: agentId,
@@ -123,6 +131,7 @@ const CadastroContexto = () => {
       setIsError(true);
     } finally {
       setModalVisible(true);
+      setLoading(false); // Desativando o carregamento
     }
   };
 
@@ -179,6 +188,12 @@ const CadastroContexto = () => {
         )}
       </View>
 
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
+
       <Modal
         transparent={true}
         animationType="fade"
@@ -217,8 +232,14 @@ const styles = StyleSheet.create({
   errorText: { color: "#F4F4F4" },
   successText: { color: "#F4F4F4" },
   closeButton: { padding: 10, borderRadius: 5, borderWidth: 1, borderColor: "#fff", backgroundColor: "#F5F5F5", alignItems: "center" },
-  closeButtonText: { color: "#fff", fontSize: 16 },
-  btnBack: { alignItems: "flex-start" }
+  closeButtonText: { color: "#212121", fontSize: 16 },
+  btnBack: { alignItems: "flex-start" },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default CadastroContexto;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { apiCall } from '../../../config/api';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 
@@ -11,6 +11,7 @@ const SignUpScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
     const [isError, setIsError] = useState(false);
+    const [loading, setLoading] = useState(false); // Estado para o carregamento
 
     // Carrega a fonte roboto
     const [fontsLoaded] = useFonts({
@@ -30,6 +31,8 @@ const SignUpScreen = () => {
             setModalVisible(true);
             return;
         }
+
+        setLoading(true); // Ativa o carregamento
 
         try {
             const response = await apiCall('/api/usuario/cadastrar', {
@@ -53,7 +56,6 @@ const SignUpScreen = () => {
                 setName(""); 
                 setEmail(""); 
                 setPassword("");
-
                 console.log("Usuário cadastrado com sucesso:", {
                     nome: data.nome,
                     email: data.email,
@@ -67,6 +69,7 @@ const SignUpScreen = () => {
             setModalMessage("Erro na conexão com o servidor.");
             setIsError(true);
         } finally {
+            setLoading(false); // Desativa o carregamento
             setModalVisible(true);
         }
     };
@@ -103,6 +106,12 @@ const SignUpScreen = () => {
             <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                 <Text style={styles.buttonText}>Cadastrar</Text>
             </TouchableOpacity>
+
+            {loading && (
+                <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color="#fff" />
+                </View>
+            )}
 
             <Modal
                 transparent={true}
@@ -149,7 +158,7 @@ const styles = StyleSheet.create({
         fontFamily: "Roboto_400Regular",
         fontSize: 18,
         marginBottom: 20,
-      },
+    },
     button: {
         width: "60%",
         padding: 10,
@@ -217,7 +226,13 @@ const styles = StyleSheet.create({
         textAlign: "left", 
         alignSelf: "flex-start" ,
         fontFamily: "Roboto_400Regular",
-      },
+    },
+    loadingOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 });
 
 export default SignUpScreen;

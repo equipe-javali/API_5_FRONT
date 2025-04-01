@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import * as Font from 'expo-font'; 
 import { apiCall } from '../../config/api';
 import { router } from 'expo-router';
 
-const Login = () => {
+const Register = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const admin = true; 
   const [modalMessage, setModalMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  
+  const [loading, setLoading] = useState(false); // Estado de loading
+  const admin = true; 
+
   useEffect(() => {
     const loadFonts = async () => {
       await Font.loadAsync({
@@ -34,7 +35,7 @@ const Login = () => {
       return;
     }
     
-        if (!email.endsWith('@pro4tech.com.br')) {
+    if (!email.endsWith('@pro4tech.com.br')) {
       setModalMessage('É necessário utilizar um email com domínio "@pro4tech.com.br".');
       setIsError(true);
       setModalVisible(true);
@@ -42,6 +43,7 @@ const Login = () => {
     }
 
     try {
+      setLoading(true); // Inicia o loading
       const response = await apiCall('/api/usuario/cadastrar', {
         method: 'POST',
         headers: {
@@ -63,7 +65,6 @@ const Login = () => {
         setNome('');
         setEmail('');
         setSenha('');
-      
       } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {       
         setModalMessage('Usuário já cadastrado.');
         setIsError(true);
@@ -80,12 +81,12 @@ const Login = () => {
       setIsError(true);
     } finally {
       setModalVisible(true);
+      setLoading(false); // Finaliza o loading
     }
   };
 
-
   if (!fontLoaded) {
-      return <Text>Carregando fontes...</Text>;
+    return <Text>Carregando fontes...</Text>;
   }
 
   return (
@@ -142,18 +143,21 @@ const Login = () => {
         onChangeText={setSenha}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
+      <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#F5F5F5" />
+        ) : (
+          <Text style={styles.buttonText}>Cadastrar</Text>
+        )}
       </TouchableOpacity>
 
-            <View style={styles.registerContainer}>
-              <Text style={styles.registerText}>Já tem uma conta? </Text>
-              <TouchableOpacity onPress={() => router.push('/Start/login')}>
-                <Text style={styles.registerLink}>Entrar</Text>
-              </TouchableOpacity>
-            </View>
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Já tem uma conta? </Text>
+        <TouchableOpacity onPress={() => router.push('/Start/login')}>
+          <Text style={styles.registerLink}>Entrar</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-    
   );
 };
 
@@ -223,7 +227,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   successText: {
-    color: "green",
+    color: "white",
   },
   closeButton: {
     padding: 10,
@@ -232,11 +236,6 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     backgroundColor: "#000",
     alignItems: "center",
-  },
-  closeButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontFamily: "Roboto_400Regular",
   },
   registerContainer: {
     marginTop: 20,
@@ -256,4 +255,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default Register;
