@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5'; // Importa o pacote de ícones
-import { Link } from 'expo-router'
+import { Link } from 'expo-router';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 
 type HomeProps = {
@@ -13,31 +13,30 @@ export default function Home({ navigation }: HomeProps) {
   return (
     <View style={styles.container}>
       <View style={styles.grid}>
-        {/* Quadrado 1 */}
-        <Link href="/MeusChatbots/meusChatbots" style={styles.square}>
-          <View style={styles.content}>
+        <Link href="/MeusChatbots/meusChatbots" style={styles.link}>
+          <View style={styles.card}>
             <Icon name="robot" size={40} color="#fff" />
-            <Text style={styles.squareText}>Chatbots</Text>
+            <Text style={styles.cardText}>Chatbots</Text>
           </View>
         </Link>
 
-        {/* Quadrado 2 */}
-        <Link href="/CadastroUsuario/cadastrarUsuario" style={styles.square}>
-          <View style={styles.content}>
+        <Link href="/CadastroUsuario/cadastrarUsuario" style={styles.link}>
+          <View style={styles.card}>
             <Icon name="users" size={40} color="#fff" />
-            <Text style={styles.squareText}>Usuários</Text>
+            <Text style={styles.cardText}>Usuários</Text>
           </View>
         </Link>
+
         {/* Quadrado 3 */}
-        <View style={styles.square}>
+        <View style={styles.card}>
           <Icon name="building" size={40} color="#fff" />
-          <Text style={styles.squareText}>Departamentos</Text>
+          <Text style={styles.cardText}>Departamentos</Text>
         </View>
 
         {/* Quadrado 4 */}
-        <View style={styles.square}>
+        <View style={styles.card}>
           <Icon name="briefcase" size={40} color="#fff" />
-          <Text style={styles.squareText}>Empresas</Text>
+          <Text style={styles.cardText}>Empresas</Text>
         </View>
       </View>
       <StatusBar style="auto" />
@@ -53,32 +52,28 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingTop: 50,
   },
-  content: {
-    marginTop: 45,
-    marginLeft: 45,
-  },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '80%',
+    width: '100%', 
+    paddingHorizontal: 20, 
   },
-  square: {
-    width: 140,
-    height: 140,
-    backgroundColor: '#181818',
-    margin: 10,
+  link: {
+    width: '100%',
+    marginBottom: 15, 
+  },
+  card: {
+    backgroundColor: '#212121', 
+    width: '100%', 
+    height: 120, 
+    marginBottom: 10, 
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 10, 
   },
-  squareText: {
+  cardText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    textAlign: 'center', 
   },
 });
