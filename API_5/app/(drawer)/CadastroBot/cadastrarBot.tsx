@@ -110,14 +110,14 @@ const CadastrarBot = () => {
       <TextInput
         style={styles.input}
         placeholder="Nome"
-        placeholderTextColor="#fff"
+        placeholderTextColor="#B8B8B8"
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Descrição"
-        placeholderTextColor="#fff"
+        placeholderTextColor="#B8B8B8"
         value={descricao}
         onChangeText={setDescricao}
         autoCapitalize="none"
@@ -149,9 +149,9 @@ const CadastrarBot = () => {
   
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#282828", justifyContent: "center", alignItems: "center", padding: 20 },
-  title: { fontSize: 24, fontFamily: "Roboto_400Regular", color: "#fff", marginBottom: 20, textAlign: "left", alignSelf: "flex-start" },
-  input: { width: "100%", backgroundColor: "#282828", padding: 10, borderRadius: 5, marginBottom: 15, color: "#fff", borderWidth: 1, borderColor: "#fff", fontFamily: "Roboto_400Regular" },
-  button: { width: "100%", padding: 10, borderRadius: 5, borderWidth: 2, borderColor: "#fff", alignItems: "center", backgroundColor: "#282828", fontFamily: "Roboto_400Regular" },
+  title: { fontSize: 25, fontFamily: "Roboto_400Regular", color: "#fff", marginBottom: 25, textAlign: "left", alignSelf: "flex-start" },
+  input: {padding: 15, color: "#F4F4F4", width: "100%", height: 50, borderRadius: 5, borderWidth: 1, borderColor: "#fff", alignItems: "center", backgroundColor: "#282828", fontFamily: "Roboto_400Regular", fontSize: 18, marginBottom: 20,},
+  button: { width: "60%", padding: 10, borderRadius: 5, borderWidth: 1, borderColor: "#F4F4F4", alignItems: "center", backgroundColor: "#212121", fontFamily: "Roboto_400Regular" },
   buttonText: { color: "#fff", fontSize: 16, fontFamily: "Roboto_400Regular" },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)", justifyContent: "center", alignItems: "center" },
   modalContainer: { width: "80%", backgroundColor: "#282828", borderRadius: 10, padding: 20, alignItems: "center", borderWidth: 1 },

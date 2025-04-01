@@ -25,7 +25,7 @@ export default function Home({ navigation }: HomeProps) {
         <Link href="/CadastroUsuario/cadastrarUsuario" style={styles.square}>
           <View style={styles.content}>
             <Icon name="users" size={40} color="#fff" />
-            <Text style={styles.squareText}></Text>
+            <Text style={styles.squareText}>Usuários</Text>
           </View>
         </Link>
         {/* Quadrado 3 */}
@@ -78,5 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
