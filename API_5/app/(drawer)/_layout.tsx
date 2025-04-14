@@ -1,13 +1,41 @@
 import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Image, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';  
+import { Image, StyleSheet, View, Text, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { useRouter } from 'expo-router';
+import { DrawerContentComponentProps } from '@react-navigation/drawer';
+
 
 export default function Layout() {
+  const CustomDrawerContent = (props: DrawerContentComponentProps) => {
+    const router = useRouter();
+
+    const handleLogout = () => {
+      router.replace('/'); // Redireciona para a tela de login ou raiz
+    };
+
+    return (
+      <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
+          <DrawerItemList {...props} />
+        </View>
+
+        <View style={styles.logoutContainer}>
+          <Pressable onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={20} color="white" />
+            <Text style={styles.logoutText}>Sair</Text>
+          </Pressable>
+        </View>
+      </DrawerContentScrollView>
+    );
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           drawerStyle: {
             backgroundColor: '#212121',
@@ -15,13 +43,13 @@ export default function Layout() {
           drawerActiveTintColor: 'white',
           drawerInactiveTintColor: 'gray',
           headerStyle: {
-            backgroundColor: '#212121', 
+            backgroundColor: '#212121',
           },
           headerTintColor: 'white',
           headerTitle: () => (
-            <Image 
-              source={require('../../assets/project_images/logo.png')} 
-              style={styles.logo} 
+            <Image
+              source={require('../../assets/project_images/logo.png')}
+              style={styles.logo}
             />
           ),
           headerTitleAlign: 'center',
@@ -33,7 +61,7 @@ export default function Layout() {
             drawerLabel: 'Página inicial',
             title: 'Página inicial',
             drawerIcon: ({ color }) => (
-              <Ionicons name="home" size={24} color={color} />  
+              <Ionicons name="home" size={24} color={color} />
             ),
           }}
         />
@@ -44,7 +72,7 @@ export default function Layout() {
             drawerLabel: 'Cadastrar Usuário',
             title: 'Cadastrar Usuário',
             drawerIcon: ({ color }) => (
-              <Ionicons name="person-add" size={24} color={color} />  
+              <Ionicons name="person-add" size={24} color={color} />
             ),
           }}
         />
@@ -55,7 +83,7 @@ export default function Layout() {
             drawerLabel: 'Cadastrar Bot',
             title: 'Cadastrar Bot',
             drawerIcon: ({ color }) => (
-              <Ionicons name="logo-reddit" size={24} color={color} />  
+              <Ionicons name="logo-reddit" size={24} color={color} />
             ),
           }}
         />
@@ -66,7 +94,7 @@ export default function Layout() {
             drawerLabel: 'Meus Chatbots',
             title: 'Meus Chatbots',
             drawerIcon: ({ color }) => (
-              <Ionicons name="chatbubbles" size={24} color={color} /> 
+              <Ionicons name="chatbubbles" size={24} color={color} />
             ),
           }}
         />
@@ -77,8 +105,22 @@ export default function Layout() {
 
 const styles = StyleSheet.create({
   logo: {
-    width: 120,  
-    height: 40,  
+    width: 120,
+    height: 40,
     resizeMode: 'contain',
+  },
+  logoutContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#444',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: 'white',
+    marginLeft: 10,
+    fontSize: 16,
   },
 });
