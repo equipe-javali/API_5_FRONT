@@ -13,7 +13,7 @@ export default function Layout() {
     const router = useRouter();
 
     const handleLogout = () => {
-      router.replace('/'); // Redireciona para a tela de login ou raiz
+      router.replace('/');
     };
 
     return (
