@@ -101,48 +101,54 @@ const Chat = () => {
         </TouchableOpacity>
         <Text style={styles.headerText}>
           {chatbotName
-            ? `${chatbotName} está online. O que deseja saber?`
+            ? `${chatbotName} `
             : "Chatbot está online. O que deseja saber?"}
         </Text>
+        
       </View>
       
-      {!chatId && <Text style={styles.connectingText}>Conectando...</Text>}
+      {!chatId && <View style={styles.container}>
+        <Text style={styles.connectingText}>Conectando...</Text>
+      </View>
+      }
 
       <GiftedChat
-        messages={messages}
-        onSend={(messages) => onSend(messages)}
-        user={{ _id: 1, name: "Usuário" }}
-        placeholder="Digite sua pergunta..."
-        alwaysShowSend
-        renderInputToolbar={(props) =>
-          chatId ? <InputToolbar {...props} /> : null
-        }
-        renderMessage={(props) => (
-          <View style={{ marginVertical: 6 }}>
-          <View style={{ 
-            backgroundColor: props.currentMessage?.user._id === 1 ? '#282828' : '#212121', // Cor do balão
-            borderColor: props.currentMessage?.user._id === 1 ? '#B8B8B8' : '', // Cor da borda
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: 8, // Diminui o padding
-            maxWidth: '80%', // Define a largura máxima para não ficar muito grande
-            alignSelf: props.currentMessage?.user._id === 1 ? 'flex-end' : 'flex-start', // Alinha à direita para o usuário, à esquerda para o bot
-            marginHorizontal: 10, // Espaçamento lateral para não encostar nas bordas
-          }}>
-        <Text style={{ color: '#F5F5F5' }}>{props.currentMessage?.text}</Text>
-      </View>
-    </View>
-  )}
-/>
-
-
-
-
+            messages={messages}
+            onSend={(messages) => onSend(messages)}
+            user={{ _id: 1, name: "Usuário" }}
+            placeholder="Digite sua pergunta..."
+            alwaysShowSend
+            renderInputToolbar={(props) =>
+              chatId ? <InputToolbar {...props} /> : null
+            }
+            renderMessage={(props) => (
+              <View style={{ marginVertical: 6 }}>
+              <View style={{ 
+                backgroundColor: props.currentMessage?.user._id === 1 ? '#282828' : '#212121', 
+                borderColor: props.currentMessage?.user._id === 1 ? '#B8B8B8' : '', 
+                borderWidth: 1,
+                borderRadius: 10,
+                padding: 10, 
+                margin: 5,
+                maxWidth: '80%', 
+                alignSelf: props.currentMessage?.user._id === 1 ? 'flex-end' : 'flex-start', 
+                marginHorizontal: 10, 
+              }}>
+            <Text style={{ color: '#F5F5F5' }}>{props.currentMessage?.text}</Text>
+          </View>
+        </View>
+      )}
+    />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  container2: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+  },
   container: { flex: 1, backgroundColor: "#282828" },
   headerContainer: {
     padding: 10,
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
   },
-  headerText: { fontSize: 18, color: "#fff", fontWeight: "bold", flex: 1, textAlign: "center" },
+  headerText: { fontSize: 18, color: "#fff", fontWeight: "bold", flex: 1, textAlign: "center"},
   connectingText: { fontSize: 14, color: "#aaa", marginTop: 5 },
   button: {
     padding: 10,
