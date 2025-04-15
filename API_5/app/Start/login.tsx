@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import * as Font from 'expo-font'; 
 import { apiCall } from '../../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
 const Login = () => {
@@ -54,30 +55,32 @@ const Login = () => {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        // Salvar token se necessário
-        // AsyncStorage.setItem('token', data.token);
-        
-        // Redirecionar para o chat para usuários regulares
-        router.push('/(drawer)/Home');
+        // Armazena os tokens e o status de administrador
+        await AsyncStorage.setItem('accessToken', data.access_token);
+        await AsyncStorage.setItem('refreshToken', data.refresh_token);
+        await AsyncStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
+
+        // Redireciona com base no status de administrador
+        if (data.is_admin) {
+          router.push('/(drawer)/Home'); // Redireciona para o painel de admin
+        } else {
+          router.push('/(drawer)/MeusChatbots/meusChatbots'); // Redireciona para os chatbots do usuário
+        }
       } else {
-        const errorData = await response.json();
-        setModalMessage(errorData.message || 'Credenciais inválidas');
+        setModalMessage(data.msg || 'Credenciais inválidas.');
         setModalVisible(true);
       }
     } catch (error) {
       console.error('Erro no login:', error);
-      setModalMessage('Erro ao conectar com o servidor');
+      setModalMessage('Erro ao conectar com o servidor.');
       setModalVisible(true);
     } finally {
       setLoading(false);
     }
   };
-
-  if (!fontLoaded) {
-    return <Text>Carregando fontes...</Text>;
-  }
 
   return (
     <View style={styles.container}>
