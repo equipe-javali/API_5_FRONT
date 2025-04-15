@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { apiCall } from '../../../config/api';
+import { apiCall } from './../../config/api';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 const SignUpScreen = () => {
     const [name, setName] = useState("");
@@ -11,9 +13,8 @@ const SignUpScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
     const [isError, setIsError] = useState(false);
-    const [loading, setLoading] = useState(false); // Estado para o carregamento
+    const [loading, setLoading] = useState(false);
 
-    // Carrega a fonte roboto
     const [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Roboto_700Bold,
@@ -32,7 +33,7 @@ const SignUpScreen = () => {
             return;
         }
 
-        setLoading(true); // Ativa o carregamento
+        setLoading(true);
 
         try {
             const response = await apiCall('/api/usuario/cadastrar', {
@@ -69,7 +70,7 @@ const SignUpScreen = () => {
             setModalMessage("Erro na conexão com o servidor.");
             setIsError(true);
         } finally {
-            setLoading(false); // Desativa o carregamento
+            setLoading(false);
             setModalVisible(true);
         }
     };
@@ -103,9 +104,16 @@ const SignUpScreen = () => {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-                <Text style={styles.buttonText}>Cadastrar</Text>
-            </TouchableOpacity>
+
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+                    <Text style={styles.buttonText}>Cadastrar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/CadastroUsuario/listarUsuario')}>
+                    <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+            </View>
+
 
             {loading && (
                 <View style={styles.loadingOverlay}>
@@ -159,18 +167,40 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 20,
     },
-    button: {
-        width: "60%",
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12, // espaço entre os botões
+        marginTop: 20,
+      },
+      
+      button: {
+        flex: 1,
         padding: 10,
         borderRadius: 5,
         borderWidth: 1,
         borderColor: "#f4f4f4",
         alignItems: "center",
         backgroundColor: "#212121",
-        fontFamily: "Roboto_400Regular"
+        fontFamily: "Roboto_400Regular",
+      },
+    cancelButton: {
+        flex: 1,
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: "#555",
+        alignItems: "center",
+        backgroundColor: "#2c2c2c",
+        fontFamily: "Roboto_400Regular",
     },
     buttonText: {
         color: "#fff",
+        fontSize: 16,
+        fontFamily: "Roboto_400Regular"
+    },
+    cancelButtonText: {
+        color: "#aaa",
         fontSize: 16,
         fontFamily: "Roboto_400Regular"
     },
@@ -233,6 +263,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    returnButton: {
+        padding: 10,
+        marginRight: 10,
+      },
 });
 
 export default SignUpScreen;
