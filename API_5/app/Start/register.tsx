@@ -44,7 +44,7 @@ const Register = () => {
 
     try {
       setLoading(true); // Inicia o loading
-      const response = await apiCall('/api/usuario/cadastrar', {
+      const response = await apiCall('/api/admin/cadastrar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

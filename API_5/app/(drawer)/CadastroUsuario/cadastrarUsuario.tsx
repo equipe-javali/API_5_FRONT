@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { apiCall } from '../../../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
@@ -24,56 +25,53 @@ const SignUpScreen = () => {
         return null;
     }
 
-    const handleSignUp = async () => {
-        if (!name || !email || !password) {
-            setModalMessage("Por favor, preencha todos os campos.");
-            setIsError(true);
-            setModalVisible(true);
-            return;
+        const handleSignUp = async () => {
+      if (!name || !email || !password) {
+        setModalMessage("Por favor, preencha todos os campos.");
+        setIsError(true);
+        setModalVisible(true);
+        return;
+      }
+    
+      setLoading(true); // Ativa o carregamento
+    
+      try {
+        const token = await AsyncStorage.getItem('accessToken'); // Recupera o token JWT
+    
+        const response = await apiCall('/api/usuario/cadastrar', {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${token}`, // Inclui o token JWT no cabeçalho
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nome: name,
+            email: email,
+            senha: password,
+            admin: false,
+          }),
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+          setModalMessage("Usuário cadastrado com sucesso!");
+          setIsError(false);
+          setName(""); 
+          setEmail(""); 
+          setPassword("");
+        } else {
+          setModalMessage(data.message || "Erro ao cadastrar usuário.");
+          setIsError(true);
         }
-
-        setLoading(true); // Ativa o carregamento
-
-        try {
-            const response = await apiCall('/api/usuario/cadastrar', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    nome: name,
-                    email: email,
-                    senha: password,
-                    admin: false,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setModalMessage("Usuário cadastrado com sucesso!");
-                setIsError(false);
-                setName(""); 
-                setEmail(""); 
-                setPassword("");
-                console.log("Usuário cadastrado com sucesso:", {
-                    nome: data.nome,
-                    email: data.email,
-                });
-
-            } else {
-                setModalMessage(data.message || "Erro ao cadastrar usuário.");
-                setIsError(true);
-            }
-        } catch (error) {
-            setModalMessage("Erro na conexão com o servidor.");
-            setIsError(true);
-        } finally {
-            setLoading(false); // Desativa o carregamento
-            setModalVisible(true);
-        }
+      } catch (error) {
+        setModalMessage("Erro na conexão com o servidor.");
+        setIsError(true);
+      } finally {
+        setLoading(false); // Desativa o carregamento
+        setModalVisible(true);
+      }
     };
-
     return (
         <View style={styles.container}>
             <Text style={styles.text}>
