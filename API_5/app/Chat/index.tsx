@@ -78,9 +78,11 @@ const Chat = () => {
           createdAt: new Date(),
           user: {
             _id: 2,
+            
             name: chatbotName || "Chatbot",
           }
         };
+        
         
         setMessages(previousMessages => 
           GiftedChat.append(previousMessages, [botMessage])
@@ -112,10 +114,30 @@ const Chat = () => {
         user={{ _id: 1, name: "Usuário" }}
         placeholder="Digite sua pergunta..."
         alwaysShowSend
-        renderInputToolbar={(props) => 
+        renderInputToolbar={(props) =>
           chatId ? <InputToolbar {...props} /> : null
         }
-      />
+        renderMessage={(props) => (
+          <View style={{ marginVertical: 6 }}>
+          <View style={{ 
+            backgroundColor: props.currentMessage?.user._id === 1 ? '#282828' : '#212121', // Cor do balão
+            borderColor: props.currentMessage?.user._id === 1 ? '#B8B8B8' : '', // Cor da borda
+            borderWidth: 1,
+            borderRadius: 10,
+            padding: 8, // Diminui o padding
+            maxWidth: '80%', // Define a largura máxima para não ficar muito grande
+            alignSelf: props.currentMessage?.user._id === 1 ? 'flex-end' : 'flex-start', // Alinha à direita para o usuário, à esquerda para o bot
+            marginHorizontal: 10, // Espaçamento lateral para não encostar nas bordas
+          }}>
+        <Text style={{ color: '#F5F5F5' }}>{props.currentMessage?.text}</Text>
+      </View>
+    </View>
+  )}
+/>
+
+
+
+
     </SafeAreaView>
   );
 };
