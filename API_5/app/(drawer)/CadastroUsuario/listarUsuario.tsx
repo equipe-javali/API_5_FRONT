@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { apiCall } from '../../../config/api';
-import { Link } from 'expo-router';
-
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 type Usuario = {
+  id: number;
   nome: string;
   email: string;
 };
@@ -14,32 +23,62 @@ const UserListScreen = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const carregarUsuarios = async () => {
-      try {
-        const response = await apiCall('/api/agente/listar-usuario');
-        const data = await response.json();
-        setUsuarios(data);
-      } catch (err) {
-        console.error(err);
-        setErro('Erro ao carregar usuários.');
-      } finally {
-        setCarregando(false);
-      }
-    };
-
     carregarUsuarios();
   }, []);
+
+  const carregarUsuarios = async () => {
+    try {
+      const response = await apiCall('/api/usuario/listagem-todos');
+      const data = await response.json();
+      setUsuarios(data);
+    } catch (err) {
+      console.error(err);
+      setErro('Erro ao carregar usuários.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const excluirUsuario = async (id: number) => {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir este usuário?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await apiCall(`/api/usuario/excluir/${id}`, { method: 'DELETE' });
+              setUsuarios(prev => prev.filter(usuario => usuario.id !== id));
+            } catch (err) {
+              console.error(err);
+              setErro('Erro ao excluir usuário.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const renderItem = ({ item }: { item: Usuario }) => (
     <View style={styles.item}>
       <Text style={styles.nome}>{item.nome}</Text>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.iconBtn}>
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={() => router.push(`/User/editarUsuario?id=${item.id}`)}
+        >
           <Ionicons name="pencil-outline" size={18} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={() => excluirUsuario(item.id)}
+        >
           <Ionicons name="trash-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -68,12 +107,12 @@ const UserListScreen = () => {
       <View style={styles.header}>
         <Text style={styles.titulo}>Usuários</Text>
         <Link href="/User/cadastrarUsuario" style={styles.addBtn}>
-            <Text style={styles.addBtnText}>Adicionar</Text>
+          <Text style={styles.addBtnText}>Adicionar</Text>
         </Link>
       </View>
       <FlatList
         data={usuarios}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
@@ -82,67 +121,65 @@ const UserListScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingHorizontal: 16,
-      paddingTop: 20,
-      backgroundColor: '#1c1c1e',
-    },
-    header: {
-      marginHorizontal: 10,
-
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    titulo: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: '#fff',
-    },
-    addBtn: {
-      borderColor: '#fff',
-      borderWidth: 1,
-      borderRadius: 6,
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-    },
-    addBtnText: {
-      color: '#fff',
-      fontSize: 16,
-    },
-    item: {
-      backgroundColor: '#2c2c2e',
-      padding: 14,
-      borderRadius: 8,
-      marginBottom: 12,
-      marginHorizontal: 10,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    nome: {
-      fontSize: 16,
-      color: '#fff',
-    },
-    actions: {
-      flexDirection: 'row',
-      gap: 12,
-    },
-    iconBtn: {
-      backgroundColor: '#3a3a3c',
-      padding: 8,
-      borderRadius: 6,
-      marginLeft: 8,
-    },
-    loading: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#1c1c1e',
-    },
-  });
-  
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    backgroundColor: '#1c1c1e',
+  },
+  header: {
+    marginHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  titulo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  addBtn: {
+    borderColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  addBtnText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  item: {
+    backgroundColor: '#2c2c2e',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  nome: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconBtn: {
+    backgroundColor: '#3a3a3c',
+    padding: 8,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1c1c1e',
+  },
+});
 
 export default UserListScreen;
