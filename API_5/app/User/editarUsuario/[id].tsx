@@ -24,7 +24,7 @@ const EditarUsuario = () => {
   useEffect(() => {
     const carregarUsuario = async () => {
       try {
-        const response = await apiCall(`/api/usuario/${id}`);
+        const response = await apiCall(`/api/usuario/atualizar/${id}`);
         const data = await response.json();
         setName(data.nome);
         setEmail(data.email);

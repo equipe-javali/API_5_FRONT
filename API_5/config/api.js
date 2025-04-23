@@ -64,7 +64,6 @@ export const apiCall = async (endpoint, options = {}) => {
     headers: {
       ...API_CONFIG.headers,
       ...options.headers,
-      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1NDE0NDA3LCJpYXQiOjE3NDU0MTQxMDcsImp0aSI6IjZiNTU4NmQ3YTdiNjQ3OWZhODQ0NmRiYmMyZjA0ZGUyIiwidXNlcl9pZCI6NTZ9.RYcVSgjUbKMx3COa6N28sYaRNCDVPrFLFAK-x9feFD8"
     },
   };
   
