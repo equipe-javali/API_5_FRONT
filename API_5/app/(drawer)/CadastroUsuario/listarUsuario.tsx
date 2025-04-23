@@ -17,6 +17,8 @@ type Usuario = {
   id: number;
   nome: string;
   email: string;
+  admin: boolean;
+  permissoes: any[];
 };
 
 const UserListScreen = () => {
@@ -33,7 +35,8 @@ const UserListScreen = () => {
     try {
       const response = await apiCall('/api/usuario/listagem-todos');
       const data = await response.json();
-      setUsuarios(data);
+      console.log('Usuários carregados:', data); // debug
+      setUsuarios(data.usuarios);
     } catch (err) {
       console.error(err);
       setErro('Erro ao carregar usuários.');
@@ -42,7 +45,7 @@ const UserListScreen = () => {
     }
   };
 
-  const excluirUsuario = async (id: number) => {
+  const excluirUsuario = async (email: string) => {
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este usuário?',
@@ -53,8 +56,8 @@ const UserListScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiCall(`/api/usuario/excluir/${id}`, { method: 'DELETE' });
-              setUsuarios(prev => prev.filter(usuario => usuario.id !== id));
+              await apiCall(`/api/usuario/excluir/${email}`, { method: 'DELETE' });
+              setUsuarios(prev => prev.filter(usuario => usuario.email !== email));
             } catch (err) {
               console.error(err);
               setErro('Erro ao excluir usuário.');
@@ -67,7 +70,7 @@ const UserListScreen = () => {
 
   const renderItem = ({ item }: { item: Usuario }) => (
     <View style={styles.item}>
-      <Text style={styles.nome}>{item.nome}</Text>
+      <Text style={styles.nome}>{item.nome || '(Sem nome)'}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.iconBtn}
@@ -112,7 +115,7 @@ const UserListScreen = () => {
       </View>
       <FlatList
         data={usuarios}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.email}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
