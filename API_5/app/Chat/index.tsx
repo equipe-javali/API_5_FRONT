@@ -104,7 +104,6 @@ const Chat = () => {
             ? `${chatbotName} `
             : "Chatbot está online. O que deseja saber?"}
         </Text>
-        
       </View>
       
       {!chatId && <View style={styles.container}>
