@@ -64,6 +64,7 @@ export const apiCall = async (endpoint, options = {}) => {
     headers: {
       ...API_CONFIG.headers,
       ...options.headers,
+      // Authorization: `Bearer `, 
     },
   };
   
