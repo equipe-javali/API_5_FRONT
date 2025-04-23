@@ -35,7 +35,7 @@ const UserListScreen = () => {
     try {
       const response = await apiCall('/api/usuario/listagem-todos');
       const data = await response.json();
-      console.log('Usuários carregados:', data); // debug
+      console.log('Usuários carregados:', data); 
       setUsuarios(data.usuarios);
     } catch (err) {
       console.error(err);
@@ -45,7 +45,27 @@ const UserListScreen = () => {
     }
   };
 
-  const excluirUsuario = async (email: string) => {
+  const excluirUsuario = (id: number) => {
+    const confirmarExclusao = async () => {
+      try {
+        console.log('Excluindo usuário com ID:', id);
+        const response = await apiCall(`/api/usuario/excluir/${id}`, {
+          method: 'DELETE',
+        });
+  
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.message || 'Erro ao excluir');
+        }
+  
+        setUsuarios(prev => prev.filter(usuario => usuario.id !== id));
+        Alert.alert('Sucesso', 'Usuário excluído com sucesso!');
+      } catch (err) {
+        console.error('Erro ao excluir:', err);
+        Alert.alert('Erro', 'Erro ao excluir usuário.');
+      }
+    };
+  
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este usuário?',
@@ -54,39 +74,40 @@ const UserListScreen = () => {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await apiCall(`/api/usuario/excluir/${email}`, { method: 'DELETE' });
-              setUsuarios(prev => prev.filter(usuario => usuario.email !== email));
-            } catch (err) {
-              console.error(err);
-              setErro('Erro ao excluir usuário.');
-            }
-          },
+          onPress: confirmarExclusao, 
         },
       ]
     );
   };
-
+  
+  
   const renderItem = ({ item }: { item: Usuario }) => (
     <View style={styles.item}>
       <Text style={styles.nome}>{item.nome || '(Sem nome)'}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.iconBtn}
-          onPress={() => router.push(`/User/editarUsuario?id=${item.id}`)}
+          onPress={() =>
+            router.push({
+              pathname: '/User/editarUsuario/[id]',
+              params: { id: item.id.toString() },
+            })
+          }
         >
           <Ionicons name="pencil-outline" size={18} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconBtn}
-          onPress={() => excluirUsuario(item.id)}
+          onPress={() => {
+            excluirUsuario(item.id);
+          }}
         >
           <Ionicons name="trash-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
   );
+  
 
   if (carregando) {
     return (

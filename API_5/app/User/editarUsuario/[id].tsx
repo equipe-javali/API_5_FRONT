@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiCall } from './../../config/api';
+import { apiCall } from '../../../config/api';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Modal,
   ActivityIndicator, Alert,

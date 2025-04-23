@@ -64,7 +64,7 @@ export const apiCall = async (endpoint, options = {}) => {
     headers: {
       ...API_CONFIG.headers,
       ...options.headers,
-      // "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1NDEwODc2LCJpYXQiOjE3NDU0MTA1NzYsImp0aSI6ImVjZmM5MWIzNWRkZjQ4OWU5ZDUzNTk2MDdhOGQ0ZDM4IiwidXNlcl9pZCI6NTZ9.5ftUKCOvXpTTwL2VFC87m1KTmbmHbsLkrqYVp8LhIag"
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1NDE0NDA3LCJpYXQiOjE3NDU0MTQxMDcsImp0aSI6IjZiNTU4NmQ3YTdiNjQ3OWZhODQ0NmRiYmMyZjA0ZGUyIiwidXNlcl9pZCI6NTZ9.RYcVSgjUbKMx3COa6N28sYaRNCDVPrFLFAK-x9feFD8"
     },
   };
   
