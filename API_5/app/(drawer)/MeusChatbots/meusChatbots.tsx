@@ -4,8 +4,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
 
-const MeusChatbots = () => {
-  const [chatbots, setChatbots] = useState([]);
+interface Chatbot {
+    id: number;
+    Agente_nome: string;
+    examples_count: number;
+    performance_score: number;
+    Agente_id_id?: number;
+    agent_id?: number;
+    agente_id?: number;
+    created_at: string;
+  }
+  
+const Chatbots = () => {
+  
+  const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -102,7 +114,7 @@ const MeusChatbots = () => {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}>Meus Chatbots</Text> */}
+      {/* <Text style={styles.title}> Chatbots</Text> */}
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
@@ -146,4 +158,4 @@ const styles = StyleSheet.create({
   chatButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
 });
 
-export default MeusChatbots;
+export default Chatbots;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import * as Font from 'expo-font'; 
-import { apiCall } from '../../config/api';
+import { apiCall } from '../../config/api'; // Ajuste o caminho conforme necessário
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
@@ -67,7 +67,7 @@ const Login = () => {
         if (data.is_admin) {
           router.push('/(drawer)/Home'); // Redireciona para o painel de admin
         } else {
-          router.push('/(drawer)/MeusChatbots/meusChatbots'); // Redireciona para os chatbots do usuário
+          router.push('/Start/HomeUsuario'); // Redireciona para os chatbots do usuário
         }
       } else {
         setModalMessage(data.msg || 'Credenciais inválidas.');
