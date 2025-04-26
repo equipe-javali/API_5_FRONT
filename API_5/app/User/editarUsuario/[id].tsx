@@ -22,7 +22,7 @@ const EditarUsuario = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [permissoes, setPermissoes] = useState<string[]>([]);
+  const [permissoes, setPermissoes] = useState<Permissao[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -75,23 +75,22 @@ const EditarUsuario = () => {
   }, []);
 
 
-  // Função para adicionar uma permissão
-  const adicionarPermissao = (permissao: string) => {
-    if (permissao && !permissoes.includes(permissao)) {
-      setPermissoes([...permissoes, permissao]);
-    }
-    setPermissaoSelecionada("");
-    setShowPermissoesList(false);
+    const adicionarPermissao = (permissao: Permissao) => {
+        if (permissao && !permissoes.some(p => p.id === permissao.id)) {
+          console.log("Adicionando permissão:", permissao);
+          setPermissoes([...permissoes, permissao]);
+        }
+        setPermissaoSelecionada("");
+        setShowPermissoesList(false);
+      };
+  
+  // 3. Modificar a função removerPermissao
+  const removerPermissao = (id: number) => {
+    setPermissoes(permissoes.filter(p => p.id !== id));
   };
-
-  // Função para remover uma permissão
-  const removerPermissao = (index: number) => {
-    const novasPermissoes = [...permissoes];
-    novasPermissoes.splice(index, 1);
-    setPermissoes(novasPermissoes);
-  };
-
-  useEffect(() => {
+  
+  
+    useEffect(() => {
     const carregarUsuario = async () => {
       try {
         console.log(`Carregando dados do usuário ID: ${id}`);
@@ -99,24 +98,54 @@ const EditarUsuario = () => {
         const data = await response.json();
         console.log("Dados recebidos da API:", JSON.stringify(data, null, 2));
         
+        // Função auxiliar para converter IDs de permissões em objetos completos
+        const converterPermissoes = (permissoesIDs: number[]) => {
+          if (!Array.isArray(permissoesIDs)) {
+            console.log("Permissões não é um array:", permissoesIDs);
+            return [];
+          }
+          
+          // Mapeia cada ID para um objeto completo de permissão
+          return permissoesIDs.map(permissaoID => {
+            // Tenta encontrar a permissão correspondente em todasPermissoes
+            const permissaoCompleta = todasPermissoes.find(p => p.id === permissaoID);
+            
+            // Se encontrou, usa o objeto completo, senão cria um objeto temporário
+            return permissaoCompleta || { id: permissaoID, nome: `Permissão ${permissaoID}` };
+          });
+        };
+        
         // Verifica diferentes estruturas possíveis da resposta
         if (data.usuarios) {
           // Se a estrutura for { usuarios: { ... } }
           setName(data.usuarios.nome || "");
           setEmail(data.usuarios.email || "");
-          setPermissoes(data.usuarios.permissoes || []);
+          
+          // Converter IDs para objetos
+          const permissoesObj = converterPermissoes(data.usuarios.permissoes || []);
+          setPermissoes(permissoesObj);
+          console.log("Permissões convertidas:", permissoesObj);
+          
           console.log("Dados carregados do campo 'usuarios'");
         } else if (data.usuario) {
           // Se a estrutura for { usuario: { ... } }
           setName(data.usuario.nome || "");
           setEmail(data.usuario.email || "");
-          setPermissoes(data.usuario.permissoes || []);
+          
+          // Converter IDs para objetos
+          const permissoesObj = converterPermissoes(data.usuario.permissoes || []);
+          setPermissoes(permissoesObj);
+          
           console.log("Dados carregados do campo 'usuario'");
         } else if (data.nome) {
           // Se a estrutura for { nome: "...", email: "..." }
           setName(data.nome || "");
           setEmail(data.email || "");
-          setPermissoes(data.permissoes || []);
+          
+          // Converter IDs para objetos
+          const permissoesObj = converterPermissoes(data.permissoes || []);
+          setPermissoes(permissoesObj);
+          
           console.log("Dados carregados diretamente do objeto");
         } else {
           console.error("Estrutura de resposta inesperada:", data);
@@ -135,12 +164,11 @@ const EditarUsuario = () => {
       }
     };
   
-    if (id) {
+    // Só carrega os dados do usuário quando já tiver as permissões disponíveis
+    if (id && todasPermissoes.length > 0) {
       carregarUsuario();
-    } else {
-      setInitialLoading(false);
     }
-  }, [id]);
+  }, [id, todasPermissoes]); // Adiciona todasPermissoes como dependência
   
   if (initialLoading || !fontsLoaded) {
     return (
@@ -157,55 +185,86 @@ const EditarUsuario = () => {
       setModalVisible(true);
       return;
     }
-  
+    
     setLoading(true);
+    let dadosBasicosAtualizados = false;
+    
     try {
-      // Prepara os dados para envio - formato exato que o backend espera
-      const userData: { nome: string; email: string; permissoes: string[]; senha?: string } = {
-        nome: name.trim(),
-        email: email.trim().toLowerCase(),
-        permissoes: permissoes
-      };
+      const permissaoIds = permissoes.map(p => p.id);
       
-      if (password && password.trim() !== "") {
-        userData["senha"] = password.trim();
-      }
+      // 1. PRIMEIRO: Atualizar permissões
+      console.log("Enviando permissões:", { permissoes: permissaoIds });
       
-      console.log("Enviando dados:", userData);
+      const permissionsResponse = await makeAuthenticatedRequest(`/api/usuario/permissoes/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ permissoes: permissaoIds }),
+      });
+      
+      if (permissionsResponse.ok) {
+        console.log("✅ Permissões atualizadas com sucesso!");
         
-      const response = await makeAuthenticatedRequest(`/api/usuario/atualizar/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        });
-    
-      let data;
-      const responseText = await response.text();
-      
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.log("Resposta não é JSON:", responseText);
-        data = { message: responseText };
-      }
-      
-      console.log("Resposta da API:", response.status, data);
-    
-      if (response.ok) {
-        setModalMessage("Usuário atualizado com sucesso!");
-        setIsError(false);
+        // 2. DEPOIS: Atualizar dados básicos INCLUINDO as permissões
+        const userData = {
+          nome: name.trim(),
+          email: email.trim().toLowerCase(),
+          permissoes: permissaoIds  // INCLUI permissões aqui também!
+        };
         
-        // Usar uma referência para o timeout para poder cancelá-lo se necessário
+        if (password && password.trim() !== "") {
+          userData.senha = password.trim();
+        }
+        
+        console.log("Enviando dados básicos (incluindo permissões):", userData);
+        
+        try {
+          const basicDataResponse = await makeAuthenticatedRequest(`/api/usuario/atualizar/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+          });
+          
+          // Capturar o texto da resposta para diagnóstico
+          const responseText = await basicDataResponse.text();
+          console.log("Resposta da atualização de dados:", 
+                      basicDataResponse.status, responseText);
+          
+          if (basicDataResponse.ok) {
+            dadosBasicosAtualizados = true;
+            console.log("✅ Dados básicos atualizados com sucesso!");
+          } else {
+            console.error("❌ Erro ao atualizar dados básicos:", responseText);
+          }
+        } catch (error) {
+          console.error("❌ Exceção ao atualizar dados básicos:", error);
+        }
+        
+        // Mesmo que a atualização dos dados básicos falhe, consideramos sucesso
+        // se as permissões foram atualizadas
+        setModalMessage(
+          dadosBasicosAtualizados 
+            ? "Usuário atualizado com sucesso!"
+            : "Permissões atualizadas com sucesso, mas houve um problema ao atualizar os dados básicos."
+        );
+        setIsError(!dadosBasicosAtualizados);
+        
+        // Sempre redirecionar após um tempo se as permissões foram atualizadas
         const timeoutRef = setTimeout(() => {
           router.push('/CadastroUsuario/listarUsuario');
         }, 1500);
         
-        // Guarda a referência do timeout em um estado para poder cancelá-lo
         setRedirectTimeout(timeoutRef);
+        
       } else {
-        setModalMessage(data.message || data.msg || data.detail || "Erro ao atualizar usuário.");
+        // Falha na atualização das permissões
+        const errorText = await permissionsResponse.text();
+        console.error("❌ Erro ao atualizar permissões:", errorText);
+        
+        setModalMessage("Erro ao atualizar permissões do usuário: " + errorText);
         setIsError(true);
       }
     } catch (error) {
@@ -265,10 +324,10 @@ const EditarUsuario = () => {
   
       {/* Lista de Permissões Selecionadas - REMOVER DUPLICAÇÃO */}
       <View style={styles.chipsContainer}>
-        {permissoes.map((permissao, index) => (
-          <View key={index} style={styles.chip}>
-            <Text style={styles.chipText}>{permissao}</Text>
-            <TouchableOpacity onPress={() => removerPermissao(index)}>
+        {permissoes.map((permissao) => (
+          <View key={permissao.id} style={styles.chip}>
+            <Text style={styles.chipText}>{permissao.nome}</Text>
+            <TouchableOpacity onPress={() => removerPermissao(permissao.id)}>
               <Ionicons name="close-circle" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -292,6 +351,44 @@ const EditarUsuario = () => {
             <ActivityIndicator size="large" color="#fff" />
           </View>
         )}
+<Modal
+      transparent={true}
+      animationType="fade"
+      visible={modalVisible}
+      onRequestClose={() => {
+        if (!isError) {
+          router.push('/CadastroUsuario/listarUsuario');
+        } else {
+          setModalVisible(false);
+        }
+      }}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={[
+            styles.modalText, 
+            isError ? styles.errorText : styles.successText
+          ]}>
+            {modalMessage}
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => {
+              setModalVisible(false);
+              if (!isError) {
+                // Se for sucesso, redireciona para a lista
+                router.push('/CadastroUsuario/listarUsuario');
+              }
+            }}
+          >
+            <Text style={styles.closeButtonText}>
+              {isError ? "Fechar" : "Ir para lista"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
 
 <Modal
         transparent={true}
@@ -308,21 +405,21 @@ const EditarUsuario = () => {
             <Text style={styles.permissoesModalTitle}>Selecionar Permissão</Text>
             
             <FlatList
-              data={todasPermissoes}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    adicionarPermissao(item.nome);
-                    setShowPermissoesList(false);
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>{item.nome}</Text>
-                </TouchableOpacity>
-              )}
-              style={{ maxHeight: 250 }}
-            />
+                data={todasPermissoes}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity 
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      adicionarPermissao(item); // Passa o objeto completo
+                      setShowPermissoesList(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownItemText}>{item.nome}</Text>
+                  </TouchableOpacity>
+                )}
+                style={{ maxHeight: 250 }}
+              />
             
             <TouchableOpacity
               style={styles.closeButton}
@@ -423,7 +520,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   successText: {
-    color: "green",
+    color: "white",
   },
   closeButton: {
     padding: 10,
