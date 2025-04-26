@@ -9,7 +9,13 @@ import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-// Definição do tipo de Permissão
+interface UserDataPayload {
+  nome: string;
+  email: string;
+  permissoes: number[];
+  senha?: string; // Propriedade opcional
+}
+
 type Permissao = {
   id: number;
   nome: string;
@@ -207,10 +213,10 @@ const EditarUsuario = () => {
         console.log("✅ Permissões atualizadas com sucesso!");
         
         // 2. DEPOIS: Atualizar dados básicos INCLUINDO as permissões
-        const userData = {
+        const userData: UserDataPayload = {
           nome: name.trim(),
           email: email.trim().toLowerCase(),
-          permissoes: permissaoIds  // INCLUI permissões aqui também!
+          permissoes: permissaoIds
         };
         
         if (password && password.trim() !== "") {
