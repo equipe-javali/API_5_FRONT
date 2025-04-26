@@ -6,6 +6,8 @@ import { apiCall } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
+
+
 const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [email, setEmail] = useState('');
@@ -56,18 +58,63 @@ const Login = () => {
       });
 
       const data = await response.json();
+      
 
-      if (response.ok) {
-        // Armazena os tokens e o status de administrador
-        await AsyncStorage.setItem('accessToken', data.access_token);
-        await AsyncStorage.setItem('refreshToken', data.refresh_token);
-        await AsyncStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
-
-        // Redireciona com base no status de administrador
-        if (data.is_admin) {
-          router.push('/(drawer)/Home'); // Redireciona para o painel de admin
-        } else {
-          router.push('/(drawer)/MeusChatbots/meusChatbots'); // Redireciona para os chatbots do usuário
+            if (response.ok) {
+        // Log detalhado da resposta
+        console.log('Resposta completa do login:', data);
+        
+        // Armazena os tokens
+        await AsyncStorage.setItem('access_token', data.access_token);
+        await AsyncStorage.setItem('refresh_token', data.refresh_token);
+        
+        try {
+          // Decodificar o token para obter o ID do usuário
+          const tokenParts = data.access_token.split('.');
+          const payloadBase64 = tokenParts[1];
+          // Decodifica o Base64 para string e converte para objeto
+          const payloadString = atob ? atob(payloadBase64) : 
+            Buffer.from(payloadBase64, 'base64').toString('ascii');
+          const payload = JSON.parse(payloadString);
+          const userId = payload.user_id;
+          
+          console.log('ID do usuário extraído do token:', userId);
+          
+          // Armazenar o ID do usuário
+          if (userId) {
+            await AsyncStorage.setItem('userId', userId.toString());
+          }
+        } catch (error) {
+          console.error('Erro ao extrair ID do usuário do token:', error);
+        }
+        
+        const isAdmin = data.is_staff === true || 
+                        data.admin === true || 
+                        data.is_admin === true;
+                        
+        console.log('Status de admin detectado:', isAdmin);
+        console.log('Valores nas propriedades:',
+          'is_admin:', data.is_admin,
+          'admin:', data.admin,
+          'is_staff:', data.is_staff
+        );
+        
+        await AsyncStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+        
+        console.log('Tentando redirecionar para:', isAdmin ? 
+          '/(drawer)/Home' : '/(drawer)/MeusChatbots/meusChatbots');
+        
+        try {
+          if (isAdmin) {
+            router.push('/(drawer)/Home');
+          } else {
+            router.push('/Start/homeUsuario');
+          }
+          console.log('Redirecionamento executado');
+        } catch (error) {
+          console.error('Erro no redirecionamento:', error);
+          // Rotas alternativas como fallback
+          router.push(isAdmin ? '/Home' : '/MeusChatbots/meusChatbots');
         }
       } else {
         setModalMessage(data.msg || 'Credenciais inválidas.');

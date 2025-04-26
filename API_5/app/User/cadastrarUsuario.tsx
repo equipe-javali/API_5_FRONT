@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { apiCall } from '../../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiCall } from './../../config/api';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { makeAuthenticatedRequest } from "../../config/tokenService";
 
 const SignUpScreen = () => {
     const [name, setName] = useState("");
@@ -12,9 +15,8 @@ const SignUpScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
     const [isError, setIsError] = useState(false);
-    const [loading, setLoading] = useState(false); // Estado para o carregamento
+    const [loading, setLoading] = useState(false);
 
-    // Carrega a fonte roboto
     const [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Roboto_700Bold,
@@ -33,26 +35,46 @@ const SignUpScreen = () => {
         return;
       }
     
+      // Verificar autenticação antes de começar
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setModalMessage("Você não está autenticado. Faça login novamente.");
+        setIsError(true);
+        setModalVisible(true);
+        setTimeout(() => router.push('/Start/login'), 2000);
+        return;
+      }
+    
+      // Verificar se o usuário é admin
+      const isAdmin = await AsyncStorage.getItem('isAdmin');
+      if (isAdmin !== 'true') {
+        setModalMessage("Apenas administradores podem cadastrar novos usuários.");
+        setIsError(true);
+        setModalVisible(true);
+        return;
+      }
+      
       setLoading(true); // Ativa o carregamento
     
       try {
-        const token = await AsyncStorage.getItem('accessToken'); // Recupera o token JWT
-    
-        const response = await apiCall('/api/usuario/cadastrar', {
+        console.log("Enviando requisição com token:", token.substring(0, 15) + "...");
+        
+        const response = await makeAuthenticatedRequest('/api/usuario/cadastrar', {
           method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`, // Inclui o token JWT no cabeçalho
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             nome: name,
             email: email,
-            senha: password,
-            admin: false,
+            senha: password,            
+            permissoes: [],
+            // admin: false, 
           }),
         });
     
         const data = await response.json();
+        console.log("Resposta da API:", response.status, data);
     
         if (response.ok) {
           setModalMessage("Usuário cadastrado com sucesso!");
@@ -60,15 +82,29 @@ const SignUpScreen = () => {
           setName(""); 
           setEmail(""); 
           setPassword("");
-        } else {
-          setModalMessage(data.message || "Erro ao cadastrar usuário.");
+        } else if (response.status === 401) {
+          setModalMessage("Sessão expirada. Por favor, faça login novamente.");
           setIsError(true);
-        }
-      } catch (error) {
+          setTimeout(() => router.push('/Start/login'), 2000);
+        } else {
+            // Exibir detalhes do erro para diagnóstico
+            let errorMsg = "Erro ao cadastrar usuário.";
+            if (data && typeof data === 'object') {
+              // Extrair todas as mensagens de erro para ajudar no diagnóstico
+              const errorDetails = Object.entries(data)
+                .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`)
+                .join("\n");
+              errorMsg = errorDetails || data.message || data.msg || data.detail || errorMsg;
+            }
+            setModalMessage(errorMsg);
+            setIsError(true);
+          }
+        } catch (error) {
+        console.error("Erro na requisição:", error);
         setModalMessage("Erro na conexão com o servidor.");
         setIsError(true);
       } finally {
-        setLoading(false); // Desativa o carregamento
+        setLoading(false);
         setModalVisible(true);
       }
     };
@@ -101,9 +137,16 @@ const SignUpScreen = () => {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-                <Text style={styles.buttonText}>Cadastrar</Text>
-            </TouchableOpacity>
+
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+                    <Text style={styles.buttonText}>Cadastrar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/CadastroUsuario/listarUsuario')}>
+                    <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+            </View>
+
 
             {loading && (
                 <View style={styles.loadingOverlay}>
@@ -157,18 +200,40 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 20,
     },
-    button: {
-        width: "60%",
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12, // espaço entre os botões
+        marginTop: 20,
+      },
+      
+      button: {
+        flex: 1,
         padding: 10,
         borderRadius: 5,
         borderWidth: 1,
         borderColor: "#f4f4f4",
         alignItems: "center",
         backgroundColor: "#212121",
-        fontFamily: "Roboto_400Regular"
+        fontFamily: "Roboto_400Regular",
+      },
+    cancelButton: {
+        flex: 1,
+        padding: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: "#555",
+        alignItems: "center",
+        backgroundColor: "#2c2c2c",
+        fontFamily: "Roboto_400Regular",
     },
     buttonText: {
         color: "#fff",
+        fontSize: 16,
+        fontFamily: "Roboto_400Regular"
+    },
+    cancelButtonText: {
+        color: "#aaa",
         fontSize: 16,
         fontFamily: "Roboto_400Regular"
     },
@@ -231,6 +296,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    returnButton: {
+        padding: 10,
+        marginRight: 10,
+      },
 });
 
 export default SignUpScreen;

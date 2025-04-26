@@ -14,7 +14,7 @@ const Register = () => {
   const [isError, setIsError] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false); // Estado de loading
-  const admin = true; 
+  // const admin = true; 
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -53,7 +53,8 @@ const Register = () => {
           nome: nome,
           email: email,
           senha: senha,
-          admin: admin,
+          // permissoes: [],
+          // admin: admin,
         }),
       });
 
