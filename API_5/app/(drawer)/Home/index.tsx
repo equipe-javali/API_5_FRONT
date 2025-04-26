@@ -20,24 +20,12 @@ export default function Home({ navigation }: HomeProps) {
           </View>
         </Link>
 
-        <Link href="/CadastroUsuario/cadastrarUsuario" style={styles.link}>
+        <Link href="/CadastroUsuario/listarUsuario" style={styles.link}>
           <View style={styles.card}>
             <Icon name="users" size={40} color="#fff" />
             <Text style={styles.cardText}>Usuários</Text>
           </View>
         </Link>
-
-        {/* Quadrado 3 */}
-        <View style={styles.card}>
-          <Icon name="building" size={40} color="#fff" />
-          <Text style={styles.cardText}>Departamentos</Text>
-        </View>
-
-        {/* Quadrado 4 */}
-        <View style={styles.card}>
-          <Icon name="briefcase" size={40} color="#fff" />
-          <Text style={styles.cardText}>Empresas</Text>
-        </View>
       </View>
       <StatusBar style="auto" />
     </View>

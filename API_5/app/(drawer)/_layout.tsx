@@ -67,12 +67,12 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="CadastroUsuario/cadastrarUsuario"
+          name="CadastroUsuario/listarUsuario"
           options={{
-            drawerLabel: 'Cadastrar Usuário',
-            title: 'Cadastrar Usuário',
+            drawerLabel: 'Usuários',
+            title: 'Usuários',
             drawerIcon: ({ color }) => (
-              <Ionicons name="person-add" size={24} color={color} />
+              <Ionicons name="person" size={24} color={color} />
             ),
           }}
         />
