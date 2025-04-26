@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { apiCall } from '../../../config/api';
 import { Link, useRouter } from 'expo-router';
 import {
   View,
@@ -11,7 +10,9 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { makeAuthenticatedRequest } from '../../../config/tokenService';
 
 type Usuario = {
   id: number;
@@ -33,9 +34,14 @@ const UserListScreen = () => {
 
   const carregarUsuarios = async () => {
     try {
-      const response = await apiCall('/api/usuario/listagem-todos');
+      const response = await makeAuthenticatedRequest('/api/usuario/listagem-todos');
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar usuários');
+      }
+      
       const data = await response.json();
-      console.log('Usuários carregados:', data); 
+      console.log('Usuários carregados:', data);
       setUsuarios(data.usuarios);
     } catch (err) {
       console.error(err);
@@ -49,15 +55,16 @@ const UserListScreen = () => {
     const confirmarExclusao = async () => {
       try {
         console.log('Excluindo usuário com ID:', id);
-        const response = await apiCall(`/api/usuario/excluir/${id}`, {
+
+        const response = await makeAuthenticatedRequest(`/api/usuario/excluir/${id}`, {
           method: 'DELETE',
         });
-  
+
         if (!response.ok) {
           const errData = await response.json();
           throw new Error(errData.message || 'Erro ao excluir');
         }
-  
+
         setUsuarios(prev => prev.filter(usuario => usuario.id !== id));
         Alert.alert('Sucesso', 'Usuário excluído com sucesso!');
       } catch (err) {
@@ -65,7 +72,7 @@ const UserListScreen = () => {
         Alert.alert('Erro', 'Erro ao excluir usuário.');
       }
     };
-  
+
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este usuário?',
@@ -74,12 +81,11 @@ const UserListScreen = () => {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: confirmarExclusao, 
+          onPress: confirmarExclusao,
         },
       ]
     );
   };
-  
   
   const renderItem = ({ item }: { item: Usuario }) => (
     <View style={styles.item}>

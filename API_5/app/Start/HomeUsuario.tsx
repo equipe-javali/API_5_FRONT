@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { apiCall } from "../../config/api";
 import { Ionicons } from "@expo/vector-icons";
+import { makeAuthenticatedRequest } from "../../config/tokenService";
 
 // Defina a interface com tipos explícitos para garantir consistência
 interface Chatbot {
@@ -18,23 +19,12 @@ const MeusChatbots = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const token = await AsyncStorage.getItem("accessToken");
-        if (!token) {
-          console.error("Token JWT não encontrado.");
-          return;
-        }
-
-        const response = await apiCall("/api/chat/listar", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
+        // Usar o makeAuthenticatedRequest em vez de apiCall direto
+        const response = await makeAuthenticatedRequest("/api/chat/listar");
+  
         if (response.ok) {
           const data = await response.json();
           
@@ -48,7 +38,6 @@ const MeusChatbots = () => {
             setChatbots(validChatbots);
           } else if (data && typeof data === 'object') {
             // Se for um objeto, talvez a lista esteja em uma propriedade específica
-            // (Ajuste conforme a estrutura real da sua API)
             const chatbotList = Array.isArray(data.results) ? data.results : 
                                 Array.isArray(data.chatbots) ? data.chatbots : 
                                 Array.isArray(data.data) ? data.data : [];
@@ -59,7 +48,6 @@ const MeusChatbots = () => {
             
             setChatbots(validChatbots);
           } else {
-            // Resposta não é um array nem objeto esperado
             console.error("Formato de dados inesperado:", data);
             setChatbots([]);
           }
@@ -74,10 +62,9 @@ const MeusChatbots = () => {
         setLoading(false);
       }
     };
-
+  
     fetchChatbots();
   }, []);
-
   const iniciarChat = async (chatbot: Chatbot) => {
     try {
       // Garantir que chatbot.id existe antes de usar toString()

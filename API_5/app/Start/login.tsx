@@ -26,24 +26,7 @@ const Login = () => {
   }, []);
 
   const handleLogin = async () => {
-    // Validação básica
-    if (!email || !senha) {
-      setModalMessage('Por favor, preencha todos os campos.');
-      setModalVisible(true);
-      return;
-    }
-
     try {
-      setLoading(true);
-      
-      // Verificar se é um email corporativo pro4tech
-      // if (email.endsWith('@pro4tech.com.br')) {
-      //   // Redirecionar para a tela de registro para usuários corporativos
-      //   router.push('/Start/register');
-      //   return;
-      // }
-      
-      // Para outros emails, tentar fazer login
       const response = await apiCall('/api/usuario/login', {
         method: 'POST',
         headers: {
@@ -54,21 +37,17 @@ const Login = () => {
           senha: senha,
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        // Armazena os tokens e o status de administrador
-        await AsyncStorage.setItem('accessToken', data.access_token);
-        await AsyncStorage.setItem('refreshToken', data.refresh_token);
-        await AsyncStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
-
-        // Redireciona com base no status de administrador
-        if (data.is_admin) {
-          router.push('/(drawer)/Home'); // Redireciona para o painel de admin
-        } else {
-          router.push('/Start/HomeUsuario'); // Redireciona para os chatbots do usuário
-        }
+        // Salve os tokens no AsyncStorage
+        await AsyncStorage.setItem('access_token', data.access_token);
+        await AsyncStorage.setItem('refresh_token', data.refresh_token);
+        console.log('Tokens salvos:', data.access_token, data.refresh_token);
+      
+        // Redirecione o usuário
+        router.push('/Start/HomeUsuario');
       } else {
         setModalMessage(data.msg || 'Credenciais inválidas.');
         setModalVisible(true);
