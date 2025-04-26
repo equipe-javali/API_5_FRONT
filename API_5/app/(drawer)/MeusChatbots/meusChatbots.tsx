@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { makeAuthenticatedRequest } from "../../../config/tokenService";
+ 
 interface Chatbot {
-    id: number;
-    Agente_nome: string;
-    examples_count: number;
-    performance_score: number;
-    Agente_id_id?: number;
-    agent_id?: number;
-    agente_id?: number;
-    created_at: string;
-  }
-  
+  id: number;
+  Agente_nome: string;
+  examples_count: number;
+  performance_score: number;
+  Agente_id_id?: number;
+  agent_id?: number;
+  agente_id?: number;
+  created_at: string;
+  descricao?: string;
+}
+ 
 const Chatbots = () => {
-  
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedChatbot, setSelectedChatbot] = useState<Chatbot | null>(null);
+  const [updatedName, setUpdatedName] = useState("");
+  const [updatedDescription, setUpdatedDescription] = useState("");
   const router = useRouter();
-
+ 
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        // Fetch model data with full agent details
         const response = await apiCall("/api/modelo/listar-completo", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-        
+ 
         if (response.ok) {
           const data = await response.json();
           console.log("API Response:", data);
@@ -43,13 +48,80 @@ const Chatbots = () => {
         setLoading(false);
       }
     };
-
+ 
     fetchChatbots();
   }, []);
-
-  const ChatbotItem = ({ item }: { item: any }) => {
+ 
+  const handleEdit = (chatbot: Chatbot) => {
+    setSelectedChatbot(chatbot);
+    setUpdatedName(chatbot.Agente_nome);
+    setUpdatedDescription(chatbot.descricao || "");
+    setModalVisible(true);
+  };
+ 
+  const handleSave = async () => {
+    if (!selectedChatbot) return;
+ 
+    try {
+      const response = await makeAuthenticatedRequest(`/api/agente/atualizar/${selectedChatbot.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nome: updatedName,
+          descricao: updatedDescription,
+        }),
+      });
+ 
+      if (response.ok) {
+        Alert.alert("Sucesso", "Chatbot atualizado com sucesso!");
+        setModalVisible(false);
+        const updatedChatbots = chatbots.map((bot) =>
+          bot.id === selectedChatbot.id
+            ? { ...bot, Agente_nome: updatedName, descricao: updatedDescription }
+            : bot
+        );
+        setChatbots(updatedChatbots);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Erro", errorData.message || "Erro ao atualizar o chatbot.");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar chatbot:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+ 
+  useEffect(() => {
+    const fetchChatbots = async () => {
+      try {
+        const response = await makeAuthenticatedRequest("/api/modelo/listar-completo", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+ 
+        if (response.ok) {
+          const data = await response.json();
+          console.log("API Response:", data);
+          setChatbots(data);
+        } else {
+          console.error("Erro ao buscar chatbots:", await response.text());
+        }
+      } catch (error) {
+        console.error("Erro na conexão:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+ 
+    fetchChatbots();
+  }, []);
+ 
+ 
+  const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
-
+ 
     return (
       <TouchableOpacity
         style={styles.itemContainer}
@@ -73,32 +145,21 @@ const Chatbots = () => {
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
-            {/* Dedicated "Chat" button that navigates to Chat screen */}
+ 
+            {/* Botão "Chat" */}
             <TouchableOpacity
               style={styles.chatButton}
               onPress={() => {
-                // Add debugging to see the entire item object
-                console.log("Chatbot item:", JSON.stringify(item, null, 2));
-                
-                // Get the correct agent ID, using multiple fallbacks
                 const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
-                
-                console.log("Navigating with params:", {
-                  agenteId: agentId,
-                  chatbotName: item.Agente_nome
-                });
-                
                 if (!agentId) {
                   console.error("No agent ID found in item:", item);
                   return;
                 }
-                
-                // Navigate with the correct agent ID
                 router.push({
                   pathname: "/Chat",
-                  params: { 
+                  params: {
                     agenteId: String(agentId),
-                    chatbotName: item.Agente_nome 
+                    chatbotName: item.Agente_nome
                   }
                 });
               }}
@@ -106,15 +167,23 @@ const Chatbots = () => {
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
             </TouchableOpacity>
+ 
+            {/* Botão "Editar" */}
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEdit(item)}
+            >
+              <Ionicons name="create" size={20} color="#fff" />
+              <Text style={styles.editButtonText}>Editar</Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
-    ); 
+    );
   };
-
+ 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}> Chatbots</Text> */}
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
@@ -127,10 +196,47 @@ const Chatbots = () => {
           }
         />
       )}
+ 
+      {/* Modal de edição */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Editar Chatbot</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome"
+              value={updatedName}
+              onChangeText={setUpdatedName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Descrição"
+              value={updatedDescription}
+              onChangeText={setUpdatedDescription}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.buttonText}>Salvar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#282828", padding: 20 },
   title: { fontSize: 24, color: "#fff", textAlign: "center", marginVertical: 10 },
@@ -156,6 +262,67 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   chatButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
+  editButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#28A745", // Green color for "Edit"
+    padding: 8,
+    borderRadius: 5,
+    marginTop: 10,
+    alignSelf: "flex-start",
+  },
+  editButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo semitransparente
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "#444", // Cor de fundo do modal
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    color: "#fff", // Cor do texto do título
+    marginBottom: 10,
+  },
+  input: {
+    width: "100%",
+    backgroundColor: "#555", // Cor de fundo do campo de entrada
+    color: "#fff", // Cor do texto no campo de entrada
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: "#28A745", // Cor verde para o botão "Salvar"
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 5,
+    alignItems: "center",
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#DC3545", // Cor vermelha para o botão "Cancelar"
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff", // Cor do texto dos botões
+    fontSize: 16,
+  },
 });
-
+ 
 export default Chatbots;
