@@ -34,15 +34,22 @@ export const refreshToken = async () => {
   }
 };
 
-export const makeAuthenticatedRequest = async (url: string, options: { headers?: Record<string, string> } = {}) => {
+export const makeAuthenticatedRequest = async (
+  url: string,
+  options?: { 
+    method?: string; 
+    headers?: Record<string, string>; 
+    body?: string | FormData;
+  }
+): Promise<Response> => {
   // Obter token atual
   let token = await getToken();
   
   // Configurar headers com o token
   const requestOptions = {
-    ...options,
+    ...(options || {}),
     headers: {
-      ...options.headers,
+      ...(options?.headers || {}), 
       'Authorization': `Bearer ${token}`,
     },
   };

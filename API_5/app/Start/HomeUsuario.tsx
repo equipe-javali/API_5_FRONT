@@ -14,57 +14,144 @@ interface Chatbot {
   tipo: string;
 }
 
+interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  admin: boolean;
+  permissoes: number[];
+}
+
 const MeusChatbots = () => {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-    useEffect(() => {
-    const fetchChatbots = async () => {
+  useEffect(() => {
+    const fetchChatbotsComPermissao = async () => {
       try {
-        // Usar o makeAuthenticatedRequest em vez de apiCall direto
-        const response = await makeAuthenticatedRequest("/api/chat/listar");
-  
-        if (response.ok) {
-          const data = await response.json();
+        // 1. Primeiro, obter informações do usuário logado
+        let userId = await AsyncStorage.getItem('userId');
+        if (!userId) {
+          console.log("ID não encontrado no AsyncStorage, tentando extrair do token");
+          const token = await AsyncStorage.getItem('access_token');
           
-          // Verificar se data é um array
-          if (Array.isArray(data)) {
-            // Filtrar itens inválidos que não têm ID
-            const validChatbots = data.filter(item => 
-              item && typeof item === 'object' && item.id !== undefined && item.id !== null
-            ) as Chatbot[];
-            
-            setChatbots(validChatbots);
-          } else if (data && typeof data === 'object') {
-            // Se for um objeto, talvez a lista esteja em uma propriedade específica
-            const chatbotList = Array.isArray(data.results) ? data.results : 
-                                Array.isArray(data.chatbots) ? data.chatbots : 
-                                Array.isArray(data.data) ? data.data : [];
-            
-            const validChatbots = chatbotList.filter((item: Chatbot) => 
-              item && typeof item === 'object' && item.id !== undefined && item.id !== null
-            ) as Chatbot[];
-            
-            setChatbots(validChatbots);
-          } else {
-            console.error("Formato de dados inesperado:", data);
-            setChatbots([]);
+          if (token) {
+            try {
+              const tokenParts = token.split('.');
+              const payloadBase64 = tokenParts[1];
+              const payloadString = atob ? atob(payloadBase64) : 
+                Buffer.from(payloadBase64, 'base64').toString('ascii');
+              const payload = JSON.parse(payloadString);
+              
+              if (payload.user_id) {
+                userId = payload.user_id.toString();
+                if (userId) {
+                  if (userId) {
+                    if (userId) {
+                      if (userId) {
+                        await AsyncStorage.setItem('userId', userId);
+                      }
+                    }
+                  }
+                }
+                console.log("ID extraído do token atual:", userId);
+              }
+            } catch (error) {
+              console.error("Erro ao decodificar token:", error);
+            }
           }
-        } else {
-          console.error("Erro ao listar chatbots:", response.status, await response.text());
-          setChatbots([]);
         }
+        
+        // 2. Se ainda não tem ID, tentar buscar do endpoint current
+        if (!userId) {
+          console.log("Buscando ID do usuário atual da API");
+          const userInfoResponse = await makeAuthenticatedRequest("/api/usuario/current");
+          
+          if (userInfoResponse.ok) {
+            const currentUserData = await userInfoResponse.json();
+            console.log("Dados do usuário atual:", currentUserData);
+            
+            if (currentUserData && currentUserData.id) {
+              userId = currentUserData.id.toString();
+              await AsyncStorage.setItem('userId', userId);
+              console.log("ID do usuário salvo:", userId);
+            } else {
+              throw new Error("ID não encontrado na resposta de usuario/current");
+            }
+          } else {
+            throw new Error("Falha ao buscar usuário atual");
+          }
+        }
+        
+        // 3. Verificação final para garantir que temos um ID
+        if (!userId) {
+          throw new Error("Não foi possível obter o ID do usuário");
+        }
+        
+        console.log("Buscando dados do usuário com ID:", userId);
+        
+        // 2. Buscar detalhes do usuário, incluindo suas permissões
+        const userResponse = await makeAuthenticatedRequest(`/api/usuario/listagem/${userId}`);
+        if (!userResponse.ok) {
+          throw new Error("Falha ao buscar detalhes do usuário");
+        }
+        
+        const userData = await userResponse.json();
+        console.log("Dados do usuário:", JSON.stringify(userData, null, 2));
+        
+        // Extrair permissões do usuário, dependendo da estrutura da resposta
+        let userPermissions: number[] = [];
+        if (userData.usuarios && userData.usuarios.permissoes) {
+          userPermissions = userData.usuarios.permissoes;
+        } else if (userData.usuario && userData.usuario.permissoes) {
+          userPermissions = userData.usuario.permissoes;
+        } else if (userData.permissoes) {
+          userPermissions = userData.permissoes;
+        }
+        
+        console.log("Permissões do usuário:", userPermissions);
+        
+        // 3. Buscar todos os chatbots/agentes
+        const agentsResponse = await makeAuthenticatedRequest("/api/agente/listar-todos");
+        if (!agentsResponse.ok) {
+          throw new Error("Falha ao buscar agentes");
+        }
+        
+        const agentsData = await agentsResponse.json();
+        console.log("Total de agentes:", Array.isArray(agentsData) ? agentsData.length : 0);
+        
+        // 4. Filtrar apenas os agentes que o usuário tem permissão para acessar
+        const allowedAgents = Array.isArray(agentsData) 
+          ? agentsData.filter(agent => 
+              agent && 
+              agent.id && 
+              userPermissions.includes(agent.id))
+          : [];
+          
+        console.log(`Agentes permitidos: ${allowedAgents.length} de ${Array.isArray(agentsData) ? agentsData.length : 0}`);
+        
+        // 5. Converter para o formato de chatbot esperado
+        const formattedChatbots = allowedAgents.map(agent => ({
+          id: agent.id,
+          nome: agent.nome || "Sem nome",
+          descricao: agent.descricao || "Sem descrição",
+          tipo: agent.tipo || "geral"
+        }));
+        
+        setChatbots(formattedChatbots);
       } catch (error) {
-        console.error("Erro na conexão:", error);
+        console.error("Erro ao carregar chatbots com permissão:", error);
         setChatbots([]);
       } finally {
         setLoading(false);
       }
     };
   
-    fetchChatbots();
+    fetchChatbotsComPermissao();
   }, []);
+
+  // Resto do código permanece igual...
   const iniciarChat = async (chatbot: Chatbot) => {
     try {
       // Garantir que chatbot.id existe antes de usar toString()
