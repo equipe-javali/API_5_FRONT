@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { makeAuthenticatedRequest } from "../../config/tokenService";
 
 const SignUpScreen = () => {
     const [name, setName] = useState("");
@@ -26,7 +27,7 @@ const SignUpScreen = () => {
         return null;
     }
 
-    const handleSignUp = async () => {
+        const handleSignUp = async () => {
       if (!name || !email || !password) {
         setModalMessage("Por favor, preencha todos os campos.");
         setIsError(true);
@@ -34,26 +35,46 @@ const SignUpScreen = () => {
         return;
       }
     
+      // Verificar autenticação antes de começar
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setModalMessage("Você não está autenticado. Faça login novamente.");
+        setIsError(true);
+        setModalVisible(true);
+        setTimeout(() => router.push('/Start/login'), 2000);
+        return;
+      }
+    
+      // Verificar se o usuário é admin
+      const isAdmin = await AsyncStorage.getItem('isAdmin');
+      if (isAdmin !== 'true') {
+        setModalMessage("Apenas administradores podem cadastrar novos usuários.");
+        setIsError(true);
+        setModalVisible(true);
+        return;
+      }
+      
       setLoading(true); // Ativa o carregamento
     
       try {
-        const token = await AsyncStorage.getItem('accessToken'); // Recupera o token JWT
-    
-        const response = await apiCall('/api/usuario/cadastrar', {
+        console.log("Enviando requisição com token:", token.substring(0, 15) + "...");
+        
+        const response = await makeAuthenticatedRequest('/api/usuario/cadastrar', {
           method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`, // Inclui o token JWT no cabeçalho
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             nome: name,
             email: email,
-            senha: password,
-            admin: false,
+            senha: password,            
+            permissoes: [],
+            // admin: false, 
           }),
         });
     
         const data = await response.json();
+        console.log("Resposta da API:", response.status, data);
     
         if (response.ok) {
           setModalMessage("Usuário cadastrado com sucesso!");
@@ -61,16 +82,29 @@ const SignUpScreen = () => {
           setName(""); 
           setEmail(""); 
           setPassword("");
-        } else {
-          setModalMessage(data.message || "Erro ao cadastrar usuário.");
+        } else if (response.status === 401) {
+          setModalMessage("Sessão expirada. Por favor, faça login novamente.");
           setIsError(true);
-
-        }
-      } catch (error) {
+          setTimeout(() => router.push('/Start/login'), 2000);
+        } else {
+            // Exibir detalhes do erro para diagnóstico
+            let errorMsg = "Erro ao cadastrar usuário.";
+            if (data && typeof data === 'object') {
+              // Extrair todas as mensagens de erro para ajudar no diagnóstico
+              const errorDetails = Object.entries(data)
+                .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`)
+                .join("\n");
+              errorMsg = errorDetails || data.message || data.msg || data.detail || errorMsg;
+            }
+            setModalMessage(errorMsg);
+            setIsError(true);
+          }
+        } catch (error) {
+        console.error("Erro na requisição:", error);
         setModalMessage("Erro na conexão com o servidor.");
         setIsError(true);
       } finally {
-        setLoading(false); // Desativa o carregamento
+        setLoading(false);
         setModalVisible(true);
       }
     };
