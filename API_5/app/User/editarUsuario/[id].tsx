@@ -34,28 +34,45 @@ const EditarUsuario = () => {
   const [todasPermissoes, setTodasPermissoes] = useState<Permissao[]>([]);
   const [permissaoSelecionada, setPermissaoSelecionada] = useState<string>("");
   const [showPermissoesList, setShowPermissoesList] = useState(false);
+  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
+
 
   // Buscar todas as permissões disponíveis
   // 1. Alterar o useEffect para carregar permissões
-useEffect(() => {
-  const carregarPermissoes = async () => {
-    try {
-      // Adicionar a barra inicial na URL
-      const response = await makeAuthenticatedRequest("/api/agente/listar-todos");
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Permissões carregadas:", data);
-        setTodasPermissoes(data.permissoes || []);
-      } else {
-        console.error("Erro ao carregar permissões:", response.status);
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      try {
+        console.log("Carregando permissões...");
+        const response = await makeAuthenticatedRequest("/api/agente/listar-todos");
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Resposta:", data);
+          
+          if (data.permissoes) {
+            // Se o backend já retorna no formato esperado
+            setTodasPermissoes(data.permissoes);
+          } else if (Array.isArray(data)) {
+            // Se o backend retorna um array diretamente (usando serializer padrão)
+            const permissoesFormatadas = data.map(agente => ({
+              id: agente.id,
+              nome: agente.nome
+            }));
+            setTodasPermissoes(permissoesFormatadas);
+            console.log("Permissões formatadas:", permissoesFormatadas);
+          } else {
+            console.error("Formato de dados desconhecido:", data);
+          }
+        } else {
+          console.error("Erro ao carregar permissões:", response.status);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar permissões:", error);
       }
-    } catch (error) {
-      console.error("Erro ao buscar permissões:", error);
-    }
-  };
-
-  carregarPermissoes();
-}, []);
+    };
+  
+    carregarPermissoes();
+  }, []);
 
 
   // Função para adicionar uma permissão
@@ -179,9 +196,14 @@ useEffect(() => {
       if (response.ok) {
         setModalMessage("Usuário atualizado com sucesso!");
         setIsError(false);
-        setTimeout(() => {
+        
+        // Usar uma referência para o timeout para poder cancelá-lo se necessário
+        const timeoutRef = setTimeout(() => {
           router.push('/CadastroUsuario/listarUsuario');
         }, 1500);
+        
+        // Guarda a referência do timeout em um estado para poder cancelá-lo
+        setRedirectTimeout(timeoutRef);
       } else {
         setModalMessage(data.message || data.msg || data.detail || "Erro ao atualizar usuário.");
         setIsError(true);
