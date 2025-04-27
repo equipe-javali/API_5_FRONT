@@ -205,7 +205,7 @@ export default function Chat() {
     <View style={styles.header}>
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={() => router.push('/MeusChatbots/meusChatbots')}
+        onPress={() => router.push('/Start/HomeUsuario')}
       >
         <Ionicons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>

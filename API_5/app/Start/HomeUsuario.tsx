@@ -27,6 +27,36 @@ const MeusChatbots = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Função de logout
+  const handleLogout = async () => {
+    // Limpa armazenamento (tokens, userId etc.)
+    await AsyncStorage.multiRemove([
+      "access_token",
+      "refresh_token",
+      "userId",
+      "isAdmin",
+      "currentChatbotId",
+      "currentChatbotName",
+    ]);
+    // Redireciona para login
+    router.replace("/Start/login");
+  };
+
+  // Header customizado
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <TouchableOpacity style={styles.headerIconPlaceholder} disabled>
+        <Ionicons name="chatbubbles-outline" size={24} color="#444" />
+      </TouchableOpacity>
+
+      <Text style={styles.headerTitle}>Meus Chatbots</Text>
+
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <Ionicons name="log-out-outline" size={24} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
+
   useEffect(() => {
     const fetchChatbotsComPermissao = async () => {
       try {
@@ -35,15 +65,15 @@ const MeusChatbots = () => {
         if (!userId) {
           console.log("ID não encontrado no AsyncStorage, tentando extrair do token");
           const token = await AsyncStorage.getItem('access_token');
-          
+
           if (token) {
             try {
               const tokenParts = token.split('.');
               const payloadBase64 = tokenParts[1];
-              const payloadString = atob ? atob(payloadBase64) : 
+              const payloadString = atob ? atob(payloadBase64) :
                 Buffer.from(payloadBase64, 'base64').toString('ascii');
               const payload = JSON.parse(payloadString);
-              
+
               if (payload.user_id) {
                 userId = payload.user_id.toString();
                 if (userId) {
@@ -62,16 +92,16 @@ const MeusChatbots = () => {
             }
           }
         }
-        
+
         // 2. Se ainda não tem ID, tentar buscar do endpoint current
         if (!userId) {
           console.log("Buscando ID do usuário atual da API");
           const userInfoResponse = await makeAuthenticatedRequest("/api/usuario/current");
-          
+
           if (userInfoResponse.ok) {
             const currentUserData = await userInfoResponse.json();
             console.log("Dados do usuário atual:", currentUserData);
-            
+
             if (currentUserData && currentUserData.id) {
               userId = currentUserData.id.toString();
               await AsyncStorage.setItem('userId', userId);
@@ -83,23 +113,23 @@ const MeusChatbots = () => {
             throw new Error("Falha ao buscar usuário atual");
           }
         }
-        
+
         // 3. Verificação final para garantir que temos um ID
         if (!userId) {
           throw new Error("Não foi possível obter o ID do usuário");
         }
-        
+
         console.log("Buscando dados do usuário com ID:", userId);
-        
+
         // 2. Buscar detalhes do usuário, incluindo suas permissões
         const userResponse = await makeAuthenticatedRequest(`/api/usuario/listagem/${userId}`);
         if (!userResponse.ok) {
           throw new Error("Falha ao buscar detalhes do usuário");
         }
-        
+
         const userData = await userResponse.json();
         console.log("Dados do usuário:", JSON.stringify(userData, null, 2));
-        
+
         // Extrair permissões do usuário, dependendo da estrutura da resposta
         let userPermissions: number[] = [];
         if (userData.usuarios && userData.usuarios.permissoes) {
@@ -109,28 +139,28 @@ const MeusChatbots = () => {
         } else if (userData.permissoes) {
           userPermissions = userData.permissoes;
         }
-        
+
         console.log("Permissões do usuário:", userPermissions);
-        
+
         // 3. Buscar todos os chatbots/agentes
         const agentsResponse = await makeAuthenticatedRequest("/api/agente/listar-todos");
         if (!agentsResponse.ok) {
           throw new Error("Falha ao buscar agentes");
         }
-        
+
         const agentsData = await agentsResponse.json();
         console.log("Total de agentes:", Array.isArray(agentsData) ? agentsData.length : 0);
-        
+
         // 4. Filtrar apenas os agentes que o usuário tem permissão para acessar
-        const allowedAgents = Array.isArray(agentsData) 
-          ? agentsData.filter(agent => 
-              agent && 
-              agent.id && 
-              userPermissions.includes(agent.id))
+        const allowedAgents = Array.isArray(agentsData)
+          ? agentsData.filter(agent =>
+            agent &&
+            agent.id &&
+            userPermissions.includes(agent.id))
           : [];
-          
+
         console.log(`Agentes permitidos: ${allowedAgents.length} de ${Array.isArray(agentsData) ? agentsData.length : 0}`);
-        
+
         // 5. Converter para o formato de chatbot esperado
         const formattedChatbots = allowedAgents.map(agent => ({
           id: agent.id,
@@ -138,7 +168,7 @@ const MeusChatbots = () => {
           descricao: agent.descricao || "Sem descrição",
           tipo: agent.tipo || "geral"
         }));
-        
+
         setChatbots(formattedChatbots);
       } catch (error) {
         console.error("Erro ao carregar chatbots com permissão:", error);
@@ -147,7 +177,7 @@ const MeusChatbots = () => {
         setLoading(false);
       }
     };
-  
+
     fetchChatbotsComPermissao();
   }, []);
 
@@ -177,6 +207,7 @@ const MeusChatbots = () => {
   if (loading) {
     return (
       <View style={styles.container}>
+        {renderHeader()}
         <ActivityIndicator size="large" color="#fff" />
       </View>
     );
@@ -185,12 +216,12 @@ const MeusChatbots = () => {
   if (chatbots.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Meus Chatbots</Text>
+        {renderHeader()}
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot.</Text>  
-          <TouchableOpacity style={styles.button} onPress={() => router.push("/Chat")}>
+          <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
+          {/* <TouchableOpacity style={styles.button} onPress={() => router.push("/Chat")}>
             <Text style={styles.buttonText}>Criar Chatbot</Text>
-          </TouchableOpacity>        
+          </TouchableOpacity>         */}
         </View>
       </View>
     );
@@ -198,20 +229,21 @@ const MeusChatbots = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Meus Chatbots</Text>
+      {renderHeader()}
+
       <FlatList
         data={chatbots}
         keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
         renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={styles.chatbotCard} 
+          <TouchableOpacity
+            style={styles.chatbotCard}
             onPress={() => iniciarChat(item)}
           >
             <View style={styles.chatbotHeader}>
               <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
               <View style={[
-                styles.chatbotBadge, 
-                {backgroundColor: item.tipo === 'rh' ? '#007BFF' : '#FF9500'}
+                styles.chatbotBadge,
+                { backgroundColor: item.tipo === 'rh' ? '#007BFF' : '#FF9500' }
               ]}>
                 <Text style={styles.chatbotBadgeText}>
                   {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
@@ -220,7 +252,10 @@ const MeusChatbots = () => {
             </View>
             <Text style={styles.chatbotDescription}>{item.descricao || "Sem descrição"}</Text>
             <View style={styles.chatActions}>
-              <TouchableOpacity style={styles.chatAction}>
+              <TouchableOpacity
+                style={styles.chatAction}
+                onPress={() => iniciarChat(item)}
+              >
                 <Ionicons name="chatbubble-outline" size={18} color="#fff" />
                 <Text style={styles.chatActionText}>Conversar</Text>
               </TouchableOpacity>
@@ -228,18 +263,26 @@ const MeusChatbots = () => {
           </TouchableOpacity>
         )}
       />
-      <TouchableOpacity 
+      {/* <TouchableOpacity 
         style={styles.fab}
         onPress={() => router.push("/CadastroBot/cadastrarBot")}
       >
         <Ionicons name="add" size={24} color="#fff" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#282828", padding: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: "#282828",
+    paddingHorizontal: 20      // mantém o padding para o conteúdo
+  },
+  content: {
+    flex: 1,
+    padding: 20
+  },
   title: { fontSize: 24, color: "#fff", textAlign: "center", marginVertical: 10 },
   itemContainer: {
     backgroundColor: "#444",
@@ -321,7 +364,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
+
   button: {
     backgroundColor: "#007BFF",
     padding: 10,
@@ -344,6 +387,33 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: "flex-start",
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1e1e1e",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginHorizontal: -20,
+    marginBottom: 10,
+    marginTop: 0
+  },
+  headerTitle: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  logoutButton: {
+    padding: 8,
+  },
+  headerIconPlaceholder: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  }
 });
 
 export default MeusChatbots;

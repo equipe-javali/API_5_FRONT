@@ -212,7 +212,7 @@ const Chatbots = () => {
             </Text>
   
             {/* Botão "Chat" */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.chatButton}
               onPress={() => {
                 const agentId = item.id; // Usando o campo `id`
@@ -231,7 +231,7 @@ const Chatbots = () => {
             >
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
   
             {/* Botão "Editar" */}
             <TouchableOpacity
