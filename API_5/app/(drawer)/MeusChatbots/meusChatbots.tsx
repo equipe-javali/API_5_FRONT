@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { makeAuthenticatedRequest } from "../../../config/tokenService";
- 
+
 interface Chatbot {
   id: number;
   Agente_nome: string;
@@ -17,16 +17,29 @@ interface Chatbot {
   created_at: string;
   descricao?: string;
 }
- 
+
 const Chatbots = () => {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [contextModalVisible, setContextModalVisible] = useState(false);
   const [selectedChatbot, setSelectedChatbot] = useState<Chatbot | null>(null);
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
+  const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
+  const [rawContextText, setRawContextText] = useState(""); // Novo estado para o texto bruto
+
+<TextInput
+  style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
+  multiline={true}
+  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
+  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
+  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
+  autoCorrect={false} // Desativa correção automática
+  autoCapitalize="none" // Desativa capitalização automática
+/>
   const router = useRouter();
- 
+
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
@@ -34,10 +47,9 @@ const Chatbots = () => {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
- 
+
         if (response.ok) {
           const data = await response.json();
-          console.log("API Response:", data);
           setChatbots(data);
         } else {
           console.error("Erro ao buscar chatbots:", await response.text());
@@ -48,20 +60,50 @@ const Chatbots = () => {
         setLoading(false);
       }
     };
- 
+
     fetchChatbots();
   }, []);
- 
+
   const handleEdit = (chatbot: Chatbot) => {
     setSelectedChatbot(chatbot);
     setUpdatedName(chatbot.Agente_nome);
     setUpdatedDescription(chatbot.descricao || "");
     setModalVisible(true);
   };
- 
+
+  const handleEditContext = async (chatbot: Chatbot) => {
+    try {
+      console.log("ID do agente:", chatbot.Agente_id_id); // Log do ID do agente
+      const response = await makeAuthenticatedRequest(`/api/contexto/listar/${chatbot.Agente_id_id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Dados do contexto:", data); // Log para verificar a resposta
+        setAgentContext(data.contexts || []); // Armazena o array completo de contextos
+  
+        // Formata os contextos existentes para exibição no TextInput
+        const formattedText = (data.contexts || [])
+          .map((context: { pergunta: string; resposta: string }) => `${context.pergunta} || ${context.resposta}`)
+          .join("\n");
+        setRawContextText(formattedText);
+  
+        setSelectedChatbot(chatbot);
+        setContextModalVisible(true);
+      } else {
+        Alert.alert("Erro", "Erro ao buscar o contexto do agente.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar contexto:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+
   const handleSave = async () => {
     if (!selectedChatbot) return;
- 
+
     try {
       const response = await makeAuthenticatedRequest(`/api/agente/atualizar/${selectedChatbot.id}`, {
         method: "PUT",
@@ -73,7 +115,7 @@ const Chatbots = () => {
           descricao: updatedDescription,
         }),
       });
- 
+
       if (response.ok) {
         Alert.alert("Sucesso", "Chatbot atualizado com sucesso!");
         setModalVisible(false);
@@ -92,36 +134,55 @@ const Chatbots = () => {
       Alert.alert("Erro", "Erro na conexão com o servidor.");
     }
   };
- 
-  useEffect(() => {
-    const fetchChatbots = async () => {
-      try {
-        const response = await makeAuthenticatedRequest("/api/modelo/listar-completo", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
- 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("API Response:", data);
-          setChatbots(data);
-        } else {
-          console.error("Erro ao buscar chatbots:", await response.text());
-        }
-      } catch (error) {
-        console.error("Erro na conexão:", error);
-      } finally {
-        setLoading(false);
+
+  const handleSaveContext = async () => {
+    if (!selectedChatbot) return;
+  
+    // Divide o texto em linhas e valida o formato
+    const lines = rawContextText.split("\n");
+    const updatedContexts = lines.map((line) => {
+      const [pergunta = "", resposta = ""] = line.split("||").map((str) => str.trim());
+      return { pergunta, resposta };
+    });
+  
+    const isValid = updatedContexts.every(
+      (context) => context.pergunta && context.resposta
+    );
+  
+    if (!isValid) {
+      Alert.alert(
+        "Formato inválido",
+        "Certifique-se de que cada linha esteja no formato: Pergunta || Resposta"
+      );
+      return;
+    }
+  
+    try {
+      const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.Agente_id_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
+      });
+  
+      if (response.ok) {
+        Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
+        setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
+        setContextModalVisible(false);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Erro", errorData.message || "Erro ao atualizar os contextos.");
       }
-    };
- 
-    fetchChatbots();
-  }, []);
- 
- 
+    } catch (error) {
+      console.error("Erro ao atualizar contextos:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+
   const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
- 
+
     return (
       <TouchableOpacity
         style={styles.itemContainer}
@@ -145,7 +206,7 @@ const Chatbots = () => {
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
- 
+
             {/* Botão "Chat" */}
             <TouchableOpacity
               style={styles.chatButton}
@@ -167,7 +228,7 @@ const Chatbots = () => {
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
             </TouchableOpacity>
- 
+
             {/* Botão "Editar" */}
             <TouchableOpacity
               style={styles.editButton}
@@ -176,12 +237,21 @@ const Chatbots = () => {
               <Ionicons name="create" size={20} color="#fff" />
               <Text style={styles.editButtonText}>Editar</Text>
             </TouchableOpacity>
+
+            {/* Botão "Editar Contexto" */}
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEditContext(item)}
+            >
+              <Ionicons name="document-text" size={20} color="#fff" />
+              <Text style={styles.editButtonText}>Editar Contexto</Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
     );
   };
- 
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -196,8 +266,8 @@ const Chatbots = () => {
           }
         />
       )}
- 
-      {/* Modal de edição */}
+
+      {/* Modal de edição de nome e descrição */}
       <Modal
         transparent={true}
         animationType="fade"
@@ -233,10 +303,47 @@ const Chatbots = () => {
           </View>
         </View>
       </Modal>
+
+            {/* Modal de edição de contexto */}
+            <Modal
+        transparent={true}
+        animationType="fade"
+        visible={contextModalVisible}
+        onRequestClose={() => setContextModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ScrollView>
+              <Text style={styles.modalTitle}>Editar Contexto</Text>
+              <TextInput
+                style={[styles.input, { height: 200 }]}
+                multiline={true}
+                value={rawContextText}
+                onChangeText={setRawContextText}
+                placeholder="Digite no formato: Pergunta || Resposta (uma por linha). O contexto não pode ser vazio."
+                autoCorrect={false}
+                autoCapitalize="none"
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveContext}>
+                  <Text style={styles.buttonText}>Salvar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setContextModalVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 };
- 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#282828", padding: 20 },
   title: { fontSize: 24, color: "#fff", textAlign: "center", marginVertical: 10 },
@@ -265,7 +372,7 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#28A745", // Green color for "Edit"
+    backgroundColor: "#282828", // Green color for "Edit"
     padding: 8,
     borderRadius: 5,
     marginTop: 10,
@@ -305,7 +412,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: "#28A745", // Cor verde para o botão "Salvar"
+    backgroundColor: "#282828", // Cor verde para o botão "Salvar"
     padding: 10,
     borderRadius: 5,
     marginRight: 5,
@@ -313,7 +420,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: "#DC3545", // Cor vermelha para o botão "Cancelar"
+    backgroundColor: "#3E3E3E", // Cor vermelha para o botão "Cancelar"
     padding: 10,
     borderRadius: 5,
     marginLeft: 5,
@@ -323,6 +430,33 @@ const styles = StyleSheet.create({
     color: "#fff", // Cor do texto dos botões
     fontSize: 16,
   },
+  contextItem: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: "#555",
+    borderRadius: 5,
+  },
+  contextQuestion: {
+    fontSize: 16,
+    color: "#fff",
+    marginBottom: 5,
+  },
+  contextAnswer: {
+    fontSize: 16,
+    color: "#fff",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  scrollContainer: {
+    maxHeight: 300, // Limita a altura do conteúdo rolável
+    marginBottom: 10, // Espaço entre o conteúdo e os botões
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
 });
- 
+
 export default Chatbots;
