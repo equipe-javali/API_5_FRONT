@@ -10,7 +10,7 @@ interface Chatbot {
   id: number;
   Agente_nome: string;
   examples_count: number;
-  performance_score: number;
+  // performance_score: number;
   Agente_id_id?: number;
   agent_id?: number;
   agente_id?: number;
@@ -199,10 +199,10 @@ const Chatbots = () => {
         <Text style={styles.itemFrases}>Frases: {item.examples_count}</Text>
         {expanded && (
           <View style={styles.itemDetails}>
-            <Text style={styles.itemText}>Performance: {item.performance_score}</Text>
-            <Text style={styles.itemText}>
+            {/* <Text style={styles.itemText}>Performance: {item.performance_score}</Text> */}
+            {/* <Text style={styles.itemText}>
               Agente ID: {item.Agente_id_id}
-            </Text>
+            </Text> */}
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
