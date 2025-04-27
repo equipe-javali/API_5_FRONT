@@ -29,28 +29,32 @@ const Chatbots = () => {
   const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
   const [rawContextText, setRawContextText] = useState(""); // Novo estado para o texto bruto
 
-<TextInput
-  style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
-  multiline={true}
-  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
-  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
-  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
-  autoCorrect={false} // Desativa correção automática
-  autoCapitalize="none" // Desativa capitalização automática
-/>
+
+  <TextInput
+    style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
+    multiline={true}
+    value={rawContextText} // Exibe o texto bruto digitado pelo usuário
+    onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
+    placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
+    autoCorrect={false} // Desativa correção automática
+    autoCapitalize="none" // Desativa capitalização automática
+  />
   const router = useRouter();
 
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await apiCall("/api/modelo/listar-completo", {
+        const response = await apiCall("/api/modelo/listar", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-
+  
         if (response.ok) {
           const data = await response.json();
-          setChatbots(data);
+  
+          // Filtra apenas os agentes válidos
+          const validChatbots = data.filter((chatbot: Chatbot) => chatbot.id);
+          setChatbots(validChatbots);
         } else {
           console.error("Erro ao buscar chatbots:", await response.text());
         }
@@ -60,7 +64,7 @@ const Chatbots = () => {
         setLoading(false);
       }
     };
-
+  
     fetchChatbots();
   }, []);
 
@@ -78,18 +82,18 @@ const Chatbots = () => {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         console.log("Dados do contexto:", data); // Log para verificar a resposta
         setAgentContext(data.contexts || []); // Armazena o array completo de contextos
-  
+
         // Formata os contextos existentes para exibição no TextInput
         const formattedText = (data.contexts || [])
           .map((context: { pergunta: string; resposta: string }) => `${context.pergunta} || ${context.resposta}`)
           .join("\n");
         setRawContextText(formattedText);
-  
+
         setSelectedChatbot(chatbot);
         setContextModalVisible(true);
       } else {
@@ -137,18 +141,18 @@ const Chatbots = () => {
 
   const handleSaveContext = async () => {
     if (!selectedChatbot) return;
-  
+
     // Divide o texto em linhas e valida o formato
     const lines = rawContextText.split("\n");
     const updatedContexts = lines.map((line) => {
       const [pergunta = "", resposta = ""] = line.split("||").map((str) => str.trim());
       return { pergunta, resposta };
     });
-  
+
     const isValid = updatedContexts.every(
       (context) => context.pergunta && context.resposta
     );
-  
+
     if (!isValid) {
       Alert.alert(
         "Formato inválido",
@@ -156,7 +160,7 @@ const Chatbots = () => {
       );
       return;
     }
-  
+
     try {
       const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.Agente_id_id}`, {
         method: "PUT",
@@ -165,7 +169,7 @@ const Chatbots = () => {
         },
         body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
       });
-  
+
       if (response.ok) {
         Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
         setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
@@ -182,7 +186,7 @@ const Chatbots = () => {
 
   const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
-
+  
     return (
       <TouchableOpacity
         style={styles.itemContainer}
@@ -201,17 +205,17 @@ const Chatbots = () => {
           <View style={styles.itemDetails}>
             <Text style={styles.itemText}>Performance: {item.performance_score}</Text>
             <Text style={styles.itemText}>
-              Agente ID: {item.Agente_id_id}
+              Agente ID: {item.id} {/* Alterado para usar o campo `id` */}
             </Text>
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
-
+  
             {/* Botão "Chat" */}
             <TouchableOpacity
               style={styles.chatButton}
               onPress={() => {
-                const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
+                const agentId = item.id; // Usando o campo `id`
                 if (!agentId) {
                   console.error("No agent ID found in item:", item);
                   return;
@@ -220,15 +224,15 @@ const Chatbots = () => {
                   pathname: "/Chat",
                   params: {
                     agenteId: String(agentId),
-                    chatbotName: item.Agente_nome
-                  }
+                    chatbotName: item.Agente_nome,
+                  },
                 });
               }}
             >
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
             </TouchableOpacity>
-
+  
             {/* Botão "Editar" */}
             <TouchableOpacity
               style={styles.editButton}
@@ -237,7 +241,7 @@ const Chatbots = () => {
               <Ionicons name="create" size={20} color="#fff" />
               <Text style={styles.editButtonText}>Editar</Text>
             </TouchableOpacity>
-
+  
             {/* Botão "Editar Contexto" */}
             <TouchableOpacity
               style={styles.editButton}
@@ -250,6 +254,34 @@ const Chatbots = () => {
         )}
       </TouchableOpacity>
     );
+  };
+
+  const handleDelete = async (agent_id: number) => {
+    const confirmation = window.confirm("Tem certeza de que deseja excluir este chatbot?");
+    if (confirmation) {
+      try {
+        console.log("Chamando API para deletar chatbot com ID:", agent_id); // Log para depuração
+        const response = await makeAuthenticatedRequest(`/api/agente/deletar/${agent_id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+  
+        console.log("Resposta da API:", response);
+  
+        if (response.ok) {
+          alert("Chatbot excluído com sucesso!");
+          setChatbots(chatbots.filter((bot) => bot.id !== agent_id));
+          setModalVisible(false); // Fecha o modal após a exclusão
+        } else {
+          const errorData = await response.json();
+          console.error("Erro da API:", errorData);
+          alert(errorData.message || "Erro ao excluir o chatbot.");
+        }
+      } catch (error) {
+        console.error("Erro ao excluir chatbot:", error);
+        alert("Erro na conexão com o servidor.");
+      }
+    }
   };
 
   return (
@@ -300,12 +332,26 @@ const Chatbots = () => {
                 <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => {
+                console.log("selectedChatbot:", selectedChatbot); // Verifica o valor
+                if (selectedChatbot?.id) {
+                  handleDelete(selectedChatbot.id);
+                } else {
+                  Alert.alert("Erro", "Nenhum chatbot selecionado para exclusão.");
+                }
+              }}
+            >
+              <Ionicons name="trash" size={20} color="#fff" />
+              <Text style={styles.deleteButtonText}>Excluir Chatbot</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-            {/* Modal de edição de contexto */}
-            <Modal
+      {/* Modal de edição de contexto */}
+      <Modal
         transparent={true}
         animationType="fade"
         visible={contextModalVisible}
@@ -456,6 +502,21 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 1,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FF3B30", // Vermelho para o botão "Excluir"
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    justifyContent: "center",
+  },
+  deleteButtonText: {
+    color: "#fff",
+    marginLeft: 5,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
