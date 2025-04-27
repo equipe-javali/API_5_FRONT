@@ -36,8 +36,9 @@ export default function Chat() {
         const resp = await makeAuthenticatedRequest('/api/usuario/current');
         if (resp.ok) {
           const data = await resp.json();
-          userId = data.id.toString();
-          await AsyncStorage.setItem('userId', userId);
+          const newUserId = data.id.toString();
+          await AsyncStorage.setItem('userId', newUserId);
+          userId = newUserId;
         }
       }
 
@@ -184,7 +185,7 @@ export default function Chat() {
     ]}>
       <Text style={styles.dateLabel}>
         {new Date(item.timestamp).toLocaleDateString('pt-BR', {
-          hour:   '2-digit',
+          hour: '2-digit',
           minute: '2-digit'
         })}
       </Text>
@@ -200,7 +201,6 @@ export default function Chat() {
     </View>
   );
   
-  // Header do chat - sem alterações
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity 
