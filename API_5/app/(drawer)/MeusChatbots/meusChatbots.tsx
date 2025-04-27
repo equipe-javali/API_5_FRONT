@@ -1,38 +1,55 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { makeAuthenticatedRequest } from "../../../config/tokenService";
 
 interface Chatbot {
-    id: number;
-    Agente_nome: string;
-    examples_count: number;
-    performance_score: number;
-    Agente_id_id?: number;
-    agent_id?: number;
-    agente_id?: number;
-    created_at: string;
-  }
-  
+  id: number;
+  Agente_nome: string;
+  examples_count: number;
+  performance_score: number;
+  Agente_id_id?: number;
+  agent_id?: number;
+  agente_id?: number;
+  created_at: string;
+  descricao?: string;
+}
+
 const Chatbots = () => {
-  
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [contextModalVisible, setContextModalVisible] = useState(false);
+  const [selectedChatbot, setSelectedChatbot] = useState<Chatbot | null>(null);
+  const [updatedName, setUpdatedName] = useState("");
+  const [updatedDescription, setUpdatedDescription] = useState("");
+  const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
+  const [rawContextText, setRawContextText] = useState(""); // Novo estado para o texto bruto
+
+<TextInput
+  style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
+  multiline={true}
+  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
+  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
+  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
+  autoCorrect={false} // Desativa correção automática
+  autoCapitalize="none" // Desativa capitalização automática
+/>
   const router = useRouter();
 
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        // Fetch model data with full agent details
         const response = await apiCall("/api/modelo/listar-completo", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-        
+
         if (response.ok) {
           const data = await response.json();
-          console.log("API Response:", data);
           setChatbots(data);
         } else {
           console.error("Erro ao buscar chatbots:", await response.text());
@@ -47,7 +64,123 @@ const Chatbots = () => {
     fetchChatbots();
   }, []);
 
-  const ChatbotItem = ({ item }: { item: any }) => {
+  const handleEdit = (chatbot: Chatbot) => {
+    setSelectedChatbot(chatbot);
+    setUpdatedName(chatbot.Agente_nome);
+    setUpdatedDescription(chatbot.descricao || "");
+    setModalVisible(true);
+  };
+
+  const handleEditContext = async (chatbot: Chatbot) => {
+    try {
+      console.log("ID do agente:", chatbot.Agente_id_id); // Log do ID do agente
+      const response = await makeAuthenticatedRequest(`/api/contexto/listar/${chatbot.Agente_id_id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Dados do contexto:", data); // Log para verificar a resposta
+        setAgentContext(data.contexts || []); // Armazena o array completo de contextos
+  
+        // Formata os contextos existentes para exibição no TextInput
+        const formattedText = (data.contexts || [])
+          .map((context: { pergunta: string; resposta: string }) => `${context.pergunta} || ${context.resposta}`)
+          .join("\n");
+        setRawContextText(formattedText);
+  
+        setSelectedChatbot(chatbot);
+        setContextModalVisible(true);
+      } else {
+        Alert.alert("Erro", "Erro ao buscar o contexto do agente.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar contexto:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedChatbot) return;
+
+    try {
+      const response = await makeAuthenticatedRequest(`/api/agente/atualizar/${selectedChatbot.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nome: updatedName,
+          descricao: updatedDescription,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert("Sucesso", "Chatbot atualizado com sucesso!");
+        setModalVisible(false);
+        const updatedChatbots = chatbots.map((bot) =>
+          bot.id === selectedChatbot.id
+            ? { ...bot, Agente_nome: updatedName, descricao: updatedDescription }
+            : bot
+        );
+        setChatbots(updatedChatbots);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Erro", errorData.message || "Erro ao atualizar o chatbot.");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar chatbot:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+
+  const handleSaveContext = async () => {
+    if (!selectedChatbot) return;
+  
+    // Divide o texto em linhas e valida o formato
+    const lines = rawContextText.split("\n");
+    const updatedContexts = lines.map((line) => {
+      const [pergunta = "", resposta = ""] = line.split("||").map((str) => str.trim());
+      return { pergunta, resposta };
+    });
+  
+    const isValid = updatedContexts.every(
+      (context) => context.pergunta && context.resposta
+    );
+  
+    if (!isValid) {
+      Alert.alert(
+        "Formato inválido",
+        "Certifique-se de que cada linha esteja no formato: Pergunta || Resposta"
+      );
+      return;
+    }
+  
+    try {
+      const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.Agente_id_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
+      });
+  
+      if (response.ok) {
+        Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
+        setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
+        setContextModalVisible(false);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Erro", errorData.message || "Erro ao atualizar os contextos.");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar contextos:", error);
+      Alert.alert("Erro", "Erro na conexão com o servidor.");
+    }
+  };
+
+  const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -73,32 +206,21 @@ const Chatbots = () => {
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
-            {/* Dedicated "Chat" button that navigates to Chat screen */}
+
+            {/* Botão "Chat" */}
             <TouchableOpacity
               style={styles.chatButton}
               onPress={() => {
-                // Add debugging to see the entire item object
-                console.log("Chatbot item:", JSON.stringify(item, null, 2));
-                
-                // Get the correct agent ID, using multiple fallbacks
                 const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
-                
-                console.log("Navigating with params:", {
-                  agenteId: agentId,
-                  chatbotName: item.Agente_nome
-                });
-                
                 if (!agentId) {
                   console.error("No agent ID found in item:", item);
                   return;
                 }
-                
-                // Navigate with the correct agent ID
                 router.push({
                   pathname: "/Chat",
-                  params: { 
+                  params: {
                     agenteId: String(agentId),
-                    chatbotName: item.Agente_nome 
+                    chatbotName: item.Agente_nome
                   }
                 });
               }}
@@ -106,15 +228,32 @@ const Chatbots = () => {
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
             </TouchableOpacity>
+
+            {/* Botão "Editar" */}
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEdit(item)}
+            >
+              <Ionicons name="create" size={20} color="#fff" />
+              <Text style={styles.editButtonText}>Editar</Text>
+            </TouchableOpacity>
+
+            {/* Botão "Editar Contexto" */}
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEditContext(item)}
+            >
+              <Ionicons name="document-text" size={20} color="#fff" />
+              <Text style={styles.editButtonText}>Editar Contexto</Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
-    ); 
+    );
   };
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}> Chatbots</Text> */}
       {loading ? (
         <ActivityIndicator size="large" color="#fff" />
       ) : (
@@ -127,6 +266,80 @@ const Chatbots = () => {
           }
         />
       )}
+
+      {/* Modal de edição de nome e descrição */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Editar Chatbot</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome"
+              value={updatedName}
+              onChangeText={setUpdatedName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Descrição"
+              value={updatedDescription}
+              onChangeText={setUpdatedDescription}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.buttonText}>Salvar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+            {/* Modal de edição de contexto */}
+            <Modal
+        transparent={true}
+        animationType="fade"
+        visible={contextModalVisible}
+        onRequestClose={() => setContextModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ScrollView>
+              <Text style={styles.modalTitle}>Editar Contexto</Text>
+              <TextInput
+                style={[styles.input, { height: 200 }]}
+                multiline={true}
+                value={rawContextText}
+                onChangeText={setRawContextText}
+                placeholder="Digite no formato: Pergunta || Resposta (uma por linha). O contexto não pode ser vazio."
+                autoCorrect={false}
+                autoCapitalize="none"
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveContext}>
+                  <Text style={styles.buttonText}>Salvar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setContextModalVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 };
@@ -156,6 +369,94 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   chatButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
+  editButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#282828", // Green color for "Edit"
+    padding: 8,
+    borderRadius: 5,
+    marginTop: 10,
+    alignSelf: "flex-start",
+  },
+  editButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo semitransparente
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "#444", // Cor de fundo do modal
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    color: "#fff", // Cor do texto do título
+    marginBottom: 10,
+  },
+  input: {
+    width: "100%",
+    backgroundColor: "#555", // Cor de fundo do campo de entrada
+    color: "#fff", // Cor do texto no campo de entrada
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: "#282828", // Cor verde para o botão "Salvar"
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 5,
+    alignItems: "center",
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#3E3E3E", // Cor vermelha para o botão "Cancelar"
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff", // Cor do texto dos botões
+    fontSize: 16,
+  },
+  contextItem: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: "#555",
+    borderRadius: 5,
+  },
+  contextQuestion: {
+    fontSize: 16,
+    color: "#fff",
+    marginBottom: 5,
+  },
+  contextAnswer: {
+    fontSize: 16,
+    color: "#fff",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  scrollContainer: {
+    maxHeight: 300, // Limita a altura do conteúdo rolável
+    marginBottom: 10, // Espaço entre o conteúdo e os botões
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
 });
 
 export default Chatbots;
