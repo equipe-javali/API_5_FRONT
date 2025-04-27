@@ -3,8 +3,8 @@ module.exports = {
     default: {
       addListener: () => ({ remove: () => {} }),
       removeListener: () => {},
-      setInputMode: () => {},
-      update: () => {},
+      // setInputMode: () => {},
+      // update: () => {},
       events: {},
     },
   };
