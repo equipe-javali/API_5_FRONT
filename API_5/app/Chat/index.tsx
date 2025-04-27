@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
-  TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator
+  TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, SectionList
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiCall } from '../../config/api';
+import { makeAuthenticatedRequest } from '../../config/tokenService';
 
 export default function Chat() {
   const params = useLocalSearchParams();
@@ -14,7 +16,7 @@ export default function Chat() {
   // Parâmetros e estados
   const agenteId = params.agenteId ? Number(params.agenteId) : null;
   const chatbotName = params.chatbotName as string;
-  const [chatId, setChatId] = useState(null);
+  const [chatId, setChatId] = useState<number | null>(null);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: string; timestamp: Date }[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,21 +26,55 @@ export default function Chat() {
   // Iniciar chat - sem alterações, já funciona para iniciar a conversa
   useEffect(() => {
     const startChat = async () => {
-      if (agenteId) {
-        try {
-          const response = await apiCall("/api/chat/iniciar-conversa", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              agenteId: agenteId,
-              usuarioId: 1 
-            }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setChatId(data.chat_id);
-            
+      if (!agenteId) return;
+
+      // 1) tenta ler userId do AsyncStorage
+      let userId = await AsyncStorage.getItem('userId');
+
+      // 2) se não existir, busca no endpoint /api/usuario/current
+      if (!userId) {
+        const resp = await makeAuthenticatedRequest('/api/usuario/current');
+        if (resp.ok) {
+          const data = await resp.json();
+          const newUserId = data.id.toString();
+          await AsyncStorage.setItem('userId', newUserId);
+          userId = newUserId;
+        }
+      }
+
+      // 3) converte para number e chama o backend
+      const usuarioId = userId ? Number(userId) : null;
+      if (!usuarioId) {
+        console.error('Não foi possível obter userId');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await apiCall("/api/chat/iniciar-conversa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            agenteId,
+            usuarioId
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setChatId(data.chat_id);
+
+          if (Array.isArray(data.messages) && data.messages.length > 0) {
+            // formata o histórico vindo do back
+            const history = data.messages.map((msg: any) => ({
+              id: msg.id.toString(),
+              text: msg.texto,
+              sender: msg.usuario ? "user" : "bot",
+              timestamp: new Date(msg.dataCriacao),
+            }));
+            setMessages(history);
+          } else {
+            // primeira conversa: mensagem de boas-vindas
             setMessages([{
               id: 'welcome',
               text: 'Olá! Como posso ajudar você hoje?',
@@ -46,11 +82,13 @@ export default function Chat() {
               timestamp: new Date()
             }]);
           }
-        } catch (error) {
-          console.error("Erro na inicialização:", error);
-        } finally {
-          setLoading(false);
+        } else {
+          console.error("Falha ao iniciar conversa:", await response.text());
         }
+      } catch (err) {
+        console.error("Erro na inicialização:", err);
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -145,6 +183,13 @@ export default function Chat() {
       styles.messageBubble, 
       item.sender === 'user' ? styles.userMessage : styles.botMessage
     ]}>
+      <Text style={styles.dateLabel}>
+        {new Date(item.timestamp).toLocaleDateString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </Text>
+
       {item.text === "Processando..." ? (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={styles.messageText}>Processando</Text>
@@ -156,7 +201,6 @@ export default function Chat() {
     </View>
   );
   
-  // Header do chat - sem alterações
   const renderHeader = () => (
     <View style={styles.header}>
       <TouchableOpacity 
@@ -170,6 +214,37 @@ export default function Chat() {
     </View>
   );
   
+  // Agrupa as mensagens por dia
+  const sections = useMemo(() => {
+    const groups = messages.reduce((acc, msg) => {
+      const day = msg.timestamp.toLocaleDateString('pt-BR', {
+        day:   '2-digit',
+        month: '2-digit',
+        year:  'numeric'
+      });
+      if (!acc[day]) acc[day] = []
+      acc[day].push(msg)
+      return acc
+    }, {} as Record<string, typeof messages>)
+    return Object
+      .entries(groups)
+      .map(([title, data]) => ({ title, data }))
+      .sort((a, b) => 
+         //datas mais antigas primeiro
+         new Date(a.title.split('/').reverse().join('-')).getTime() -
+         new Date(b.title.split('/').reverse().join('-')).getTime()
+      )
+  }, [messages])
+
+  // render de cada seção (data)
+  const renderSectionHeader = ({
+    section: { title }
+  }: { section: { title: string; data: any[] } }) => (
+    <View style={styles.sectionHeaderContainer}>
+      <Text style={styles.sectionHeader}>{title}</Text>
+    </View>
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
@@ -185,11 +260,11 @@ export default function Chat() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={80}
         >
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessageItem}
+          <SectionList
+            sections={sections}
             keyExtractor={item => item.id}
+            renderSectionHeader={renderSectionHeader}
+            renderItem={renderMessageItem}
             contentContainerStyle={styles.messagesContainer}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
             onLayout={() => flatListRef.current?.scrollToEnd()}
@@ -208,7 +283,7 @@ export default function Chat() {
               style={[
                 styles.sendButton,
                 (!inputText.trim() || !chatId || isProcessing) && 
-                  {backgroundColor: '#555'} // Desabilita visualmente
+                  {backgroundColor: '#555'}
               ]}
               onPress={sendMessage}
               disabled={!inputText.trim() || !chatId || isProcessing}
@@ -223,7 +298,7 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
-  // Mantenha todos os estilos existentes...
+
   container: {
     flex: 1,
     backgroundColor: '#282828',
@@ -309,5 +384,23 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sectionHeaderContainer: {
+    alignItems: 'center',
+    marginVertical: 8
+  },
+  sectionHeader: {
+    backgroundColor: '#555',
+    color: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    fontSize: 12
+  },
+  dateLabel: {
+    fontSize:      10,
+    color:         '#888',
+    marginBottom:  4,
+    alignSelf:     'flex-end'
   },
 });

@@ -108,7 +108,7 @@ const Login = () => {
           if (isAdmin) {
             router.push('/(drawer)/Home');
           } else {
-            router.push('/Start/homeUsuario');
+            router.push('/Start/HomeUsuario');
           }
           console.log('Redirecionamento executado');
         } catch (error) {
