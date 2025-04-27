@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
-  TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator
+  TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, SectionList
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -182,6 +182,13 @@ export default function Chat() {
       styles.messageBubble, 
       item.sender === 'user' ? styles.userMessage : styles.botMessage
     ]}>
+      <Text style={styles.dateLabel}>
+        {new Date(item.timestamp).toLocaleDateString('pt-BR', {
+          hour:   '2-digit',
+          minute: '2-digit'
+        })}
+      </Text>
+
       {item.text === "Processando..." ? (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={styles.messageText}>Processando</Text>
@@ -207,6 +214,37 @@ export default function Chat() {
     </View>
   );
   
+  // Agrupa as mensagens por dia
+  const sections = useMemo(() => {
+    const groups = messages.reduce((acc, msg) => {
+      const day = msg.timestamp.toLocaleDateString('pt-BR', {
+        day:   '2-digit',
+        month: '2-digit',
+        year:  'numeric'
+      });
+      if (!acc[day]) acc[day] = []
+      acc[day].push(msg)
+      return acc
+    }, {} as Record<string, typeof messages>)
+    return Object
+      .entries(groups)
+      .map(([title, data]) => ({ title, data }))
+      .sort((a, b) => 
+         //datas mais antigas primeiro
+         new Date(a.title.split('/').reverse().join('-')).getTime() -
+         new Date(b.title.split('/').reverse().join('-')).getTime()
+      )
+  }, [messages])
+
+  // render de cada seção (data)
+  const renderSectionHeader = ({
+    section: { title }
+  }: { section: { title: string; data: any[] } }) => (
+    <View style={styles.sectionHeaderContainer}>
+      <Text style={styles.sectionHeader}>{title}</Text>
+    </View>
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
@@ -222,11 +260,11 @@ export default function Chat() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={80}
         >
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessageItem}
+          <SectionList
+            sections={sections}
             keyExtractor={item => item.id}
+            renderSectionHeader={renderSectionHeader}
+            renderItem={renderMessageItem}
             contentContainerStyle={styles.messagesContainer}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
             onLayout={() => flatListRef.current?.scrollToEnd()}
@@ -245,7 +283,7 @@ export default function Chat() {
               style={[
                 styles.sendButton,
                 (!inputText.trim() || !chatId || isProcessing) && 
-                  {backgroundColor: '#555'} // Desabilita visualmente
+                  {backgroundColor: '#555'}
               ]}
               onPress={sendMessage}
               disabled={!inputText.trim() || !chatId || isProcessing}
@@ -260,7 +298,7 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
-  // Mantenha todos os estilos existentes...
+
   container: {
     flex: 1,
     backgroundColor: '#282828',
@@ -346,5 +384,23 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sectionHeaderContainer: {
+    alignItems: 'center',
+    marginVertical: 8
+  },
+  sectionHeader: {
+    backgroundColor: '#555',
+    color: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    fontSize: 12
+  },
+  dateLabel: {
+    fontSize:      10,
+    color:         '#888',
+    marginBottom:  4,
+    alignSelf:     'flex-end'
   },
 });
