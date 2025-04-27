@@ -3,9 +3,11 @@ import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
   TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiCall } from '../../config/api';
+import { makeAuthenticatedRequest } from '../../config/tokenService';
 
 export default function Chat() {
   const params = useLocalSearchParams();
@@ -14,7 +16,7 @@ export default function Chat() {
   // Parâmetros e estados
   const agenteId = params.agenteId ? Number(params.agenteId) : null;
   const chatbotName = params.chatbotName as string;
-  const [chatId, setChatId] = useState(null);
+  const [chatId, setChatId] = useState<number | null>(null);
   const [messages, setMessages] = useState<{ id: string; text: string; sender: string; timestamp: Date }[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,21 +26,54 @@ export default function Chat() {
   // Iniciar chat - sem alterações, já funciona para iniciar a conversa
   useEffect(() => {
     const startChat = async () => {
-      if (agenteId) {
-        try {
-          const response = await apiCall("/api/chat/iniciar-conversa", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              agenteId: agenteId,
-              usuarioId: 1 
-            }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setChatId(data.chat_id);
-            
+      if (!agenteId) return;
+
+      // 1) tenta ler userId do AsyncStorage
+      let userId = await AsyncStorage.getItem('userId');
+
+      // 2) se não existir, busca no endpoint /api/usuario/current
+      if (!userId) {
+        const resp = await makeAuthenticatedRequest('/api/usuario/current');
+        if (resp.ok) {
+          const data = await resp.json();
+          userId = data.id.toString();
+          await AsyncStorage.setItem('userId', userId);
+        }
+      }
+
+      // 3) converte para number e chama o backend
+      const usuarioId = userId ? Number(userId) : null;
+      if (!usuarioId) {
+        console.error('Não foi possível obter userId');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await apiCall("/api/chat/iniciar-conversa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            agenteId,
+            usuarioId
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setChatId(data.chat_id);
+
+          if (Array.isArray(data.messages) && data.messages.length > 0) {
+            // formata o histórico vindo do back
+            const history = data.messages.map((msg: any) => ({
+              id: msg.id.toString(),
+              text: msg.texto,
+              sender: msg.usuario ? "user" : "bot",
+              timestamp: new Date(msg.dataCriacao),
+            }));
+            setMessages(history);
+          } else {
+            // primeira conversa: mensagem de boas-vindas
             setMessages([{
               id: 'welcome',
               text: 'Olá! Como posso ajudar você hoje?',
@@ -46,11 +81,13 @@ export default function Chat() {
               timestamp: new Date()
             }]);
           }
-        } catch (error) {
-          console.error("Erro na inicialização:", error);
-        } finally {
-          setLoading(false);
+        } else {
+          console.error("Falha ao iniciar conversa:", await response.text());
         }
+      } catch (err) {
+        console.error("Erro na inicialização:", err);
+      } finally {
+        setLoading(false);
       }
     };
     
