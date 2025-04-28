@@ -301,7 +301,7 @@ const Chatbots = () => {
 
             {/* Botão "Excluir" */}
             <TouchableOpacity
-              style={[styles.editButton, { backgroundColor: "#D32F2F" }]}
+              style={[styles.editButton, { backgroundColor: "#D32F2F", marginRight: 0 }]}
               onPress={() => {
                 setSelectedChatbot(item);                
                 handleDelete();
@@ -341,36 +341,39 @@ const Chatbots = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Editar Chatbot</Text>
+            <Text style={styles.title}>Editar Chatbot</Text>
             <TextInput
-              style={styles.input}
+              style={styles.contextInput}
               placeholder="Nome"
+              placeholderTextColor="#ccc"
               value={updatedName}
               onChangeText={setUpdatedName}
             />
             <TextInput
-              style={styles.input}
+              style={styles.contextInput}
               placeholder="Descrição"
+              placeholderTextColor="#ccc"
               value={updatedDescription}
               onChangeText={setUpdatedDescription}
             />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.buttonText}>Salvar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+              <Text style={styles.actionButtonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#fff" />
+              </View>
+            )}
           </View>
         </View>
       </Modal>
 
             {/* Modal de edição de contexto */}
-            <Modal
+      <Modal
         transparent={true}
         animationType="fade"
         visible={contextModalVisible}
@@ -378,29 +381,29 @@ const Chatbots = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <ScrollView>
-              <Text style={styles.modalTitle}>Editar Contexto</Text>
-              <TextInput
-                style={[styles.input, { height: 200 }]}
-                multiline={true}
-                value={rawContextText}
-                onChangeText={setRawContextText}
-                placeholder="Digite no formato: Pergunta || Resposta (uma por linha). O contexto não pode ser vazio."
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSaveContext}>
-                  <Text style={styles.buttonText}>Salvar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setContextModalVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
+            <Text style={styles.title}>Editar Contexto</Text>
+            <TextInput
+              style={[styles.contextInput, { height: 150 }]}
+              placeholder="Digite no formato: Pergunta || Resposta (uma por linha)"
+              placeholderTextColor="#ccc"
+              multiline={true}
+              value={rawContextText}
+              onChangeText={setRawContextText}
+              autoCorrect={false}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity style={styles.button} onPress={handleSaveContext}>
+              <Text style={styles.actionButtonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setContextModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#fff" />
               </View>
-            </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
@@ -424,39 +427,25 @@ const styles = StyleSheet.create({
   itemDetails: { marginTop: 10, borderTopWidth: 1, borderTopColor: "#666", paddingTop: 10 },
   itemText: { fontSize: 14, color: "#ccc", marginTop: 3 },
   emptyText: { fontSize: 18, color: "gray", textAlign: "center", marginTop: 20 },
-  chatButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007BFF",
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 10,
-    alignSelf: "flex-start",
-  },
-  chatButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
+  
+  
   editButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#282828", // Green color for "Edit"
+    backgroundColor: "#282828",
     padding: 8,
     borderRadius: 5,
     marginTop: 10,
-    alignSelf: "flex-start",
-  },
-  editButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo semitransparente
+    marginRight: 15, // Adiciona espaço horizontal entre os botões
+    alignSelf: "flex-start",    
+    paddingHorizontal: 15, 
+    minWidth: 120, 
+    minHeight: 40,
     justifyContent: "center",
-    alignItems: "center",
   },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: "#444", // Cor de fundo do modal
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-  },
+  
+  
+  editButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },  
   modalTitle: {
     fontSize: 20,
     color: "#fff", // Cor do texto do título
@@ -518,19 +507,68 @@ const styles = StyleSheet.create({
     maxHeight: 300, // Limita a altura do conteúdo rolável
     marginBottom: 10, // Espaço entre o conteúdo e os botões
   },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    zIndex: 1,
-  },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "flex-start",
     flexWrap: "wrap",
     marginTop: 10,
   },
-  
+  modalContainer: { 
+    width: "80%", 
+    backgroundColor: "#282828", 
+    borderRadius: 10, 
+    padding: 20, 
+    alignItems: "center", 
+    borderWidth: 1, 
+    borderColor: "#fff" 
+  },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+  contextInput: { 
+    width: "100%",
+    borderColor: "#fff", 
+    borderWidth: 1, 
+    marginBottom: 10, 
+    paddingHorizontal: 10, 
+    borderRadius: 5, 
+    color: "#fff",
+    padding: 10
+  },
+  button: { 
+    backgroundColor: "#F5F5F5", 
+    padding: 10, 
+    borderRadius: 5, 
+    alignItems: "center", 
+    marginVertical: 10,
+    width: "100%" 
+  },
+  actionButtonText: { 
+    color: "#212121", 
+    fontSize: 16 
+  },
+  closeButton: { 
+    padding: 10, 
+    borderRadius: 5, 
+    borderWidth: 1, 
+    borderColor: "#fff", 
+    backgroundColor: "#282828", 
+    alignItems: "center",
+    width: "100%"
+  },
+  closeButtonText: { 
+    color: "#fff", 
+    fontSize: 16 
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   
 });
 
