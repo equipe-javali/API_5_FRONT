@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
-import * as Font from 'expo-font'; 
+import * as Font from 'expo-font';
 import { apiCall } from '../../config/api';
 import { router } from 'expo-router';
 
@@ -14,12 +14,31 @@ const Register = () => {
   const [isError, setIsError] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false); // Estado de loading
-  // const admin = true; 
+  // const admin = true;
+
+  const [senhaValida, setSenhaValida] = useState({
+    tamanho: false,
+    maiuscula: false,
+    minuscula: false,
+    numero: false,
+    especial: false,
+  });
+
+  const validarSenha = (senha) => {
+    setSenhaValida({
+      tamanho: senha.length >= 8,
+      maiuscula: /[A-Z]/.test(senha),
+      minuscula: /[a-z]/.test(senha),
+      numero: /\d/.test(senha),
+      especial: /[@$!%*#?&]/.test(senha),
+    });
+  };
+
 
   useEffect(() => {
     const loadFonts = async () => {
       await Font.loadAsync({
-          Roboto: require('../../assets/fonts/Roboto-Regular.ttf'),
+        Roboto: require('../../assets/fonts/Roboto-Regular.ttf'),
       });
       setFontLoaded(true);
     };
@@ -34,7 +53,7 @@ const Register = () => {
       setModalVisible(true);
       return;
     }
-    
+
     if (!email.endsWith('@pro4tech.com.br')) {
       setModalMessage('É necessário utilizar um email com domínio "@pro4tech.com.br".');
       setIsError(true);
@@ -62,11 +81,11 @@ const Register = () => {
 
       if (response.ok) {
         setModalMessage('Usuário cadastrado com sucesso!');
-        setIsError(false);        
+        setIsError(false);
         setNome('');
         setEmail('');
         setSenha('');
-      } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {       
+      } else if (data.email && Array.isArray(data.email) && data.email[0].toLowerCase().includes('exists')) {
         setModalMessage('Usuário já cadastrado.');
         setIsError(true);
       } else if (data.message && data.message.toLowerCase().includes('já cadastrado')) {
@@ -93,7 +112,7 @@ const Register = () => {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      
+
       <Image
         source={require('../../assets/project_images/logotipo.png')}
         style={styles.image}
@@ -121,7 +140,7 @@ const Register = () => {
       <TextInput
         style={styles.input}
         placeholder="Nome"
-        placeholderTextColor="#B8B8B8" 
+        placeholderTextColor="#B8B8B8"
         value={nome}
         onChangeText={setNome}
       />
@@ -130,19 +149,41 @@ const Register = () => {
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
-        placeholderTextColor="#B8B8B8" 
+        placeholderTextColor="#B8B8B8"
         value={email}
         onChangeText={setEmail}
       />
-      
+
       <TextInput
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
-        placeholderTextColor="#B8B8B8" 
+        placeholderTextColor="#B8B8B8"
         value={senha}
-        onChangeText={setSenha}
+        onChangeText={(text) => {
+          setSenha(text);
+          validarSenha(text);
+        }}
       />
+
+      <View style={styles.senhaDicasContainer}>
+        <Text style={[styles.senhaDica, senhaValida.tamanho ? styles.valido : styles.invalido]}>
+          {senhaValida.tamanho ? '✓' : '✗'} Pelo menos 8 caracteres
+        </Text>
+        <Text style={[styles.senhaDica, senhaValida.maiuscula ? styles.valido : styles.invalido]}>
+          {senhaValida.maiuscula ? '✓' : '✗'} Pelo menos uma letra maiúscula
+        </Text>
+        <Text style={[styles.senhaDica, senhaValida.minuscula ? styles.valido : styles.invalido]}>
+          {senhaValida.minuscula ? '✓' : '✗'} Pelo menos uma letra minúscula
+        </Text>
+        <Text style={[styles.senhaDica, senhaValida.numero ? styles.valido : styles.invalido]}>
+          {senhaValida.numero ? '✓' : '✗'} Pelo menos um número
+        </Text>
+        <Text style={[styles.senhaDica, senhaValida.especial ? styles.valido : styles.invalido]}>
+          {senhaValida.especial ? '✓' : '✗'} Pelo menos um caractere especial
+        </Text>
+      </View>
+
 
       <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
         {loading ? (
@@ -188,16 +229,16 @@ const styles = StyleSheet.create({
     height: 150,
   },
   button: {
-    borderWidth: 1, 
+    borderWidth: 1,
     borderColor: '#F5F5F5',
-    backgroundColor: '#282828',  
-    borderRadius: 10,  
-    paddingVertical: 12, 
-    paddingHorizontal: 50,  
-    marginTop: 20,  
+    backgroundColor: '#282828',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 50,
+    marginTop: 20,
   },
   buttonText: {
-    color: '#F5F5F5',  
+    color: '#F5F5F5',
     fontSize: 24,
     fontFamily: 'Roboto',
     textAlign: 'center',
@@ -254,6 +295,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     textDecorationLine: 'underline',
   },
+  senhaDicasContainer: {
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  senhaDica: {
+    fontSize: 14,
+    fontFamily: 'Roboto',
+  },
+  valido: {
+    color: 'lightgreen',
+  },
+  invalido: {
+    color: 'gray',
+  },  
 });
 
 export default Register;
