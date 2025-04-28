@@ -17,6 +17,24 @@ const SignUpScreen = () => {
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const [senhaValida, setSenhaValida] = useState({
+        tamanho: false,
+        maiuscula: false,
+        minuscula: false,
+        numero: false,
+        especial: false,
+    });
+
+    const validarSenha = (senha) => {
+        setSenhaValida({
+            tamanho: senha.length >= 8,
+            maiuscula: /[A-Z]/.test(senha),
+            minuscula: /[a-z]/.test(senha),
+            numero: /\d/.test(senha),
+            especial: /[@$!%*#?&]/.test(senha),
+        });
+    };
+
     const [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Roboto_700Bold,
@@ -27,86 +45,93 @@ const SignUpScreen = () => {
         return null;
     }
 
-        const handleSignUp = async () => {
-      if (!name || !email || !password) {
-        setModalMessage("Por favor, preencha todos os campos.");
-        setIsError(true);
-        setModalVisible(true);
-        return;
-      }
-    
-      // Verificar autenticação antes de começar
-      const token = await AsyncStorage.getItem('access_token');
-      if (!token) {
-        setModalMessage("Você não está autenticado. Faça login novamente.");
-        setIsError(true);
-        setModalVisible(true);
-        setTimeout(() => router.push('/Start/login'), 2000);
-        return;
-      }
-    
-      // Verificar se o usuário é admin
-      const isAdmin = await AsyncStorage.getItem('isAdmin');
-      if (isAdmin !== 'true') {
-        setModalMessage("Apenas administradores podem cadastrar novos usuários.");
-        setIsError(true);
-        setModalVisible(true);
-        return;
-      }
-      
-      setLoading(true); // Ativa o carregamento
-    
-      try {
-        console.log("Enviando requisição com token:", token.substring(0, 15) + "...");
-        
-        const response = await makeAuthenticatedRequest('/api/usuario/cadastrar', {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nome: name,
-            email: email,
-            senha: password,            
-            permissoes: [],
-            // admin: false, 
-          }),
-        });
-    
-        const data = await response.json();
-        console.log("Resposta da API:", response.status, data);
-    
-        if (response.ok) {
-          setModalMessage("Usuário cadastrado com sucesso!");
-          setIsError(false);
-          setName(""); 
-          setEmail(""); 
-          setPassword("");
-        } else if (response.status === 401) {
-          setModalMessage("Sessão expirada. Por favor, faça login novamente.");
-          setIsError(true);
-          setTimeout(() => router.push('/Start/login'), 2000);
-        } else {
-            // Exibir detalhes do erro para diagnóstico
-            let errorMsg = "Erro ao cadastrar usuário.";
-            if (data && typeof data === 'object') {
-              // Extrair todas as mensagens de erro para ajudar no diagnóstico
-              const errorDetails = Object.entries(data)
-                .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`)
-                .join("\n");
-              errorMsg = errorDetails || data.message || data.msg || data.detail || errorMsg;
-            }
-            setModalMessage(errorMsg);
+    const handleSignUp = async () => {
+        if (!name || !email || !password) {
+            setModalMessage("Por favor, preencha todos os campos.");
             setIsError(true);
-          }
+            setModalVisible(true);
+            return;
+        }
+
+        if (Object.values(senhaValida).includes(false)) {
+            setModalMessage("A senha não atende aos requisitos de segurança.");
+            setIsError(true);
+            setModalVisible(true);
+            return;
+        }
+
+        // Verificar autenticação antes de começar
+        const token = await AsyncStorage.getItem('access_token');
+        if (!token) {
+            setModalMessage("Você não está autenticado. Faça login novamente.");
+            setIsError(true);
+            setModalVisible(true);
+            setTimeout(() => router.push('/Start/login'), 2000);
+            return;
+        }
+
+        // Verificar se o usuário é admin
+        const isAdmin = await AsyncStorage.getItem('isAdmin');
+        if (isAdmin !== 'true') {
+            setModalMessage("Apenas administradores podem cadastrar novos usuários.");
+            setIsError(true);
+            setModalVisible(true);
+            return;
+        }
+
+        setLoading(true); // Ativa o carregamento
+
+        try {
+            console.log("Enviando requisição com token:", token.substring(0, 15) + "...");
+
+            const response = await makeAuthenticatedRequest('/api/usuario/cadastrar', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nome: name,
+                    email: email,
+                    senha: password,
+                    permissoes: [],
+                    // admin: false, 
+                }),
+            });
+
+            const data = await response.json();
+            console.log("Resposta da API:", response.status, data);
+
+            if (response.ok) {
+                setModalMessage("Usuário cadastrado com sucesso!");
+                setIsError(false);
+                setName("");
+                setEmail("");
+                setPassword("");
+            } else if (response.status === 401) {
+                setModalMessage("Sessão expirada. Por favor, faça login novamente.");
+                setIsError(true);
+                setTimeout(() => router.push('/Start/login'), 2000);
+            } else {
+                // Exibir detalhes do erro para diagnóstico
+                let errorMsg = "Erro ao cadastrar usuário.";
+                if (data && typeof data === 'object') {
+                    // Extrair todas as mensagens de erro para ajudar no diagnóstico
+                    const errorDetails = Object.entries(data)
+                        .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`)
+                        .join("\n");
+                    errorMsg = errorDetails || data.message || data.msg || data.detail || errorMsg;
+                }
+                setModalMessage(errorMsg);
+                setIsError(true);
+            }
         } catch (error) {
-        console.error("Erro na requisição:", error);
-        setModalMessage("Erro na conexão com o servidor.");
-        setIsError(true);
-      } finally {
-        setLoading(false);
-        setModalVisible(true);
-      }
+            console.error("Erro na requisição:", error);
+            setModalMessage("Erro na conexão com o servidor.");
+            setIsError(true);
+        } finally {
+            setLoading(false);
+            setModalVisible(true);
+        }
     };
     return (
         <View style={styles.container}>
@@ -134,9 +159,29 @@ const SignUpScreen = () => {
                 placeholder="Senha"
                 placeholderTextColor="#B8B8B8"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                    setPassword(text);
+                    validarSenha(text);
+                }}
                 secureTextEntry
             />
+            <View style={styles.senhaDicasContainer}>
+                <Text style={[styles.senhaDica, senhaValida.tamanho ? styles.valido : styles.invalido]}>
+                    {senhaValida.tamanho ? '✓' : '✗'} Pelo menos 8 caracteres
+                </Text>
+                <Text style={[styles.senhaDica, senhaValida.maiuscula ? styles.valido : styles.invalido]}>
+                    {senhaValida.maiuscula ? '✓' : '✗'} Pelo menos uma letra maiúscula
+                </Text>
+                <Text style={[styles.senhaDica, senhaValida.minuscula ? styles.valido : styles.invalido]}>
+                    {senhaValida.minuscula ? '✓' : '✗'} Pelo menos uma letra minúscula
+                </Text>
+                <Text style={[styles.senhaDica, senhaValida.numero ? styles.valido : styles.invalido]}>
+                    {senhaValida.numero ? '✓' : '✗'} Pelo menos um número
+                </Text>
+                <Text style={[styles.senhaDica, senhaValida.especial ? styles.valido : styles.invalido]}>
+                    {senhaValida.especial ? '✓' : '✗'} Pelo menos um caractere especial
+                </Text>
+            </View>
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.button} onPress={handleSignUp}>
@@ -205,9 +250,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 12, // espaço entre os botões
         marginTop: 20,
-      },
-      
-      button: {
+    },
+
+    button: {
         flex: 1,
         padding: 10,
         borderRadius: 5,
@@ -216,7 +261,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#212121",
         fontFamily: "Roboto_400Regular",
-      },
+    },
     cancelButton: {
         flex: 1,
         padding: 10,
@@ -283,11 +328,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     text: {
-        fontSize: 25, 
+        fontSize: 25,
         marginBottom: 25,
-        color: '#FFFFFF', 
-        textAlign: "left", 
-        alignSelf: "flex-start" ,
+        color: '#FFFFFF',
+        textAlign: "left",
+        alignSelf: "flex-start",
         fontFamily: "Roboto_400Regular",
     },
     loadingOverlay: {
@@ -299,7 +344,24 @@ const styles = StyleSheet.create({
     returnButton: {
         padding: 10,
         marginRight: 10,
-      },
+    },
+    senhaDicasContainer: {
+        width: '100%',
+        marginBottom: 10,
+    },
+    senhaDica: {
+        fontSize: 14,
+        color: '#fff',
+        marginBottom: 2,
+        fontFamily: 'Roboto_400Regular',
+    },
+    valido: {
+        color: 'lightgreen',
+    },
+    invalido: {
+        color: 'gray',
+    },
+
 });
 
 export default SignUpScreen;
