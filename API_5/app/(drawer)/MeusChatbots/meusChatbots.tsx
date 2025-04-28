@@ -8,9 +8,9 @@ import { makeAuthenticatedRequest } from "../../../config/tokenService";
 
 interface Chatbot {
   id: number;
-  Agente_nome: string;
+  nome: string;
   examples_count: number;
-  // performance_score: number;
+  performance_score: number;
   Agente_id_id?: number;
   agent_id?: number;
   agente_id?: number;
@@ -29,22 +29,21 @@ const Chatbots = () => {
   const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
   const [rawContextText, setRawContextText] = useState(""); // Novo estado para o texto bruto
 
-
-  <TextInput
-    style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
-    multiline={true}
-    value={rawContextText} // Exibe o texto bruto digitado pelo usuário
-    onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
-    placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
-    autoCorrect={false} // Desativa correção automática
-    autoCapitalize="none" // Desativa capitalização automática
-  />
+<TextInput
+  style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
+  multiline={true}
+  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
+  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
+  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
+  autoCorrect={false} // Desativa correção automática
+  autoCapitalize="none" // Desativa capitalização automática
+/>
   const router = useRouter();
 
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await apiCall("/api/modelo/listar-completo", {
+        const response = await makeAuthenticatedRequest("/api/agente/listar-todos", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -68,9 +67,11 @@ const Chatbots = () => {
     fetchChatbots();
   }, []);
 
+
+
   const handleEdit = (chatbot: Chatbot) => {
     setSelectedChatbot(chatbot);
-    setUpdatedName(chatbot.Agente_nome);
+    setUpdatedName(chatbot.nome);
     setUpdatedDescription(chatbot.descricao || "");
     setModalVisible(true);
   };
@@ -78,22 +79,22 @@ const Chatbots = () => {
   const handleEditContext = async (chatbot: Chatbot) => {
     try {
       console.log("ID do agente:", chatbot.Agente_id_id); // Log do ID do agente
-      const response = await makeAuthenticatedRequest(`/api/contexto/listar/${chatbot.Agente_id_id}`, {
+      const response = await makeAuthenticatedRequest(`/api/contexto/listar/${chatbot.id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         console.log("Dados do contexto:", data); // Log para verificar a resposta
         setAgentContext(data.contexts || []); // Armazena o array completo de contextos
-
+  
         // Formata os contextos existentes para exibição no TextInput
         const formattedText = (data.contexts || [])
           .map((context: { pergunta: string; resposta: string }) => `${context.pergunta} || ${context.resposta}`)
           .join("\n");
         setRawContextText(formattedText);
-
+  
         setSelectedChatbot(chatbot);
         setContextModalVisible(true);
       } else {
@@ -125,7 +126,7 @@ const Chatbots = () => {
         setModalVisible(false);
         const updatedChatbots = chatbots.map((bot) =>
           bot.id === selectedChatbot.id
-            ? { ...bot, Agente_nome: updatedName, descricao: updatedDescription }
+            ? { ...bot, nome: updatedName, descricao: updatedDescription }
             : bot
         );
         setChatbots(updatedChatbots);
@@ -141,18 +142,18 @@ const Chatbots = () => {
 
   const handleSaveContext = async () => {
     if (!selectedChatbot) return;
-
+  
     // Divide o texto em linhas e valida o formato
     const lines = rawContextText.split("\n");
     const updatedContexts = lines.map((line) => {
       const [pergunta = "", resposta = ""] = line.split("||").map((str) => str.trim());
       return { pergunta, resposta };
     });
-
+  
     const isValid = updatedContexts.every(
       (context) => context.pergunta && context.resposta
     );
-
+  
     if (!isValid) {
       Alert.alert(
         "Formato inválido",
@@ -160,16 +161,16 @@ const Chatbots = () => {
       );
       return;
     }
-
+  
     try {
-      const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.Agente_id_id}`, {
+      const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
       });
-
+  
       if (response.ok) {
         Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
         setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
@@ -186,14 +187,14 @@ const Chatbots = () => {
 
   const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
-  
+
     return (
       <TouchableOpacity
         style={styles.itemContainer}
         onPress={() => setExpanded(!expanded)}
       >
         <View style={styles.itemHeader}>
-          <Text style={styles.itemTitle}>{item.Agente_nome}</Text>
+          <Text style={styles.itemTitle}>{item.nome}</Text>
           <Ionicons
             name={expanded ? "chevron-up" : "chevron-down"}
             size={24}
@@ -203,19 +204,19 @@ const Chatbots = () => {
         <Text style={styles.itemFrases}>Frases: {item.examples_count}</Text>
         {expanded && (
           <View style={styles.itemDetails}>
-            {/* <Text style={styles.itemText}>Performance: {item.performance_score}</Text> */}
-            {/* <Text style={styles.itemText}>
-            // Agente ID: {item.Agente_id_id}
-            </Text> */}
+            <Text style={styles.itemText}>Performance: {item.performance_score}</Text>
+            <Text style={styles.itemText}>
+              Agente ID: {item.Agente_id_id}
+            </Text>
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
-  
+
             {/* Botão "Chat" */}
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={styles.chatButton}
               onPress={() => {
-                const agentId = item.id; // Usando o campo `id`
+                const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
                 if (!agentId) {
                   console.error("No agent ID found in item:", item);
                   return;
@@ -224,15 +225,15 @@ const Chatbots = () => {
                   pathname: "/Chat",
                   params: {
                     agenteId: String(agentId),
-                    chatbotName: item.Agente_nome,
-                  },
+                    chatbotName: item.nome
+                  }
                 });
               }}
             >
               <Ionicons name="chatbubbles" size={20} color="#fff" />
               <Text style={styles.chatButtonText}>Chat</Text>
-            </TouchableOpacity> */}
-  
+            </TouchableOpacity>
+
             {/* Botão "Editar" */}
             <TouchableOpacity
               style={styles.editButton}
@@ -241,7 +242,7 @@ const Chatbots = () => {
               <Ionicons name="create" size={20} color="#fff" />
               <Text style={styles.editButtonText}>Editar</Text>
             </TouchableOpacity>
-  
+
             {/* Botão "Editar Contexto" */}
             <TouchableOpacity
               style={styles.editButton}
@@ -256,80 +257,6 @@ const Chatbots = () => {
     );
   };
 
-          const handleDelete = async (chatbot: Chatbot) => {
-            Alert.alert(
-              "Confirmar exclusão",
-              "Tem certeza que deseja excluir este chatbot? Isso também excluirá todos os contextos associados.",
-              [
-                { text: "Cancelar", style: "cancel" },
-                {
-                  text: "Excluir",
-                  style: "destructive",
-                  onPress: async () => {
-                    try {
-                      const agenteId = chatbot.Agente_id_id;
-                      
-                      if (!agenteId) {
-                        Alert.alert("Erro", "ID do agente não encontrado");
-                        return;
-                      }
-                      
-                      console.log("Excluindo contextos do agente ID:", agenteId);
-                      
-                      try {
-                        console.log(`Atualizando contextos do agente ${agenteId} para lista vazia...`);
-                        const updateResponse = await makeAuthenticatedRequest(
-                          `/api/contexto/atualizar/${agenteId}`, 
-                          {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ contexts: [] }),
-                          }
-                        );
-                      
-                        if (!updateResponse.ok) {
-                          console.warn("Não foi possível esvaziar os contextos, continuando mesmo assim");
-                        } else {
-                          console.log("Contextos esvaziados com sucesso");
-                        }
-                      } catch (updateError) {
-                        console.warn("Erro ao esvaziar contextos:", updateError);
-                        // Continue mesmo com erro - tentaremos excluir o agente de qualquer forma
-                      }
-                      
-                      // Passo 2: Excluir o agente
-                      console.log("Excluindo agente ID:", agenteId);
-                      const deleteAgentResponse = await makeAuthenticatedRequest(
-                        `/api/agente/deletar/${agenteId}`,
-                        {
-                          method: "DELETE",
-                          headers: { "Content-Type": "application/json" }
-                        }
-                      );
-                
-                      if (deleteAgentResponse.ok) {
-                        Alert.alert("Sucesso", "Chatbot e seus contextos foram excluídos com sucesso!");
-                        setChatbots(chatbots.filter((bot) => bot.Agente_id_id !== agenteId));
-                        setModalVisible(false);
-                      } else {
-                        try {
-                          const errorData = await deleteAgentResponse.json();
-                          console.error("Erro ao excluir agente:", errorData);
-                          Alert.alert("Erro", errorData.message || errorData.error || "Erro ao excluir o chatbot.");
-                        } catch (jsonError) {
-                          console.error("Erro ao processar resposta da API:", deleteAgentResponse.status, jsonError);
-                          Alert.alert("Erro", `Erro ao excluir o chatbot (${deleteAgentResponse.status}).`);
-                        }
-                      }
-                    } catch (error) {
-                      console.error("Erro ao excluir chatbot:", error);
-                      Alert.alert("Erro", "Erro na conexão com o servidor.");
-                    }
-                  }
-                }
-              ]
-            );
-          };
   return (
     <View style={styles.container}>
       {loading ? (
@@ -378,26 +305,12 @@ const Chatbots = () => {
                 <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => {
-                console.log("selectedChatbot:", selectedChatbot);
-                if (selectedChatbot) {
-                  handleDelete(selectedChatbot); 
-                } else {
-                  Alert.alert("Erro", "Nenhum chatbot selecionado para exclusão.");
-                }
-              }}
-            >
-              <Ionicons name="trash" size={20} color="#fff" />
-              <Text style={styles.deleteButtonText}>Excluir Chatbot</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Modal de edição de contexto */}
-      <Modal
+            {/* Modal de edição de contexto */}
+            <Modal
         transparent={true}
         animationType="fade"
         visible={contextModalVisible}
@@ -548,21 +461,6 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 1,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FF3B30", // Vermelho para o botão "Excluir"
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    justifyContent: "center",
-  },
-  deleteButtonText: {
-    color: "#fff",
-    marginLeft: 5,
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 
