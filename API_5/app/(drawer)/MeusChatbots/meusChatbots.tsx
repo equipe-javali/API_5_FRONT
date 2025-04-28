@@ -27,10 +27,10 @@ const Chatbots = () => {
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
-  const [rawContextText, setRawContextText] = useState(""); // Novo estado para o texto bruto
+  const [rawContextText, setRawContextText] = useState(""); 
 
 <TextInput
-  style={[styles.input, { height: 200 }]} // Campo de texto maior para edição em massa
+  style={[styles.input, { height: 200, maxWidth: 300 }]} // Campo de texto maior para edição em massa
   multiline={true}
   value={rawContextText} // Exibe o texto bruto digitado pelo usuário
   onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
@@ -185,6 +185,72 @@ const Chatbots = () => {
     }
   };
 
+  
+
+    const handleDelete = async () => {
+    console.log("Chatbot selecionado para exclusão:", selectedChatbot);
+    if (!selectedChatbot) {
+      Alert.alert("Erro", "Nenhum chatbot selecionado para exclusão");
+      return;
+    }
+    
+    Alert.alert(
+      "Confirmar exclusão",
+      `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Identificar o ID correto do agente
+              const agenteId = selectedChatbot.Agente_id_id || selectedChatbot.agent_id || selectedChatbot.agente_id || selectedChatbot.id;
+              
+              if (!agenteId) {
+                Alert.alert("Erro", "ID do agente não encontrado");
+                return;
+              }
+              
+              console.log(`Excluindo agente ID: ${agenteId}`);
+              const response = await makeAuthenticatedRequest(
+                `/api/agente/deletar/${agenteId}`, 
+                {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" }
+                }
+              );
+                
+              if (response.ok) {
+                // Obter a resposta para exibir a mensagem personalizada do backend
+                const respData = await response.json();
+                Alert.alert("Sucesso", respData.message || "Chatbot excluído com sucesso!");
+                
+                // Atualiza a lista filtrando pelo Agente_id_id
+                setChatbots(chatbots.filter(bot => 
+                  (bot.Agente_id_id !== agenteId) && 
+                  (bot.agent_id !== agenteId) && 
+                  (bot.agente_id !== agenteId) &&
+                  (bot.id !== agenteId)
+                ));
+              } else {
+                try {
+                  const errorData = await response.json();
+                  Alert.alert("Erro", errorData.error || "Não foi possível excluir o chatbot.");
+                } catch (parseError) {
+                  Alert.alert("Erro", `Erro de servidor: ${response.status}`);
+                }
+              }
+            } catch (error) {
+              console.error("Erro ao excluir chatbot:", error);
+              Alert.alert("Erro", "Erro na conexão com o servidor.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
 
@@ -251,9 +317,21 @@ const Chatbots = () => {
               <Ionicons name="document-text" size={20} color="#fff" />
               <Text style={styles.editButtonText}>Editar Contexto</Text>
             </TouchableOpacity>
+                        {/* Botão "Excluir" */}
+            <TouchableOpacity
+              style={[styles.editButton, { backgroundColor: "#D32F2F" }]}
+              onPress={() => {
+                setSelectedChatbot(item);                
+                handleDelete();
+              }}
+            >
+              <Ionicons name="trash" size={20} color="#fff" />
+              <Text style={styles.editButtonText}>Excluir</Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
+      
     );
   };
 
@@ -413,7 +491,7 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    
   },
   saveButton: {
     flex: 1,
@@ -422,6 +500,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 5,
     alignItems: "center",
+    maxWidth: 100, // Limita a largura do botão "Salvar"
   },
   cancelButton: {
     flex: 1,
@@ -430,6 +509,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginLeft: 5,
     alignItems: "center",
+    // maxWidth: 100, // Limita a largura do botão "Cancelar"
   },
   buttonText: {
     color: "#fff", // Cor do texto dos botões
