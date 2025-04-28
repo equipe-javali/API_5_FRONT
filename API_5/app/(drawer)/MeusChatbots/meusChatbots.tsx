@@ -278,46 +278,28 @@ const Chatbots = () => {
               Data de criação: {new Date(item.created_at).toLocaleString()}
             </Text>
 
-            {/* Botão "Chat" */}
-            <TouchableOpacity
-              style={styles.chatButton}
-              onPress={() => {
-                const agentId = item.Agente_id_id || item.agent_id || item.agente_id;
-                if (!agentId) {
-                  console.error("No agent ID found in item:", item);
-                  return;
-                }
-                router.push({
-                  pathname: "/Chat",
-                  params: {
-                    agenteId: String(agentId),
-                    chatbotName: item.nome
-                  }
-                });
-              }}
-            >
-              <Ionicons name="chatbubbles" size={20} color="#fff" />
-              <Text style={styles.chatButtonText}>Chat</Text>
-            </TouchableOpacity>
+            {/* Container para botões de edição */}
+            <View style={styles.buttonRow}>
+              {/* Botão "Editar" */}
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => handleEdit(item)}
+              >
+                <Ionicons name="create" size={20} color="#fff" />
+                <Text style={styles.editButtonText}>Editar</Text>
+              </TouchableOpacity>
 
-            {/* Botão "Editar" */}
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => handleEdit(item)}
-            >
-              <Ionicons name="create" size={20} color="#fff" />
-              <Text style={styles.editButtonText}>Editar</Text>
-            </TouchableOpacity>
+              {/* Botão "Editar Contexto" */}
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => handleEditContext(item)}
+              >
+                <Ionicons name="document-text" size={20} color="#fff" />
+                <Text style={styles.editButtonText}>Editar Contexto</Text>
+              </TouchableOpacity>
+            </View>
 
-            {/* Botão "Editar Contexto" */}
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => handleEditContext(item)}
-            >
-              <Ionicons name="document-text" size={20} color="#fff" />
-              <Text style={styles.editButtonText}>Editar Contexto</Text>
-            </TouchableOpacity>
-                        {/* Botão "Excluir" */}
+            {/* Botão "Excluir" */}
             <TouchableOpacity
               style={[styles.editButton, { backgroundColor: "#D32F2F" }]}
               onPress={() => {
@@ -542,6 +524,14 @@ const styles = StyleSheet.create({
     right: 10,
     zIndex: 1,
   },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
+  
+  
 });
 
 export default Chatbots;
