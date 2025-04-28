@@ -44,7 +44,7 @@ const Chatbots = () => {
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await apiCall("/api/modelo/listar", {
+        const response = await apiCall("/api/modelo/listar-completo", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -205,7 +205,7 @@ const Chatbots = () => {
           <View style={styles.itemDetails}>
             {/* <Text style={styles.itemText}>Performance: {item.performance_score}</Text> */}
             {/* <Text style={styles.itemText}>
-              Agente ID: {item.Agente_id_id}
+            // Agente ID: {item.Agente_id_id}
             </Text> */}
             <Text style={styles.itemText}>
               Data de criação: {new Date(item.created_at).toLocaleString()}
@@ -256,34 +256,80 @@ const Chatbots = () => {
     );
   };
 
-  const handleDelete = async (agent_id: number) => {
-    const confirmation = window.confirm("Tem certeza de que deseja excluir este chatbot?");
-    if (confirmation) {
-      try {
-        console.log("Chamando API para deletar chatbot com ID:", agent_id); // Log para depuração
-        const response = await makeAuthenticatedRequest(`/api/agente/deletar/${agent_id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
-  
-        console.log("Resposta da API:", response);
-  
-        if (response.ok) {
-          alert("Chatbot excluído com sucesso!");
-          setChatbots(chatbots.filter((bot) => bot.id !== agent_id));
-          setModalVisible(false); // Fecha o modal após a exclusão
-        } else {
-          const errorData = await response.json();
-          console.error("Erro da API:", errorData);
-          alert(errorData.message || "Erro ao excluir o chatbot.");
-        }
-      } catch (error) {
-        console.error("Erro ao excluir chatbot:", error);
-        alert("Erro na conexão com o servidor.");
-      }
-    }
-  };
-
+          const handleDelete = async (chatbot: Chatbot) => {
+            Alert.alert(
+              "Confirmar exclusão",
+              "Tem certeza que deseja excluir este chatbot? Isso também excluirá todos os contextos associados.",
+              [
+                { text: "Cancelar", style: "cancel" },
+                {
+                  text: "Excluir",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      const agenteId = chatbot.Agente_id_id;
+                      
+                      if (!agenteId) {
+                        Alert.alert("Erro", "ID do agente não encontrado");
+                        return;
+                      }
+                      
+                      console.log("Excluindo contextos do agente ID:", agenteId);
+                      
+                      try {
+                        console.log(`Atualizando contextos do agente ${agenteId} para lista vazia...`);
+                        const updateResponse = await makeAuthenticatedRequest(
+                          `/api/contexto/atualizar/${agenteId}`, 
+                          {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ contexts: [] }),
+                          }
+                        );
+                      
+                        if (!updateResponse.ok) {
+                          console.warn("Não foi possível esvaziar os contextos, continuando mesmo assim");
+                        } else {
+                          console.log("Contextos esvaziados com sucesso");
+                        }
+                      } catch (updateError) {
+                        console.warn("Erro ao esvaziar contextos:", updateError);
+                        // Continue mesmo com erro - tentaremos excluir o agente de qualquer forma
+                      }
+                      
+                      // Passo 2: Excluir o agente
+                      console.log("Excluindo agente ID:", agenteId);
+                      const deleteAgentResponse = await makeAuthenticatedRequest(
+                        `/api/agente/deletar/${agenteId}`,
+                        {
+                          method: "DELETE",
+                          headers: { "Content-Type": "application/json" }
+                        }
+                      );
+                
+                      if (deleteAgentResponse.ok) {
+                        Alert.alert("Sucesso", "Chatbot e seus contextos foram excluídos com sucesso!");
+                        setChatbots(chatbots.filter((bot) => bot.Agente_id_id !== agenteId));
+                        setModalVisible(false);
+                      } else {
+                        try {
+                          const errorData = await deleteAgentResponse.json();
+                          console.error("Erro ao excluir agente:", errorData);
+                          Alert.alert("Erro", errorData.message || errorData.error || "Erro ao excluir o chatbot.");
+                        } catch (jsonError) {
+                          console.error("Erro ao processar resposta da API:", deleteAgentResponse.status, jsonError);
+                          Alert.alert("Erro", `Erro ao excluir o chatbot (${deleteAgentResponse.status}).`);
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Erro ao excluir chatbot:", error);
+                      Alert.alert("Erro", "Erro na conexão com o servidor.");
+                    }
+                  }
+                }
+              ]
+            );
+          };
   return (
     <View style={styles.container}>
       {loading ? (
@@ -335,9 +381,9 @@ const Chatbots = () => {
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => {
-                console.log("selectedChatbot:", selectedChatbot); // Verifica o valor
-                if (selectedChatbot?.id) {
-                  handleDelete(selectedChatbot.id);
+                console.log("selectedChatbot:", selectedChatbot);
+                if (selectedChatbot) {
+                  handleDelete(selectedChatbot); 
                 } else {
                   Alert.alert("Erro", "Nenhum chatbot selecionado para exclusão.");
                 }
