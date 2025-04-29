@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
@@ -31,15 +31,15 @@ const Chatbots = () => {
   const [deleteTriggered, setDeleteTriggered] = useState(false);
 
 <TextInput
-  style={[styles.input, { height: 200, maxWidth: 300 }]} // Campo de texto maior para edição em massa
+  style={[styles.input, { height: 200, maxWidth: 300 }]}
   multiline={true}
-  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
-  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
-  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
-  autoCorrect={false} // Desativa correção automática
-  autoCapitalize="none" // Desativa capitalização automática
+  value={rawContextText}
+  onChangeText={setRawContextText} 
+  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" 
+  autoCorrect={false} 
+  autoCapitalize="none" 
 />
-  const router = useRouter();
+  
 
   useEffect(() => {
     const fetchChatbots = async () => {
@@ -72,76 +72,136 @@ useEffect(() => {
   if (selectedChatbot && deleteTriggered) {
     console.log("Chatbot selecionado para exclusão:", selectedChatbot);
     
-    Alert.alert(
-      "Confirmar exclusão",
-      `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`,
-      [
-        { 
-          text: "Cancelar", 
-          style: "cancel",
-          onPress: () => setDeleteTriggered(false) // Cancela o processo
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
+    if (Platform.OS === 'web') {
+      // Usa window.confirm para web
+      const confirmDelete = window.confirm(
+        `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`
+      );
+      
+      if (!confirmDelete) {
+        // Se cancelou, apenas reseta o gatilho
+        setDeleteTriggered(false);
+        return;
+      }
+      
+      // Se confirmou, executa a lógica de exclusão
+      (async () => {
+        try {
+          // Identificar o ID correto do agente
+          const agenteId = selectedChatbot.Agente_id_id || 
+                          selectedChatbot.agent_id || 
+                          selectedChatbot.agente_id || 
+                          selectedChatbot.id;
+          
+          if (!agenteId) {
+            window.alert("ID do agente não encontrado");
+            setDeleteTriggered(false);
+            return;
+          }
+          
+          console.log(`Excluindo agente ID: ${agenteId}`);
+          const response = await makeAuthenticatedRequest(
+            `/api/agente/deletar/${agenteId}`, 
+            {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+            
+          if (response.ok) {
+            const respData = await response.json();
+            window.alert(respData.message || "Chatbot excluído com sucesso!");
+            
+            setChatbots(chatbots.filter(bot => 
+              (bot.Agente_id_id !== agenteId) && 
+              (bot.agent_id !== agenteId) && 
+              (bot.agente_id !== agenteId) &&
+              (bot.id !== agenteId)
+            ));
+          } else {
             try {
-              // Identificar o ID correto do agente
-              const agenteId = selectedChatbot.Agente_id_id || 
-                              selectedChatbot.agent_id || 
-                              selectedChatbot.agente_id || 
-                              selectedChatbot.id;
-              
-              if (!agenteId) {
-                Alert.alert("Erro", "ID do agente não encontrado");
-                setDeleteTriggered(false);
-                return;
-              }
-              
-              console.log(`Excluindo agente ID: ${agenteId}`);
-              const response = await makeAuthenticatedRequest(
-                `/api/agente/deletar/${agenteId}`, 
-                {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" }
-                }
-              );
-                
-              if (response.ok) {
-                // Obter a resposta para exibir a mensagem personalizada do backend
-                const respData = await response.json();
-                Alert.alert("Sucesso", respData.message || "Chatbot excluído com sucesso!");
-                
-                // Atualiza a lista filtrando pelo Agente_id_id
-                setChatbots(chatbots.filter(bot => 
-                  (bot.Agente_id_id !== agenteId) && 
-                  (bot.agent_id !== agenteId) && 
-                  (bot.agente_id !== agenteId) &&
-                  (bot.id !== agenteId)
-                ));
-              } else {
-                try {
-                  const errorData = await response.json();
-                  Alert.alert("Erro", errorData.error || "Não foi possível excluir o chatbot.");
-                } catch (parseError) {
-                  Alert.alert("Erro", `Erro de servidor: ${response.status}`);
-                }
-              }
-            } catch (error) {
-              console.error("Erro ao excluir chatbot:", error);
-              Alert.alert("Erro", "Erro na conexão com o servidor.");
-            } finally {
-              // Sempre reseta o gatilho depois de concluir (sucesso ou erro)
-              setDeleteTriggered(false);
+              const errorData = await response.json();
+              window.alert(errorData.error || "Não foi possível excluir o chatbot.");
+            } catch (parseError) {
+              window.alert(`Erro de servidor: ${response.status}`);
             }
           }
+        } catch (error) {
+          console.error("Erro ao excluir chatbot:", error);
+          window.alert("Erro na conexão com o servidor.");
+        } finally {
+          setDeleteTriggered(false);
         }
-      ],
-      {
-        // Reseta o gatilho se o alerta for dispensado sem escolher uma opção
-        onDismiss: () => setDeleteTriggered(false)
-      }
-    );
+      })();
+    } else {
+      // Usa o Alert normal para dispositivos móveis (código existente)
+      Alert.alert(
+        "Confirmar exclusão",
+        `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`,
+        [
+          { 
+            text: "Cancelar", 
+            style: "cancel",
+            onPress: () => setDeleteTriggered(false)
+          },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                // Identificar o ID correto do agente
+                const agenteId = selectedChatbot.Agente_id_id || 
+                                selectedChatbot.agent_id || 
+                                selectedChatbot.agente_id || 
+                                selectedChatbot.id;
+                
+                if (!agenteId) {
+                  Alert.alert("Erro", "ID do agente não encontrado");
+                  setDeleteTriggered(false);
+                  return;
+                }
+                
+                console.log(`Excluindo agente ID: ${agenteId}`);
+                const response = await makeAuthenticatedRequest(
+                  `/api/agente/deletar/${agenteId}`, 
+                  {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" }
+                  }
+                );
+                  
+                if (response.ok) {
+                  const respData = await response.json();
+                  Alert.alert("Sucesso", respData.message || "Chatbot excluído com sucesso!");
+                  
+                  setChatbots(chatbots.filter(bot => 
+                    (bot.Agente_id_id !== agenteId) && 
+                    (bot.agent_id !== agenteId) && 
+                    (bot.agente_id !== agenteId) &&
+                    (bot.id !== agenteId)
+                  ));
+                } else {
+                  try {
+                    const errorData = await response.json();
+                    Alert.alert("Erro", errorData.error || "Não foi possível excluir o chatbot.");
+                  } catch (parseError) {
+                    Alert.alert("Erro", `Erro de servidor: ${response.status}`);
+                  }
+                }
+              } catch (error) {
+                console.error("Erro ao excluir chatbot:", error);
+                Alert.alert("Erro", "Erro na conexão com o servidor.");
+              } finally {
+                setDeleteTriggered(false);
+              }
+            }
+          }
+        ],
+        {        
+          onDismiss: () => setDeleteTriggered(false)
+        }
+      );
+    }
   }
 }, [selectedChatbot, deleteTriggered, chatbots]);
 
