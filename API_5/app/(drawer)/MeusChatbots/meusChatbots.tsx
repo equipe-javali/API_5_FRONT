@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiCall } from "../../../config/api";
 import { useRouter } from "expo-router";
@@ -28,17 +28,18 @@ const Chatbots = () => {
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [agentContext, setAgentContext] = useState<{ pergunta: string; resposta: string }[]>([]);
   const [rawContextText, setRawContextText] = useState(""); 
+  const [deleteTriggered, setDeleteTriggered] = useState(false);
 
 <TextInput
-  style={[styles.input, { height: 200, maxWidth: 300 }]} // Campo de texto maior para edição em massa
+  style={[styles.input, { height: 200, maxWidth: 300 }]}
   multiline={true}
-  value={rawContextText} // Exibe o texto bruto digitado pelo usuário
-  onChangeText={setRawContextText} // Atualiza o texto bruto diretamente
-  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" // Apenas informa o formato esperado
-  autoCorrect={false} // Desativa correção automática
-  autoCapitalize="none" // Desativa capitalização automática
+  value={rawContextText}
+  onChangeText={setRawContextText} 
+  placeholder="Digite no formato: Pergunta || Resposta (uma por linha)" 
+  autoCorrect={false} 
+  autoCapitalize="none" 
 />
-  const router = useRouter();
+  
 
   useEffect(() => {
     const fetchChatbots = async () => {
@@ -67,7 +68,142 @@ const Chatbots = () => {
     fetchChatbots();
   }, []);
 
-
+useEffect(() => {
+  if (selectedChatbot && deleteTriggered) {
+    console.log("Chatbot selecionado para exclusão:", selectedChatbot);
+    
+    if (Platform.OS === 'web') {
+      // Usa window.confirm para web
+      const confirmDelete = window.confirm(
+        `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`
+      );
+      
+      if (!confirmDelete) {
+        // Se cancelou, apenas reseta o gatilho
+        setDeleteTriggered(false);
+        return;
+      }
+      
+      // Se confirmou, executa a lógica de exclusão
+      (async () => {
+        try {
+          // Identificar o ID correto do agente
+          const agenteId = selectedChatbot.Agente_id_id || 
+                          selectedChatbot.agent_id || 
+                          selectedChatbot.agente_id || 
+                          selectedChatbot.id;
+          
+          if (!agenteId) {
+            window.alert("ID do agente não encontrado");
+            setDeleteTriggered(false);
+            return;
+          }
+          
+          console.log(`Excluindo agente ID: ${agenteId}`);
+          const response = await makeAuthenticatedRequest(
+            `/api/agente/deletar/${agenteId}`, 
+            {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+            
+          if (response.ok) {
+            const respData = await response.json();
+            window.alert(respData.message || "Chatbot excluído com sucesso!");
+            
+            setChatbots(chatbots.filter(bot => 
+              (bot.Agente_id_id !== agenteId) && 
+              (bot.agent_id !== agenteId) && 
+              (bot.agente_id !== agenteId) &&
+              (bot.id !== agenteId)
+            ));
+          } else {
+            try {
+              const errorData = await response.json();
+              window.alert(errorData.error || "Não foi possível excluir o chatbot.");
+            } catch (parseError) {
+              window.alert(`Erro de servidor: ${response.status}`);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao excluir chatbot:", error);
+          window.alert("Erro na conexão com o servidor.");
+        } finally {
+          setDeleteTriggered(false);
+        }
+      })();
+    } else {
+      // Usa o Alert normal para dispositivos móveis (código existente)
+      Alert.alert(
+        "Confirmar exclusão",
+        `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`,
+        [
+          { 
+            text: "Cancelar", 
+            style: "cancel",
+            onPress: () => setDeleteTriggered(false)
+          },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                // Identificar o ID correto do agente
+                const agenteId = selectedChatbot.Agente_id_id || 
+                                selectedChatbot.agent_id || 
+                                selectedChatbot.agente_id || 
+                                selectedChatbot.id;
+                
+                if (!agenteId) {
+                  Alert.alert("Erro", "ID do agente não encontrado");
+                  setDeleteTriggered(false);
+                  return;
+                }
+                
+                console.log(`Excluindo agente ID: ${agenteId}`);
+                const response = await makeAuthenticatedRequest(
+                  `/api/agente/deletar/${agenteId}`, 
+                  {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" }
+                  }
+                );
+                  
+                if (response.ok) {
+                  const respData = await response.json();
+                  Alert.alert("Sucesso", respData.message || "Chatbot excluído com sucesso!");
+                  
+                  setChatbots(chatbots.filter(bot => 
+                    (bot.Agente_id_id !== agenteId) && 
+                    (bot.agent_id !== agenteId) && 
+                    (bot.agente_id !== agenteId) &&
+                    (bot.id !== agenteId)
+                  ));
+                } else {
+                  try {
+                    const errorData = await response.json();
+                    Alert.alert("Erro", errorData.error || "Não foi possível excluir o chatbot.");
+                  } catch (parseError) {
+                    Alert.alert("Erro", `Erro de servidor: ${response.status}`);
+                  }
+                }
+              } catch (error) {
+                console.error("Erro ao excluir chatbot:", error);
+                Alert.alert("Erro", "Erro na conexão com o servidor.");
+              } finally {
+                setDeleteTriggered(false);
+              }
+            }
+          }
+        ],
+        {        
+          onDismiss: () => setDeleteTriggered(false)
+        }
+      );
+    }
+  }
+}, [selectedChatbot, deleteTriggered, chatbots]);
 
   const handleEdit = (chatbot: Chatbot) => {
     setSelectedChatbot(chatbot);
@@ -140,8 +276,11 @@ const Chatbots = () => {
     }
   };
 
-  const handleSaveContext = async () => {
+    const handleSaveContext = async () => {
     if (!selectedChatbot) return;
+  
+    // Configura loading
+    setLoading(true);
   
     // Divide o texto em linhas e valida o formato
     const lines = rawContextText.split("\n");
@@ -159,21 +298,39 @@ const Chatbots = () => {
         "Formato inválido",
         "Certifique-se de que cada linha esteja no formato: Pergunta || Resposta"
       );
+      setLoading(false);
       return;
     }
   
     try {
+      // 1. Primeiro atualiza os contextos
       const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
+        body: JSON.stringify({ contexts: updatedContexts }),
       });
   
       if (response.ok) {
-        Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
-        setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
+        // 2. Se os contextos foram atualizados, treina o modelo
+        const trainResponse = await makeAuthenticatedRequest("/api/contexto/treinar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Agente_id: selectedChatbot.id })
+        });
+  
+        if (trainResponse.ok) {
+          Alert.alert("Sucesso", "Contextos atualizados e chatbot treinado com sucesso!");
+        } else {
+          const trainData = await trainResponse.json();
+          Alert.alert(
+            "Atenção", 
+            `Contextos atualizados, mas ocorreu um erro ao treinar: ${trainData.message || trainData.error}`
+          );
+        }
+  
+        setAgentContext(updatedContexts);
         setContextModalVisible(false);
       } else {
         const errorData = await response.json();
@@ -182,75 +339,12 @@ const Chatbots = () => {
     } catch (error) {
       console.error("Erro ao atualizar contextos:", error);
       Alert.alert("Erro", "Erro na conexão com o servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
   
-
-    const handleDelete = async () => {
-    console.log("Chatbot selecionado para exclusão:", selectedChatbot);
-    if (!selectedChatbot) {
-      Alert.alert("Erro", "Nenhum chatbot selecionado para exclusão");
-      return;
-    }
-    
-    Alert.alert(
-      "Confirmar exclusão",
-      `Tem certeza que deseja excluir o chatbot "${selectedChatbot.nome}"? Isso também excluirá todos os contextos associados.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // Identificar o ID correto do agente
-              const agenteId = selectedChatbot.Agente_id_id || selectedChatbot.agent_id || selectedChatbot.agente_id || selectedChatbot.id;
-              
-              if (!agenteId) {
-                Alert.alert("Erro", "ID do agente não encontrado");
-                return;
-              }
-              
-              console.log(`Excluindo agente ID: ${agenteId}`);
-              const response = await makeAuthenticatedRequest(
-                `/api/agente/deletar/${agenteId}`, 
-                {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" }
-                }
-              );
-                
-              if (response.ok) {
-                // Obter a resposta para exibir a mensagem personalizada do backend
-                const respData = await response.json();
-                Alert.alert("Sucesso", respData.message || "Chatbot excluído com sucesso!");
-                
-                // Atualiza a lista filtrando pelo Agente_id_id
-                setChatbots(chatbots.filter(bot => 
-                  (bot.Agente_id_id !== agenteId) && 
-                  (bot.agent_id !== agenteId) && 
-                  (bot.agente_id !== agenteId) &&
-                  (bot.id !== agenteId)
-                ));
-              } else {
-                try {
-                  const errorData = await response.json();
-                  Alert.alert("Erro", errorData.error || "Não foi possível excluir o chatbot.");
-                } catch (parseError) {
-                  Alert.alert("Erro", `Erro de servidor: ${response.status}`);
-                }
-              }
-            } catch (error) {
-              console.error("Erro ao excluir chatbot:", error);
-              Alert.alert("Erro", "Erro na conexão com o servidor.");
-            }
-          }
-        }
-      ]
-    );
-  };
-
   const ChatbotItem = ({ item }: { item: Chatbot }) => {
     const [expanded, setExpanded] = useState(false);
 
@@ -267,15 +361,11 @@ const Chatbots = () => {
             color="#fff"
           />
         </View>
-        <Text style={styles.itemFrases}>Frases: {item.examples_count}</Text>
+        
         {expanded && (
           <View style={styles.itemDetails}>
-            <Text style={styles.itemText}>Performance: {item.performance_score}</Text>
             <Text style={styles.itemText}>
-              Agente ID: {item.Agente_id_id}
-            </Text>
-            <Text style={styles.itemText}>
-              Data de criação: {new Date(item.created_at).toLocaleString()}
+              {item.descricao ? item.descricao : "Sem descrição disponível"}
             </Text>
 
             {/* Container para botões de edição */}
@@ -303,8 +393,8 @@ const Chatbots = () => {
             <TouchableOpacity
               style={[styles.editButton, { backgroundColor: "#D32F2F", marginRight: 0 }]}
               onPress={() => {
-                setSelectedChatbot(item);                
-                handleDelete();
+                setSelectedChatbot(item);
+                setDeleteTriggered(true); // Ativa o gatilho em vez de chamar handleDelete
               }}
             >
               <Ionicons name="trash" size={20} color="#fff" />
