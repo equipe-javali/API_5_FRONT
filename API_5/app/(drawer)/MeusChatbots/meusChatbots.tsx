@@ -276,8 +276,11 @@ useEffect(() => {
     }
   };
 
-  const handleSaveContext = async () => {
+    const handleSaveContext = async () => {
     if (!selectedChatbot) return;
+  
+    // Configura loading
+    setLoading(true);
   
     // Divide o texto em linhas e valida o formato
     const lines = rawContextText.split("\n");
@@ -295,21 +298,39 @@ useEffect(() => {
         "Formato inválido",
         "Certifique-se de que cada linha esteja no formato: Pergunta || Resposta"
       );
+      setLoading(false);
       return;
     }
   
     try {
+      // 1. Primeiro atualiza os contextos
       const response = await makeAuthenticatedRequest(`/api/contexto/atualizar/${selectedChatbot.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ contexts: updatedContexts }), // Envia o array completo de contextos
+        body: JSON.stringify({ contexts: updatedContexts }),
       });
   
       if (response.ok) {
-        Alert.alert("Sucesso", "Contextos atualizados com sucesso!");
-        setAgentContext(updatedContexts); // Atualiza o estado com os contextos válidos
+        // 2. Se os contextos foram atualizados, treina o modelo
+        const trainResponse = await makeAuthenticatedRequest("/api/contexto/treinar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Agente_id: selectedChatbot.id })
+        });
+  
+        if (trainResponse.ok) {
+          Alert.alert("Sucesso", "Contextos atualizados e chatbot treinado com sucesso!");
+        } else {
+          const trainData = await trainResponse.json();
+          Alert.alert(
+            "Atenção", 
+            `Contextos atualizados, mas ocorreu um erro ao treinar: ${trainData.message || trainData.error}`
+          );
+        }
+  
+        setAgentContext(updatedContexts);
         setContextModalVisible(false);
       } else {
         const errorData = await response.json();
@@ -318,6 +339,8 @@ useEffect(() => {
     } catch (error) {
       console.error("Erro ao atualizar contextos:", error);
       Alert.alert("Erro", "Erro na conexão com o servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
