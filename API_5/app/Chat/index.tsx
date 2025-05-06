@@ -118,7 +118,7 @@ export default function Chat() {
     const processingId = `processing-${Date.now()}`;
     setMessages(msgs => [...msgs, {
       id: processingId,
-      text: "Processando...",
+      text: "Digitando...",
       sender: 'bot',
       timestamp: new Date()
     }]);
