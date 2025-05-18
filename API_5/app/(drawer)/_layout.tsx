@@ -98,6 +98,17 @@ export default function Layout() {
             ),
           }}
         />
+
+        <Drawer.Screen
+          name="DesempenhoChatbot/desempenhoChatbot"
+          options={{
+            drawerLabel: 'Desempenho Chatbot',
+            title: 'Desempenho Chatbot',
+            drawerIcon: ({ color }) => (
+              <Ionicons name="bar-chart-outline" size={24} color={color} />
+            ),
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );
