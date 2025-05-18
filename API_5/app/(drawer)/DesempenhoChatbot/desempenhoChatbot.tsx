@@ -26,20 +26,24 @@ export default function DesempenhoChatbot() {
   }, []);
 
   const buscarMetricas = async () => {
-    setLoading(true);
-    let url = `/api/metricas/tempo-resposta?`;
-    if (agenteSelecionado) url += `agente_id=${agenteSelecionado}&`;
-    if (inicio) url += `inicio=${inicio.toISOString().slice(0, 10)}&`;
-    if (fim) url += `fim=${fim.toISOString().slice(0, 10)}`;
-    const resp = await makeAuthenticatedRequest(url);
-    if (resp.ok) {
-      setMetricas(await resp.json());
-    } else {
-      setMetricas([]);
+  setLoading(true);
+  let url = `/api/agente/tempo-resposta?`;
+  if (agenteSelecionado) url += `agente_id=${agenteSelecionado}&`;
+  if (inicio) url += `inicio=${inicio.toISOString().slice(0, 10)}&`;
+  if (fim) url += `fim=${fim.toISOString().slice(0, 10)}`;
+  const resp = await makeAuthenticatedRequest(url);
+  if (resp.ok) {
+    let data = await resp.json();
+    // Garante que metricas sempre será um array
+    if (!Array.isArray(data)) {
+      data = [data];
     }
-    setLoading(false);
-  };
-
+    setMetricas(data);
+  } else {
+    setMetricas([]);
+  }
+  setLoading(false);
+};
   const renderDatePicker = (type: "inicio" | "fim") => {
     const value = type === "inicio" ? inicio : fim;
     const setValue = type === "inicio" ? setInicio : setFim;
@@ -145,7 +149,7 @@ export default function DesempenhoChatbot() {
         ) : (
           metricas.map((m, idx) => (
             <View key={idx} style={styles.metricItem}>
-              <Text style={styles.metricDate}>Data: <Text style={styles.metricValue}>{m.data}</Text></Text>
+              <Text style={styles.metricDate}>Métricas: <Text style={styles.metricValue}>{m.data}</Text></Text>
               <Text style={styles.metricLabel}>Tempo médio de resposta: <Text style={styles.metricValue}>{m.tempo_medio} s</Text></Text>
             </View>
           ))
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#444", // borda do input de data
-    borderRadius: 5,
+    borderRadius: 6.5,
     paddingHorizontal: 2,
     paddingVertical: 2,
     minWidth: 120,
