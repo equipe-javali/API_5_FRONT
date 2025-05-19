@@ -59,10 +59,9 @@ const Login = () => {
 
       const data = await response.json();
       
-
-            if (response.ok) {
+        if (response.ok) {
         // Log detalhado da resposta
-        console.log('Resposta completa do login:', data);
+        // console.log('Resposta completa do login:', data);
         
         // Armazena os tokens
         await AsyncStorage.setItem('access_token', data.access_token);
@@ -78,7 +77,7 @@ const Login = () => {
           const payload = JSON.parse(payloadString);
           const userId = payload.user_id;
           
-          console.log('ID do usuário extraído do token:', userId);
+          // console.log('ID do usuário extraído do token:', userId);
           
           // Armazenar o ID do usuário
           if (userId) {
@@ -175,6 +174,12 @@ const Login = () => {
           <Text style={styles.registerLink}>Registre-se aqui</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.registerContainer}>
+        <TouchableOpacity onPress={() => router.push('/Start/register')}>
+          <Text style={styles.registerLink}>Esqueci minha senha</Text>
+        </TouchableOpacity>
+      </View>
+
 
       <Modal
         transparent={true}
