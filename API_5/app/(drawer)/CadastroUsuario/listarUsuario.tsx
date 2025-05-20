@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useRouter } from 'expo-router';
-import {
-  View,
-  Text,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, FlatList, ActivityIndicator, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { makeAuthenticatedRequest } from '../../../config/tokenService';
+import styles from './style';
 
 type Usuario = {
   id: number;
@@ -22,7 +13,7 @@ type Usuario = {
   permissoes: any[];
 };
 
-const UserListScreen = () => {
+export default function UserListScreen() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -149,67 +140,3 @@ const UserListScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    backgroundColor: '#1c1c1e',
-  },
-  header: {
-    marginHorizontal: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  addBtn: {
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  addBtnText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  item: {
-    backgroundColor: '#2c2c2e',
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 12,
-    marginHorizontal: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nome: {
-    fontSize: 16,
-    color: '#fff',
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconBtn: {
-    backgroundColor: '#3a3a3c',
-    padding: 8,
-    borderRadius: 6,
-    marginLeft: 8,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1c1c1e',
-  },
-});
-
-export default UserListScreen;

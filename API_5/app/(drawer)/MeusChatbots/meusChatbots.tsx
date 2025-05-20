@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, ScrollView, Platform } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, TextInput, Alert,  Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { apiCall } from "../../../config/api";
-import { useRouter } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { makeAuthenticatedRequest } from "../../../config/tokenService";
 
 interface Chatbot {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import * as Font from 'expo-font';
 import { apiCall } from '../../config/api';
 import { router } from 'expo-router';
+import styles from './style';
 
-const Register = () => {
+export default function Register() {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +25,7 @@ const Register = () => {
     especial: false,
   });
 
-  const validarSenha = (senha) => {
+  const validarSenha = (senha: string) => {
     setSenhaValida({
       tamanho: senha.length >= 8,
       maiuscula: /[A-Z]/.test(senha),
@@ -202,114 +203,3 @@ const Register = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2E2E2E',
-    padding: 24,
-  },
-  input: {
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    fontSize: 24,
-    width: '100%',
-    borderColor: '#F5F5F5',
-    borderWidth: 1,
-    marginBottom: 12,
-    borderRadius: 5,
-    color: '#111',
-    backgroundColor: '#F5F5F5',
-    fontFamily: 'Roboto',
-  },
-  image: {
-    width: 250,
-    height: 150,
-  },
-  button: {
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
-    backgroundColor: '#282828',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#F5F5F5',
-    fontSize: 24,
-    fontFamily: 'Roboto',
-    textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: "#000",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#fff",
-  },
-  modalText: {
-    fontSize: 18,
-    fontFamily: "Roboto_400Regular",
-    color: "#fff",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  errorText: {
-    color: "white",
-  },
-  successText: {
-    color: "white",
-  },
-  closeButton: {
-    padding: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#fff",
-    backgroundColor: "#000",
-    alignItems: "center",
-  },
-  registerContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  registerText: {
-    color: '#F5F5F5',
-    fontSize: 16,
-    fontFamily: 'Roboto',
-  },
-  registerLink: {
-    color: '#B8B8B8',
-    fontSize: 16,
-    fontFamily: 'Roboto',
-    textDecorationLine: 'underline',
-  },
-  senhaDicasContainer: {
-    width: '100%',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  senhaDica: {
-    fontSize: 14,
-    fontFamily: 'Roboto',
-  },
-  valido: {
-    color: 'lightgreen',
-  },
-  invalido: {
-    color: 'gray',
-  },  
-});
-
-export default Register;
