@@ -176,6 +176,13 @@ const Login = () => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Esqueceu a senha? </Text>
+        <TouchableOpacity onPress={() => router.push('/Start/recuperarSenha')}>
+          <Text style={styles.registerLink}>Clique aqui</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         transparent={true}
         animationType="fade"
