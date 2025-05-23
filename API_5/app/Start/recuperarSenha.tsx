@@ -47,7 +47,7 @@ const RecuperarSenha = () => {
         }),
       });
     } catch (er) {
-      setModalMessage("Erro")
+      setModalMessage("Erro ao enviar as informações!")
       setModalVisible(true)
     } finally {
       setLoading(false)
