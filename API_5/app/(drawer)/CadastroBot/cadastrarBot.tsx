@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { makeAuthenticatedRequest } from '../../../config/tokenService';
-import * as SplashScreen from "expo-splash-screen";
 import { router } from "expo-router";
-import styles, { fontsLoaded } from "./style";
+import styles from "../../../styles/cadastrarBotStyle";
 
 export default function CadastrarBot () {
   const [name, setName] = useState("");
@@ -13,11 +12,6 @@ export default function CadastrarBot () {
   const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false); // Estado de carregamento
-
-  if (!fontsLoaded) {
-    SplashScreen.preventAutoHideAsync();
-    return null;
-  }
 
   const handleSignUp = async () => {
     if (!name || !descricao) {

@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5'; // Importa o pacote de ícones
 import { Link } from 'expo-router';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
-import styles from './style';
+import styles from '../../../styles/HomeStyle';
 
 type HomeProps = {
   navigation: DrawerNavigationProp<any>;
