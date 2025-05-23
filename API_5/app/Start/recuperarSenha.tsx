@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator, Alert } from 'react-native';
-import * as Font from 'expo-font';
-import { router } from 'expo-router';
+import React, { useState, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import * as Font from "expo-font";
+import { router } from "expo-router";
+import { apiCall } from "../../config/api";
 
 const RecuperarSenha = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [email, setEmail] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false); // Estado de loading
@@ -15,7 +26,7 @@ const RecuperarSenha = () => {
   useEffect(() => {
     const loadFonts = async () => {
       await Font.loadAsync({
-        Roboto: require('../../assets/fonts/Roboto-Regular.ttf'),
+        Roboto: require("../../assets/fonts/Roboto-Regular.ttf"),
       });
       setFontLoaded(true);
     };
@@ -23,8 +34,24 @@ const RecuperarSenha = () => {
     loadFonts();
   }, []);
 
-  const handleCadastro = async () => {
-    Alert.alert("HA! nada")
+  const handleEnviarEmail = async () => {
+    setLoading(true);
+    try {
+      const response = apiCall("/api/usuario/trocar-senha/", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
+    } catch (er) {
+      setModalMessage("Erro")
+      setModalVisible(true)
+    } finally {
+      setLoading(false)
+    }
   };
 
   if (!fontLoaded) {
@@ -36,7 +63,7 @@ const RecuperarSenha = () => {
       <StatusBar style="auto" />
 
       <Image
-        source={require('../../assets/project_images/logotipo.png')}
+        source={require("../../assets/project_images/logotipo.png")}
         style={styles.image}
         resizeMode="contain"
       />
@@ -49,19 +76,25 @@ const RecuperarSenha = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={[styles.modalText, isError ? styles.errorText : styles.successText]}>
+            <Text
+              style={[
+                styles.modalText,
+                isError ? styles.errorText : styles.successText,
+              ]}
+            >
               {modalMessage}
             </Text>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
               <Text style={styles.buttonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      <Text style={styles.textQuestion}>
-        Digite seu email:
-      </Text>
+      <Text style={styles.textQuestion}>Digite seu email:</Text>
 
       <TextInput
         style={styles.input}
@@ -72,8 +105,11 @@ const RecuperarSenha = () => {
         onChangeText={setEmail}
       />
 
-
-      <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleEnviarEmail}
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="#F5F5F5" />
         ) : (
@@ -81,10 +117,9 @@ const RecuperarSenha = () => {
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={()=>router.push("/Start/login")}>
+      <TouchableOpacity onPress={() => router.push("/Start/login")}>
         <Text style={styles.buttonVoltar}>Voltar</Text>
       </TouchableOpacity>
-
     </View>
   );
 };
@@ -92,23 +127,23 @@ const RecuperarSenha = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2E2E2E',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2E2E2E",
     padding: 24,
   },
   input: {
     paddingHorizontal: 24,
     paddingVertical: 10,
     fontSize: 24,
-    width: '100%',
-    borderColor: '#F5F5F5',
+    width: "100%",
+    borderColor: "#F5F5F5",
     borderWidth: 1,
     marginBottom: 12,
     borderRadius: 5,
-    color: '#111',
-    backgroundColor: '#F5F5F5',
-    fontFamily: 'Roboto',
+    color: "#111",
+    backgroundColor: "#F5F5F5",
+    fontFamily: "Roboto",
   },
   image: {
     width: 250,
@@ -116,26 +151,26 @@ const styles = StyleSheet.create({
   },
   button: {
     borderWidth: 1,
-    borderColor: '#F5F5F5',
-    backgroundColor: '#282828',
+    borderColor: "#F5F5F5",
+    backgroundColor: "#282828",
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 50,
     marginTop: 20,
   },
   buttonText: {
-    color: '#F5F5F5',
+    color: "#F5F5F5",
     fontSize: 24,
-    fontFamily: 'Roboto',
-    textAlign: 'center',
+    fontFamily: "Roboto",
+    textAlign: "center",
   },
   buttonVoltar: {
-    color: '#F5F5F5',
+    color: "#F5F5F5",
     fontSize: 18,
-    fontFamily: 'Roboto',
-    textAlign: 'center',
+    fontFamily: "Roboto",
+    textAlign: "center",
     marginTop: 15,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   modalOverlay: {
     flex: 1,
@@ -167,10 +202,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   linkVoltar: {
-    color: '#B8B8B8',
+    color: "#B8B8B8",
     fontSize: 16,
-    fontFamily: 'Roboto',
-    textDecorationLine: 'underline',
+    fontFamily: "Roboto",
+    textDecorationLine: "underline",
   },
   errorText: {
     color: "white",
