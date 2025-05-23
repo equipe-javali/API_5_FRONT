@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // IP do servidor de desenvolvimento - altere para seu IP atual
 // Isso será usado como fallback quando a detecção automática falhar
@@ -15,7 +15,7 @@ const getApiUrl = () => {
   if (__DEV__) {
     // Para web em desenvolvimento, localhost funciona
     if (runningPlatform === 'web') {
-      return 'http://localhost:8000';
+      return 'https://omni-c4j7.onrender.com';
     }
     
     // Para dispositivos móveis em desenvolvimento, use o IP da máquina host
@@ -28,7 +28,7 @@ const getApiUrl = () => {
       if (debuggerHost) {
         const host = debuggerHost.split(':')[0];
         console.log(`[API] Usando host detectado: ${host}`);
-        return `http://${host}:8000`;
+        return `https://omni-c4j7.onrender.com`;
       }
       
       // Se a detecção falhar, use o IP configurado
