@@ -37,7 +37,7 @@ const RecuperarSenha = () => {
   const handleEnviarEmail = async () => {
     setLoading(true);
     try {
-      const response = apiCall("/api/usuario/trocar-senha/", {
+      const response = await apiCall("/api/usuario/trocar-senha/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -46,8 +46,18 @@ const RecuperarSenha = () => {
           email: email,
         }),
       });
+
+      const data = await response.json()
+      if (response.ok) {
+        setEmail("")
+        setModalMessage(data.message || "Email enviado com sucesso")
+        setModalVisible(true)
+      } else {
+        setModalMessage(data.message || "Erro ao enviar o email")
+        setModalVisible(true)
+      }
     } catch (er) {
-      setModalMessage("Erro ao enviar as informações!")
+      setModalMessage("Erro ao conectar com o servidor")
       setModalVisible(true)
     } finally {
       setLoading(false)
