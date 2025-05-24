@@ -34,6 +34,7 @@ const Register = () => {
     });
   };
 
+  const isSenhaValida = Object.values(senhaValida).every(value => value);
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -185,7 +186,7 @@ const Register = () => {
       </View>
 
 
-      <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
+      <TouchableOpacity style={[styles.button, (loading || !isSenhaValida) && styles.buttonDisabled]} onPress={handleCadastro} disabled={loading || !isSenhaValida}>
         {loading ? (
           <ActivityIndicator color="#F5F5F5" />
         ) : (
@@ -241,6 +242,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 50,
     marginTop: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#282828',
+    borderColor: '#282828', // cor diferente para quando desabilitado
   },
   buttonText: {
     color: '#F5F5F5',
