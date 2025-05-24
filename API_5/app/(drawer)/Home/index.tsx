@@ -21,6 +21,10 @@ export default function Home({ }: HomeProps) {
         <Icon name="users" size={40} color={cores.cor8} />
         <Text style={styles.cardText}>Usuários</Text>
       </Link>
-    </BaseScreen>
+      <Link href="/(drawer)/Dashboard" style={styles.card}>
+        <Icon name="chart-bar" size={40} color="#fff" />
+        <Text style={styles.cardText}>Dashboard</Text>
+      </Link>
+    </BaseScreen >
   );
 };

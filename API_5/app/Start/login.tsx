@@ -159,6 +159,12 @@ export default function Login() {
           <Text style={styles.registerLink}>Registre-se aqui</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.registerContainer}>
+        <TouchableOpacity onPress={() => router.push('/Start/register')}>
+          <Text style={styles.registerLink}>Esqueci minha senha</Text>
+        </TouchableOpacity>
+      </View>
+
 
       <Modal
         transparent={true}

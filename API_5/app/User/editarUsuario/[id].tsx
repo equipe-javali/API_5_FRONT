@@ -291,11 +291,12 @@ export default function EditarUsuario() {
           onChangeText={setName}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: '#424242', color: '#B8B8B8' }]}
           placeholder="Email"
           placeholderTextColor="#B8B8B8"
           value={email}
           onChangeText={setEmail}
+          editable={false}
           keyboardType="email-address"
           autoCapitalize="none"
         />

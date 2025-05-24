@@ -98,6 +98,17 @@ export default function Layout() {
             ),
           }}
         />
+
+        <Drawer.Screen
+          name="Dashboard/index"
+          options={{
+            drawerLabel: 'Dashboard',
+            title: 'Dashboard',            
+            drawerIcon: ({ color }) => (
+              <Ionicons name="bar-chart-outline" size={24} color={color} />
+            ),
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

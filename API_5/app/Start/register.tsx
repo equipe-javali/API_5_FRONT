@@ -163,6 +163,11 @@ export default function Register() {
           <Text style={styles.registerLink}>Entrar</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.registerContainer}>
+        <TouchableOpacity onPress={() => router.push('/Start/recuperarSenha')}>
+          <Text style={styles.registerLink}>Esqueci minha senha</Text>
+        </TouchableOpacity>
+      </View>
     </BaseScreen>
   );
 };
