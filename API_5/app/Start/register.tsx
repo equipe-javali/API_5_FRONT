@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiCall } from '../../config/api';
 import { router } from 'expo-router';
 import styles, { cores } from './style';
-import { BaseScreen } from '../../components';
+import { BaseScreen, Modal } from '../../components';
 
 export default function Register() {
   const [nome, setNome] = useState('');
@@ -91,21 +91,12 @@ export default function Register() {
         resizeMode="contain"
       />
       <Modal
-        transparent={true}
-        animationType="fade"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        show={modalVisible}
+        setShow={setModalVisible}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>
-              {modalMessage}
-            </Text>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.buttonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <Text style={styles.modalText}>
+          {modalMessage}
+        </Text>
       </Modal>
       <TextInput
         style={styles.input}
@@ -161,11 +152,6 @@ export default function Register() {
         <Text style={styles.registerText}>Já tem uma conta? </Text>
         <TouchableOpacity onPress={() => router.push('/Start/login')}>
           <Text style={styles.registerLink}>Entrar</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.registerContainer}>
-        <TouchableOpacity onPress={() => router.push('/Start/recuperarSenha')}>
-          <Text style={styles.registerLink}>Esqueci minha senha</Text>
         </TouchableOpacity>
       </View>
     </BaseScreen>

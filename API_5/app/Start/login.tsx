@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiCall } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import styles, { cores } from './style';
-import { BaseScreen } from '../../components';
+import { BaseScreen, Modal } from '../../components';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -160,30 +160,13 @@ export default function Login() {
         </TouchableOpacity>
       </View>
       <View style={styles.registerContainer}>
-        <TouchableOpacity onPress={() => router.push('/Start/register')}>
+        <TouchableOpacity onPress={() => router.push('/Start/recuperarSenha')}>
           <Text style={styles.registerLink}>Esqueci minha senha</Text>
         </TouchableOpacity>
       </View>
-
-
-      <Modal
-        transparent={true}
-        animationType="fade"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{modalMessage}</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <Modal setShow={setModalVisible} show={modalVisible}>
+        <Text style={styles.modalText}>{modalMessage}</Text>
       </Modal>
-    </BaseScreen>
+    </BaseScreen >
   );
 };
