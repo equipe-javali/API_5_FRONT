@@ -14,6 +14,14 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         width: 150
     },
+    buttonContainer: {
+        alignItems: 'center',
+        display: "flex",
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        width: '100%'
+    },
     buttonText: {
         color: cores.cor7,
         textAlign: 'center',
@@ -182,6 +190,12 @@ const styles = StyleSheet.create({
     senhaDica: {
         fontSize: 14,
         fontFamily: 'Roboto'
+    },
+    titleScreen: {
+        color: cores.cor8,
+        marginHorizontal: 'auto',
+        marginBottom: 10,
+        ...fonts.title
     },
     valido: {
         color: cores.cor9
