@@ -1,3 +1,3 @@
-import baseScreen from "./baseScreen";
+import BaseScreen from "./BaseScreen";
 
-export { baseScreen };
+export { BaseScreen };

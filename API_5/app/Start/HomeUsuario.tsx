@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { makeAuthenticatedRequest } from "../../config/tokenService";
 import styles, { cores } from "./style";
-import BaseScreen from "../../components/baseScreen";
+import { BaseScreen } from "../../components";
 
 interface Chatbot {
   id: number;

@@ -4,7 +4,7 @@ import { apiCall } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import styles, { cores } from './style';
-import BaseScreen from '../../components/baseScreen';
+import { BaseScreen } from '../../components';
 
 export default function Login() {
   const [email, setEmail] = useState('');

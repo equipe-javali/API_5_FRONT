@@ -3,7 +3,7 @@ import { View, Text, Image, TextInput, TouchableOpacity, Modal, ActivityIndicato
 import { apiCall } from '../../config/api';
 import { router } from 'expo-router';
 import styles, { cores } from './style';
-import BaseScreen from '../../components/baseScreen';
+import { BaseScreen } from '../../components';
 
 export default function Register() {
   const [nome, setNome] = useState('');
