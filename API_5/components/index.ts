@@ -1,3 +1,4 @@
 import BaseScreen from "./BaseScreen";
+import Modal from "./Modal";
 
-export { BaseScreen };
+export { BaseScreen, Modal };

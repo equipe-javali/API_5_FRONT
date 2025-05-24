@@ -9,3 +9,4 @@ export const cor8  = "#ffffff";
 export const cor9  = "#90ee90";
 export const cor10 = "#007BFF";
 export const cor11 = "#FF9500";
+export const cor12 = "rgba(0, 0, 0, 0.5)"
