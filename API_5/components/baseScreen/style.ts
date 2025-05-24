@@ -3,7 +3,7 @@ import { cores, fontsLoaded, fonts } from "../../styles";
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: cores.cor1,
+        backgroundColor: cores.cor2,
         minHeight: "100%"
     },
     divContainer: {
@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
         padding: 24
     },
     textReload: {
-        color: cores.cor2,
+        color: cores.cor8,
         width: 'auto',
         ...fonts.title
     },

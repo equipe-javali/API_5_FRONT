@@ -7,14 +7,17 @@ export const [fontsLoaded] = useFonts({
 });
 
 export const cores = {
-    cor1: "#282828",
-    cor2: "#fff",
-    cor3: "#000",
-    cor4: "#F5F5F5",
-    cor5: "#282828",
-    cor6: "#ADADAD",
-    cor7: "#1e1e1e",
-    cor8: "#555"
+    cor1: "#000000",
+    cor2: "#282828",
+    cor3: "#1e1e1e",
+    cor4: "#444444",
+    cor5: "#ADADAD",
+    cor6: "#cccccc",
+    cor7: "#F5F5F5",
+    cor8: "#ffffff",
+    cor9: "#90ee90",
+    cor10: "#007BFF",
+    cor11: "#FF9500"
 }
 
 export const fonts = StyleSheet.create({
@@ -37,5 +40,13 @@ export const fonts = StyleSheet.create({
     text3: {
         fontSize: 16,
         fontFamily: 'Roboto_700Bold'
-    }
+    },
+    text4: {
+        fontSize: 16,
+        fontFamily: 'Roboto_400Regular'
+    },
+    text5: {
+        fontSize: 14,
+        fontFamily: 'Roboto_400Regular'
+    },
 })
