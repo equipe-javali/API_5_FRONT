@@ -37,7 +37,7 @@ export default function MediaMensagemChatbot() {
     })();
   }, []);
 
-    // Modificando apenas a função de busca de métricas:
+   
   const buscarMetricas = async () => {
     setMensagemErro(null);
   
@@ -72,8 +72,7 @@ export default function MediaMensagemChatbot() {
       } else if (resp.status === 500) {
         console.log("Erro 500 detectado, possivelmente divisão por zero. Retornando dados vazios.");
         
-        // Quando ocorre erro 500, vamos criar um objeto de resposta simulado
-        // com a média zero, indicando que não há mensagens no período
+        
         const dadoSimulado = {
           agentes: {
             [agenteSelecionado]: {
@@ -153,7 +152,7 @@ export default function MediaMensagemChatbot() {
         </TouchableOpacity>
       ))}
     </View>
-  );
+  ); 
 
   // DatePicker para comparação
   const renderCompararDatePicker = (type: "inicio" | "fim") => {
