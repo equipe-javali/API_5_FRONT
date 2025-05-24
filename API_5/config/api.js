@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // IP do servidor de desenvolvimento - altere para seu IP atual
 // Isso será usado como fallback quando a detecção automática falhar

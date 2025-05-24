@@ -26,6 +26,12 @@ export default function Home({ navigation }: HomeProps) {
             <Text style={styles.cardText}>Usuários</Text>
           </View>
         </Link>
+        <Link href="/(drawer)/Dashboard" style={styles.link}>
+          <View style={styles.card}>
+            <Icon name="chart-bar" size={40} color="#fff" />
+            <Text style={styles.cardText}>Dashboard</Text>
+          </View>
+        </Link>
       </View>
       <StatusBar style="auto" />
     </View>

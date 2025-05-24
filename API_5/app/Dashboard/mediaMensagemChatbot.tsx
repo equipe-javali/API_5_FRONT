@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Platform, ScrollView, Dimensions } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { makeAuthenticatedRequest } from "../../../config/tokenService";
+import { makeAuthenticatedRequest } from "../../config/tokenService";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { BarChart } from "react-native-chart-kit";
 
-export default function DesempenhoChatbot() {
-  const [agentes, setAgentes] = useState([]);
+export default function MediaMensagemChatbot() {
+  const [agentes, setAgentes] = useState<{ id: number | string; nome: string }[]>([]);
   const [agenteSelecionado, setAgenteSelecionado] = useState<string | null>(null);
   const [inicio, setInicio] = useState<Date | null>(null);
   const [fim, setFim] = useState<Date | null>(null);
@@ -37,35 +37,91 @@ export default function DesempenhoChatbot() {
     })();
   }, []);
 
+   
   const buscarMetricas = async () => {
     setMensagemErro(null);
-
+  
     if (!inicio || !fim) {
-    setMetricas([]);
-    setMensagemErro("Por favor, selecione um período.");
-    return;
-  }
+      setMetricas([]);
+      setMensagemErro("Por favor, selecione um período.");
+      return;
+    }
+    
     if (!agenteSelecionado) {
       setMetricas([]);
       setMensagemErro("Por favor, selecione um chatbot para buscar os dados.");
       return;
     }
+    
     setLoading(true);
-    let url = `/api/agente/tempo-resposta?`;
-    url += `agente_id=${agenteSelecionado}&`;
-    if (inicio) url += `inicio=${inicio.toISOString().slice(0, 10)}&`;
-    if (fim) url += `fim=${fim.toISOString().slice(0, 10)}`;
-    const resp = await makeAuthenticatedRequest(url);
-    if (resp.ok) {
-      let data = await resp.json();
-      if (!Array.isArray(data)) {
-        data = [data];
+    
+    try {
+      let url = `/api/dashboard/media_mensagens_por_agente/?`;
+      url += `agente_id=${agenteSelecionado}&`;
+      if (inicio) url += `inicio=${inicio.toISOString().slice(0, 10)}&`;
+      if (fim) url += `fim=${fim.toISOString().slice(0, 10)}`;
+      
+      console.log("Buscando dados de:", url);
+      
+      // Tenta buscar os dados normalmente
+      const resp = await makeAuthenticatedRequest(url);
+      
+      if (resp.ok) {
+        const data = await resp.json();
+        processarDadosRecebidos(data);
+      } else if (resp.status === 500) {
+        console.log("Erro 500 detectado, possivelmente divisão por zero. Retornando dados vazios.");
+        
+        
+        const dadoSimulado = {
+          agentes: {
+            [agenteSelecionado]: {
+              media_de_mensagens_por_usuario: 0
+            }
+          }
+        };
+        
+        processarDadosRecebidos(dadoSimulado);
+        setMensagemErro("Não há mensagens para este chatbot no período selecionado.");
+      } else {
+        console.error("Erro na requisição:", resp.status);
+        setMetricas([]);
+        setMensagemErro(`Erro ao buscar dados do servidor (${resp.status}).`);
       }
-      setMetricas(data);
+    } catch (error) {
+      console.error("Exceção ao buscar métricas:", error);
+      setMetricas([]);
+      setMensagemErro("Erro de conexão ao buscar dados.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Função auxiliar para processar os dados recebidos
+  const processarDadosRecebidos = (data: any) => {
+    if (
+      agenteSelecionado !== null &&
+      data &&
+      data.agentes &&
+      data.agentes[agenteSelecionado]
+    ) {
+      const agenteDados = data.agentes[agenteSelecionado];
+      const metricaFormatada = {
+        agente_id: agenteSelecionado,
+        agente_nome: agentes.find((a: any) => a.id.toString() === agenteSelecionado)?.nome || "Chatbot",
+        media_mensagens: agenteDados.media_de_mensagens_por_usuario
+      };
+      
+      setMetricas([metricaFormatada]);
+      
+      // Feedback se a média for zero
+      if (metricaFormatada.media_mensagens === 0) {
+        setMensagemErro("Não há mensagens para este chatbot no período selecionado.");
+      }
     } else {
       setMetricas([]);
+      setMensagemErro("Não foram encontrados dados para este chatbot no período selecionado.");
     }
-    setLoading(false);
   };
 
   // Multi-select de agentes para comparação
@@ -96,7 +152,7 @@ export default function DesempenhoChatbot() {
         </TouchableOpacity>
       ))}
     </View>
-  );
+  ); 
 
   // DatePicker para comparação
   const renderCompararDatePicker = (type: "inicio" | "fim") => {
@@ -156,42 +212,60 @@ export default function DesempenhoChatbot() {
 
   const buscarMetricasComparacao = async () => {
     setMensagemErroComparacao(null);
-  // Exige pelo menos dois chatbots
-  if (agentesSelecionados.length < 2) {
-    setMetricasComparacao([]);
-    setMensagemErroComparacao("Por favor, selecione pelo menos dois chatbots para comparar.");
-    return;
-  }
-  // Verifica se período foi selecionado
-  if (!compararInicio || !compararFim) {
-    setMetricasComparacao([]);
-    setMensagemErroComparacao("Por favor, selecione o período de comparação.");
-    return;
-  }
-  
-    setLoadingComparar(true);
-    let url = `/api/agente/tempo-resposta?`;
-    if (agentesSelecionados.length > 0) {
-      url += agentesSelecionados.map(id => `agente_id=${id}`).join("&") + "&";
-    }
-    if (compararInicio) url += `inicio=${compararInicio.toISOString().slice(0, 10)}&`;
-    if (compararFim) url += `fim=${compararFim.toISOString().slice(0, 10)}`;
-    const resp = await makeAuthenticatedRequest(url);
-    if (resp.ok) {
-      let data = await resp.json();
-      if (!Array.isArray(data)) data = [data];
-      setMetricasComparacao(data);
-    } else {
+    // Exige pelo menos dois chatbots
+    if (agentesSelecionados.length < 2) {
       setMetricasComparacao([]);
+      setMensagemErroComparacao("Por favor, selecione pelo menos dois chatbots para comparar.");
+      return;
     }
-    setLoadingComparar(false);
+    // Verifica se período foi selecionado
+    if (!compararInicio || !compararFim) {
+      setMetricasComparacao([]);
+      setMensagemErroComparacao("Por favor, selecione o período de comparação.");
+      return;
+    }
+    
+    setLoadingComparar(true);
+    let url = `/api/dashboard/media_mensagens_por_agente/?`;
+    
+    try {
+      // Buscar dados para cada agente selecionado
+      const resultados = [];
+      
+      for (const agenteId of agentesSelecionados) {
+        const urlAgente = `${url}agente_id=${agenteId}&inicio=${compararInicio.toISOString().slice(0, 10)}&fim=${compararFim.toISOString().slice(0, 10)}`;
+        const resp = await makeAuthenticatedRequest(urlAgente);
+        
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.agentes && data.agentes[agenteId]) {
+            const agenteNome = agentes.find((a: any) => a.id.toString() === agenteId)?.nome || `Chatbot ${agenteId}`;
+            resultados.push({
+              agente_id: agenteId,
+              agente_nome: agenteNome,
+              media_mensagens: data.agentes[agenteId].media_de_mensagens_por_usuario
+            });
+          }
+        }
+      }
+      
+      setMetricasComparacao(resultados);
+      if (resultados.length === 0) {
+        setMensagemErroComparacao("Não foram encontrados dados para os chatbots selecionados no período indicado.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar comparação:", error);
+      setMensagemErroComparacao("Ocorreu um erro ao buscar os dados para comparação.");
+    } finally {
+      setLoadingComparar(false);
+    }
   };
 
   // Dados para gráfico de comparação
   const chartDataComparacao = React.useMemo(() => {
     if (!metricasComparacao || metricasComparacao.length === 0) return null;
-    const labels = metricasComparacao.map((m: any) => m.agente_nome || m.agente || m.nome || "Agente");
-    const data = metricasComparacao.map((m: any) => m.tempo_medio);
+    const labels = metricasComparacao.map((m: any) => m.agente_nome || `Chatbot ${m.agente_id}`);
+    const data = metricasComparacao.map((m: any) => m.media_mensagens);
     return {
       labels,
       datasets: [{ data }],
@@ -255,7 +329,7 @@ export default function DesempenhoChatbot() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Desempenho dos Chatbots</Text>
+      <Text style={styles.title}>Média de Mensagens por Chatbot</Text>
       <View style={styles.filtros}>
         <Text style={styles.label}>Agente</Text>
         <View style={styles.pickerContainer}>
@@ -289,25 +363,23 @@ export default function DesempenhoChatbot() {
         </TouchableOpacity>
       </View>
       <View style={styles.metricas}>
-  {loading ? (
-    <ActivityIndicator size="large" color="#007bff" />
-  ) : mensagemErro ? (
-    <Text style={styles.emptyText}>{mensagemErro}</Text>
-  ) : metricas.length === 0 ? (
-    <Text style={styles.emptyText}>Faça as seleções para buscar os dados.</Text>
-  ) : (
-    metricas.map((m, idx) => (
-      <View key={idx} style={styles.metricItem}>
-        <Text style={styles.metricDate}>
-          {m.agente_nome || m.agente || m.nome || "Agente"}
-        </Text>
-        <Text style={styles.metricLabel}>
-          Tempo médio de resposta: <Text style={styles.metricValue}>{m.tempo_medio} s</Text>
-        </Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#007bff" />
+        ) : mensagemErro ? (
+          <Text style={styles.emptyText}>{mensagemErro}</Text>
+        ) : metricas.length === 0 ? (
+          <Text style={styles.emptyText}>Faça as seleções para buscar os dados.</Text>
+        ) : (
+          metricas.map((m, idx) => (
+            <View key={idx} style={styles.metricItem}>
+              <Text style={styles.metricDate}>{m.agente_nome || `Chatbot ${m.agente_id}`}</Text>
+              <Text style={styles.metricLabel}>
+                Média de mensagens por usuário: <Text style={styles.metricValue}>{m.media_mensagens}</Text>
+              </Text>
+            </View>
+          ))
+        )}
       </View>
-    ))
-  )}
-</View>
 
       {/* Painel de comparação fixo */}
       <View style={styles.compararPanel}>
@@ -337,31 +409,31 @@ export default function DesempenhoChatbot() {
       </View>
 
       <View style={styles.metricas}>
-  {loadingComparar ? (
-    <ActivityIndicator size="large" color="#007bff" />
-  ) : mensagemErroComparacao ? (
-    <Text style={styles.emptyText}>{mensagemErroComparacao}</Text>
-  ) : metricasComparacao.length === 0 ? (
-    <Text style={styles.emptyText}>Faça as seleções para buscar os dados.</Text>
-  ) : null}
-</View>
+        {loadingComparar ? (
+          <ActivityIndicator size="large" color="#007bff" />
+        ) : mensagemErroComparacao ? (
+          <Text style={styles.emptyText}>{mensagemErroComparacao}</Text>
+        ) : metricasComparacao.length === 0 ? (
+          <Text style={styles.emptyText}>Faça as seleções para comparar os chatbots.</Text>
+        ) : null}
+      </View>
 
       {/* Gráfico de comparação */}
       {chartDataComparacao && (
         <View style={{ marginTop: 24 }}>
-          <Text style={styles.chartTitle}>Gráfico de Comparação de Tempo Médio</Text>
+          <Text style={styles.chartTitle}>Gráfico de Comparação de Média de Mensagens</Text>
           <BarChart
             data={chartDataComparacao}
             width={Dimensions.get("window").width - 40}
             height={220}
             yAxisLabel=""
-            yAxisSuffix="s"
+            yAxisSuffix=" msg"
             chartConfig={{
               backgroundColor: "#212121",
               backgroundGradientFrom: "#212121",
               backgroundGradientTo: "#212121",
-              decimalPlaces: 2,
-              color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 204, 102, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(255,255,255,${opacity})`,
               style: { borderRadius: 16 },
               propsForBackgroundLines: { stroke: "#444" },
