@@ -1,281 +1,181 @@
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { StyleSheet } from "react-native";
-
-export const [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-});
+import { cores, fonts } from "../../styles";
 
 const styles = StyleSheet.create({
-    containerHome: {
-        flex: 1,
-        backgroundColor: "#282828",
-        paddingHorizontal: 20
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
+    button: {
         alignItems: 'center',
-        backgroundColor: '#2E2E2E',
-        padding: 24,
+        backgroundColor: cores.cor2,
+        borderColor: cores.cor7,
+        borderRadius: 10,
+        borderWidth: 1,
+        marginVertical: 20,
+        maxWidth: "100%",
+        paddingHorizontal: 50,
+        paddingVertical: 12,
+        width: 150
     },
-    content: {
-        flex: 1,
-        padding: 20
-    },
-    title: {
-        fontSize: 24,
-        color: "#fff",
-        textAlign: "center",
-        marginVertical: 10
-    },
-    itemContainer: {
-        backgroundColor: "#444",
-        padding: 15,
-        borderRadius: 5,
-        marginBottom: 10
-    },
-    itemHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center"
-    },
-    itemTitle: {
-        fontSize: 20,
-        color: "#fff",
-        fontWeight: "bold"
-    },
-    itemFrases: {
-        fontSize: 16,
-        color: "#ccc",
-        marginTop: 5
-    },
-    itemDetails: {
-        marginTop: 10,
-        borderTopWidth: 1,
-        borderTopColor: "#666",
-        paddingTop: 10
-    },
-    itemText: {
-        fontSize: 14,
-        color: "#ccc",
-        marginTop: 3
-    },
-    emptyText: {
-        fontSize: 18,
-        color: "gray",
-        textAlign: "center",
-        marginTop: 20
-    },
-    chatButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#007BFF",
-        padding: 8,
-        borderRadius: 5,
-        marginTop: 10,
-        alignSelf: "flex-start",
-    },
-    chatButtonText: {
-        color: "#fff",
-        marginLeft: 5,
-        fontSize: 14
-    },
-    chatbotCard: {
-        backgroundColor: "#444",
-        padding: 15,
-        borderRadius: 5,
-        marginBottom: 10,
-    },
-    chatbotHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    chatbotName: {
-        fontSize: 20,
-        color: "#fff",
-        fontWeight: "bold",
+    buttonText: {
+        color: cores.cor7,
+        textAlign: 'center',
+        ...fonts.bigBotton
     },
     chatbotBadge: {
-        paddingVertical: 5,
-        paddingHorizontal: 10,
         borderRadius: 5,
+        paddingVertical: 5,
+        paddingHorizontal: 10
     },
     chatbotBadgeText: {
-        color: "#fff",
-        fontSize: 14,
+        color: cores.cor8,
+        ...fonts.text5
+    },
+    chatbotCard: {
+        backgroundColor: cores.cor4,
+        borderRadius: 5,
+        flex: 1,
+        marginBottom: 10,
+        padding: 15
     },
     chatbotDescription: {
-        fontSize: 16,
-        color: "#ccc",
+        color: cores.cor6,
         marginTop: 5,
+        ...fonts.text4
+    },
+    chatbotHeader: {
+        alignItems: "center",
+        flexDirection: "row",
+        flexWrap: 'wrap',
+        gap: 5,
+        justifyContent: "space-between"
+    },
+    chatbotName: {
+        color: cores.cor8,
+        ...fonts.title
+    },
+    chatAction: {
+        alignSelf: "flex-start",
+        alignItems: "center",
+        backgroundColor: "#007BFF",
+        borderRadius: 5,
+        flexDirection: "row",
+        marginTop: 10,
+        padding: 8
     },
     chatActions: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 10,
+        marginTop: 10
     },
     chatActionText: {
-        color: "#fff",
-        marginLeft: 5,
+        color: cores.cor8,
         fontSize: 14,
+        marginLeft: 5
     },
-    fab: {
-        position: "absolute",
-        bottom: 20,
-        right: 20,
-        backgroundColor: "#007BFF",
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: "center",
-        alignItems: "center",
-        elevation: 5,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    buttonHome: {
-        backgroundColor: "#007BFF",
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 20,
-        alignItems: "center",
-        minWidth: 150,
-    },
-    button: {
-        borderWidth: 1,
-        borderColor: '#F5F5F5',
-        backgroundColor: '#282828',
-        borderRadius: 10,
-        paddingVertical: 12,
-        paddingHorizontal: 50,
-        marginTop: 20,
-        minWidth: 150,
-        alignItems: 'center',
-    },
-    buttonTextHome: {
-        color: "#fff",
-        fontSize: 18,
-        fontWeight: "bold",
-    },
-    buttonText: {
-        color: '#F5F5F5',
-        fontSize: 24,
-        fontFamily: 'Roboto',
-        textAlign: 'center',
-    },
-    chatAction: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#007BFF",
-        padding: 8,
-        borderRadius: 5,
-        marginTop: 10,
-        alignSelf: "flex-start",
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "#1e1e1e",
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        marginHorizontal: -20,
-        marginBottom: 10,
-        marginTop: 0
-    },
-    headerTitle: {
-        flex: 1,
-        color: "#fff",
-        fontSize: 20,
-        fontWeight: "bold",
-        textAlign: "center",
-    },
-    logoutButton: {
-        padding: 8,
-    },
-    headerIconPlaceholder: {
-        width: 32,
-        height: 32,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    input: {
-        paddingHorizontal: 24,
-        paddingVertical: 10,
-        fontSize: 24,
-        width: '100%',
-        borderColor: '#F5F5F5',
-        borderWidth: 1,
-        marginBottom: 12,
-        borderRadius: 5,
-        color: '#111',
-        backgroundColor: '#F5F5F5',
-        fontFamily: 'Roboto',
-    },
-    image: {
-        width: 250,
-        height: 150,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContainer: {
-        width: "80%",
-        backgroundColor: "#000",
-        borderRadius: 10,
-        padding: 20,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#fff",
-    },
-    modalText: {
-        fontSize: 18,
-        fontFamily: "Roboto_400Regular",
-        color: "#fff",
-        marginBottom: 20,
-        textAlign: "center",
+    chatContainer: {
+        width: '100%'
     },
     closeButton: {
-        padding: 10,
+        alignItems: "center",
+        backgroundColor: cores.cor1,
+        borderColor: cores.cor8,
         borderRadius: 5,
         borderWidth: 1,
-        borderColor: "#fff",
-        backgroundColor: "#000",
-        alignItems: "center",
         minWidth: 100,
+        padding: 10
+    },
+    emptyContainer: {
+        alignItems: "center",
+        flex: 1,
+        justifyContent: "center"
+    },
+    emptyText: {
+        color: cores.cor8,
+        textAlign: "center",
+        marginTop: 20,
+        ...fonts.text2
+    },
+    header: {
+        alignItems: "center",
+        backgroundColor: cores.cor3,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingHorizontal: 20,
+        paddingVertical: 15
+    },
+    headerIconPlaceholder: {
+        alignItems: "center",
+        height: 32,
+        justifyContent: "center",
+        width: 32
+    },
+    headerTitle: {
+        color: cores.cor8,
+        marginHorizontal: 'auto',
+        ...fonts.title
+    },
+    input: {
+        alignItems: 'center',
+        backgroundColor: cores.cor2,
+        borderColor: cores.cor7,
+        borderRadius: 5,
+        borderWidth: 1.1,
+        color: cores.cor8,
+        marginBottom: 12,
+        maxWidth: '100%',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        width: 400,
+        ...fonts.text
+    },
+    invalido: {
+        color: cores.cor6
+    },
+    image: {
+        maxHeight: 150,
+        maxWidth: 275,
+        width: "100%"
+    },
+    logoutButton: {
+        padding: 8
+    },
+    modalContainer: {
+        alignItems: "center",
+        backgroundColor: cores.cor1,
+        borderColor: cores.cor8,
+        borderRadius: 10,
+        borderWidth: 1,
+        padding: 20,
+        width: "80%"
+    },
+    modalOverlay: {
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        flex: 1,
+        justifyContent: "center"
+    },
+    modalText: {
+        color: cores.cor8,
+        marginBottom: 20,
+        textAlign: "center",
+        ...fonts.text
     },
     registerContainer: {
-        marginTop: 20,
-        flexDirection: 'row',
         alignItems: 'center',
-    },
-    registerText: {
-        color: '#F5F5F5',
-        fontSize: 16,
-        fontFamily: 'Roboto',
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        width: '100%'
     },
     registerLink: {
-        color: '#B8B8B8',
-        fontSize: 16,
-        fontFamily: 'Roboto',
-        textDecorationLine: 'underline'
+        color: cores.cor5,
+        textDecorationLine: 'underline',
+        ...fonts.text3
     },
-    errorText: {
-        color: "white"
-    },
-    successText: {
-        color: "white"
+    registerText: {
+        color: cores.cor7,
+        ...fonts.text3
     },
     senhaDicasContainer: {
-        width: '100%',
         marginTop: 10,
         marginBottom: 10
     },
@@ -284,11 +184,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto'
     },
     valido: {
-        color: 'lightgreen'
-    },
-    invalido: {
-        color: 'gray'
+        color: cores.cor9
     }
 });
 
+export { cores };
 export default styles;

@@ -1,30 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
-import * as Font from 'expo-font'; 
 import { apiCall } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import styles from './style';
+import styles, { cores } from './style';
+import BaseScreen from '../../components/baseScreen';
 
 export default function Login() {
-  const [fontLoaded, setFontLoaded] = useState(false);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-
-  useEffect(() => {
-    const loadFonts = async () => {
-      await Font.loadAsync({
-          Roboto: require('../../assets/fonts/Roboto-Regular.ttf'),
-      });
-      setFontLoaded(true);
-    };
-
-    loadFonts();
-  }, []);
 
   const handleLogin = async () => {
     // Validação básica
@@ -36,14 +23,14 @@ export default function Login() {
 
     try {
       setLoading(true);
-      
+
       // Verificar se é um email corporativo pro4tech
       // if (email.endsWith('@pro4tech.com.br')) {
       //   // Redirecionar para a tela de registro para usuários corporativos
       //   router.push('/Start/register');
       //   return;
       // }
-      
+
       // Para outros emails, tentar fazer login
       const response = await apiCall('/api/usuario/login', {
         method: 'POST',
@@ -57,28 +44,28 @@ export default function Login() {
       });
 
       const data = await response.json();
-      
 
-            if (response.ok) {
+
+      if (response.ok) {
         // Log detalhado da resposta
         console.log('Resposta completa do login:', data);
-        
+
         // Armazena os tokens
         await AsyncStorage.setItem('access_token', data.access_token);
         await AsyncStorage.setItem('refresh_token', data.refresh_token);
-        
+
         try {
           // Decodificar o token para obter o ID do usuário
           const tokenParts = data.access_token.split('.');
           const payloadBase64 = tokenParts[1];
           // Decodifica o Base64 para string e converte para objeto
-          const payloadString = atob ? atob(payloadBase64) : 
+          const payloadString = atob ? atob(payloadBase64) :
             Buffer.from(payloadBase64, 'base64').toString('ascii');
           const payload = JSON.parse(payloadString);
           const userId = payload.user_id;
-          
+
           console.log('ID do usuário extraído do token:', userId);
-          
+
           // Armazenar o ID do usuário
           if (userId) {
             await AsyncStorage.setItem('userId', userId.toString());
@@ -86,23 +73,23 @@ export default function Login() {
         } catch (error) {
           console.error('Erro ao extrair ID do usuário do token:', error);
         }
-        
-        const isAdmin = data.is_staff === true || 
-                        data.admin === true || 
-                        data.is_admin === true;
-                        
+
+        const isAdmin = data.is_staff === true ||
+          data.admin === true ||
+          data.is_admin === true;
+
         console.log('Status de admin detectado:', isAdmin);
         console.log('Valores nas propriedades:',
           'is_admin:', data.is_admin,
           'admin:', data.admin,
           'is_staff:', data.is_staff
         );
-        
+
         await AsyncStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-        
-        console.log('Tentando redirecionar para:', isAdmin ? 
+
+        console.log('Tentando redirecionar para:', isAdmin ?
           '/(drawer)/Home' : '/(drawer)/MeusChatbots/meusChatbots');
-        
+
         try {
           if (isAdmin) {
             router.push('/(drawer)/Home');
@@ -129,9 +116,7 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      
+    <BaseScreen >
       <Image
         source={require('../../assets/project_images/logotipo.png')}
         style={styles.image}
@@ -142,27 +127,27 @@ export default function Login() {
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
-        placeholderTextColor="#B8B8B8" 
+        placeholderTextColor={cores.cor5}
         value={email}
         onChangeText={setEmail}
       />
-      
+
       <TextInput
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
-        placeholderTextColor="#B8B8B8" 
+        placeholderTextColor={cores.cor1}
         value={senha}
         onChangeText={setSenha}
       />
 
-      <TouchableOpacity 
-        style={styles.button} 
+      <TouchableOpacity
+        style={styles.button}
         onPress={handleLogin}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#F5F5F5" />
+          <ActivityIndicator color={cores.cor7} />
         ) : (
           <Text style={styles.buttonText}>Entrar</Text>
         )}
@@ -184,8 +169,8 @@ export default function Login() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalText}>{modalMessage}</Text>
-            <TouchableOpacity 
-              style={styles.closeButton} 
+            <TouchableOpacity
+              style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.buttonText}>Fechar</Text>
@@ -193,6 +178,6 @@ export default function Login() {
           </View>
         </View>
       </Modal>
-    </View>
+    </BaseScreen>
   );
 };

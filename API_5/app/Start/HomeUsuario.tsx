@@ -4,9 +4,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { makeAuthenticatedRequest } from "../../config/tokenService";
-import styles from "./style";
+import styles, { cores } from "./style";
+import BaseScreen from "../../components/baseScreen";
 
-// Defina a interface com tipos explícitos para garantir consistência
 interface Chatbot {
   id: number;
   nome: string;
@@ -14,22 +14,12 @@ interface Chatbot {
   tipo: string;
 }
 
-interface Usuario { 
-  id: number;
-  nome: string;
-  email: string;
-  admin: boolean;
-  permissoes: number[];
-}
-
 export default function MeusChatbots() {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Função de logout
   const handleLogout = async () => {
-    // Limpa armazenamento (tokens, userId etc.)
     await AsyncStorage.multiRemove([
       "access_token",
       "refresh_token",
@@ -38,24 +28,22 @@ export default function MeusChatbots() {
       "currentChatbotId",
       "currentChatbotName",
     ]);
-    // Redireciona para login
     router.replace("/Start/login");
   };
 
-  // Header customizado
-  const renderHeader = () => (
+  const renderHeader = (
     <View style={styles.header}>
       <TouchableOpacity style={styles.headerIconPlaceholder} disabled>
-        <Ionicons name="chatbubbles-outline" size={24} color="#444" />
+        <Ionicons name="chatbubbles-outline" size={24} color={cores.cor4} />
       </TouchableOpacity>
 
       <Text style={styles.headerTitle}>Meus Chatbots</Text>
 
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-        <Ionicons name="log-out-outline" size={24} color="#fff" />
+        <Ionicons name="log-out-outline" size={24} color={cores.cor8} />
       </TouchableOpacity>
     </View>
-  );
+  )
 
   useEffect(() => {
     const fetchChatbotsComPermissao = async () => {
@@ -181,7 +169,6 @@ export default function MeusChatbots() {
     fetchChatbotsComPermissao();
   }, []);
 
-  // Resto do código permanece igual...
   const iniciarChat = async (chatbot: Chatbot) => {
     try {
       // Garantir que chatbot.id existe antes de usar toString()
@@ -204,71 +191,48 @@ export default function MeusChatbots() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.containerHome}>
-        {renderHeader()}
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    );
-  }
-
-  if (chatbots.length === 0) {
-    return (
-      <View style={styles.containerHome}>
-        {renderHeader()}
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
-          {/* <TouchableOpacity style={styles.button} onPress={() => router.push("/Chat")}>
-            <Text style={styles.buttonText}>Criar Chatbot</Text>
-          </TouchableOpacity>         */}
-        </View>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.containerHome}>
-      {renderHeader()}
-
-      <FlatList
-        data={chatbots}
-        keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.chatbotCard}
-            onPress={() => iniciarChat(item)}
-          >
-            <View style={styles.chatbotHeader}>
-              <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
-              <View style={[
-                styles.chatbotBadge,
-                { backgroundColor: item.tipo === 'rh' ? '#007BFF' : '#FF9500' }
-              ]}>
-                <Text style={styles.chatbotBadgeText}>
-                  {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.chatbotDescription}>{item.descricao || "Sem descrição"}</Text>
-            <View style={styles.chatActions}>
+    <BaseScreen header={renderHeader}>
+      {loading ?
+        <ActivityIndicator size="large" color={cores.cor8} /> :
+        chatbots.length === 0 ?
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
+          </View> :
+          <FlatList
+            style={styles.chatContainer}
+            data={chatbots}
+            keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.chatAction}
+                style={styles.chatbotCard}
                 onPress={() => iniciarChat(item)}
               >
-                <Ionicons name="chatbubble-outline" size={18} color="#fff" />
-                <Text style={styles.chatActionText}>Conversar</Text>
+                <View style={styles.chatbotHeader}>
+                  <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
+                  <View style={[
+                    styles.chatbotBadge,
+                    { backgroundColor: item.tipo === 'rh' ? cores.cor10 : cores.cor11 }
+                  ]}>
+                    <Text style={styles.chatbotBadgeText}>
+                      {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.chatbotDescription}>{item.descricao || "Sem descrição"}</Text>
+                <View style={styles.chatActions}>
+                  <TouchableOpacity
+                    style={styles.chatAction}
+                    onPress={() => iniciarChat(item)}
+                  >
+                    <Ionicons name="chatbubble-outline" size={18} color={cores.cor8} />
+                    <Text style={styles.chatActionText}>Conversar</Text>
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
-      {/* <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => router.push("/CadastroBot/cadastrarBot")}
-      >
-        <Ionicons name="add" size={24} color="#fff" />
-      </TouchableOpacity> */}
-    </View>
+            )}
+          />
+      }
+    </BaseScreen>
   );
 };
