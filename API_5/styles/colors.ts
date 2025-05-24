@@ -1,0 +1,11 @@
+export const cor1  = "#000000";
+export const cor2  = "#282828";
+export const cor3  = "#1e1e1e";
+export const cor4  = "#444444";
+export const cor5  = "#ADADAD";
+export const cor6  = "#cccccc";
+export const cor7  = "#F5F5F5";
+export const cor8  = "#ffffff";
+export const cor9  = "#90ee90";
+export const cor10 = "#007BFF";
+export const cor11 = "#FF9500";
