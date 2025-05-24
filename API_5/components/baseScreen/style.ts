@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { cores, fontsLoaded, fonts } from "../../styles";
+import { cores, fonts } from "../../styles";
 
 const styles = StyleSheet.create({
     container: {
@@ -12,6 +12,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 24
     },
+    iconLoading: {
+        marginTop: 50
+    },
     textReload: {
         color: cores.cor8,
         width: 'auto',
@@ -19,5 +22,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export { fontsLoaded };
+export { cores };
 export default styles;
