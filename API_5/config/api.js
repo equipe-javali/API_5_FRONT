@@ -15,7 +15,7 @@ const getApiUrl = () => {
   if (__DEV__) {
     // Para web em desenvolvimento, localhost funciona
     if (runningPlatform === 'web') {
-      return 'https://omni-c4j7.onrender.com';
+      return 'http://localhost:8000';
     }
     
     // Para dispositivos móveis em desenvolvimento, use o IP da máquina host
@@ -28,7 +28,7 @@ const getApiUrl = () => {
       if (debuggerHost) {
         const host = debuggerHost.split(':')[0];
         console.log(`[API] Usando host detectado: ${host}`);
-        return `https://omni-c4j7.onrender.com`;
+        return `http://${host}:8000`;
       }
       
       // Se a detecção falhar, use o IP configurado
