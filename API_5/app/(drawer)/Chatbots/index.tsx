@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, Platform } fr
 import { Ionicons } from "@expo/vector-icons";
 import { makeAuthenticatedRequest } from "../../../config/tokenService";
 import { stylesChatbots as styles } from "../../../styles";
-import { BaseScreen, Modal } from "../../../components";
+import { BaseScreen, Loading, Modal } from "../../../components";
 
 interface Chatbot {
   id: number;
@@ -394,15 +394,15 @@ export default function Chatbots() {
   };
 
   return (
-    <BaseScreen loading={{ status: loading, set: setLoading }} textReloading={{ text: 'Carregando chatbots', set: (_: string) => { } }}>
-      <FlatList
+    <BaseScreen>
+      {loading ? <Loading textLoading="chatbots" /> : <FlatList
         data={chatbots}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <ChatbotItem item={item} />}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Nenhum chatbot treinado encontrado.</Text>
         }
-      />
+      />}
 
       {/* Modal de edição de nome e descrição */}
       <Modal
