@@ -12,7 +12,6 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
-    const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const [senhaValida, setSenhaValida] = useState({
@@ -36,14 +35,12 @@ export default function SignUpScreen() {
     const handleSignUp = async () => {
         if (!name || !email || !password) {
             setModalMessage("Por favor, preencha todos os campos.");
-            setIsError(true);
             setModalVisible(true);
             return;
         }
 
         if (Object.values(senhaValida).includes(false)) {
             setModalMessage("A senha não atende aos requisitos de segurança.");
-            setIsError(true);
             setModalVisible(true);
             return;
         }
@@ -52,7 +49,6 @@ export default function SignUpScreen() {
         const token = await AsyncStorage.getItem('access_token');
         if (!token) {
             setModalMessage("Você não está autenticado. Faça login novamente.");
-            setIsError(true);
             setModalVisible(true);
             setTimeout(() => router.push('/Start/login'), 2000);
             return;
@@ -62,7 +58,6 @@ export default function SignUpScreen() {
         const isAdmin = await AsyncStorage.getItem('isAdmin');
         if (isAdmin !== 'true') {
             setModalMessage("Apenas administradores podem cadastrar novos usuários.");
-            setIsError(true);
             setModalVisible(true);
             return;
         }
@@ -91,13 +86,11 @@ export default function SignUpScreen() {
 
             if (response.ok) {
                 setModalMessage("Usuário cadastrado com sucesso!");
-                setIsError(false);
                 setName("");
                 setEmail("");
                 setPassword("");
             } else if (response.status === 401) {
                 setModalMessage("Sessão expirada. Por favor, faça login novamente.");
-                setIsError(true);
                 setTimeout(() => router.push('/Start/login'), 2000);
             } else {
                 // Exibir detalhes do erro para diagnóstico
@@ -110,12 +103,10 @@ export default function SignUpScreen() {
                     errorMsg = errorDetails || data.message || data.msg || data.detail || errorMsg;
                 }
                 setModalMessage(errorMsg);
-                setIsError(true);
             }
         } catch (error) {
             console.error("Erro na requisição:", error);
             setModalMessage("Erro na conexão com o servidor.");
-            setIsError(true);
         } finally {
             setLoading(false);
             setModalVisible(true);
