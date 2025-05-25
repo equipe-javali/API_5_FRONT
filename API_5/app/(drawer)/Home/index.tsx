@@ -17,7 +17,7 @@ export default function Home({ }: HomeProps) {
         <Icon name="robot" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Chatbots</Text>
       </Link>
-      <Link href="/CadastroUsuario/listarUsuario" style={styles.card}>
+      <Link href="/Usuarios" style={styles.card}>
         <Icon name="users" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Usuários</Text>
       </Link>

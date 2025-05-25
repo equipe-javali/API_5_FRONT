@@ -67,7 +67,7 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="CadastroUsuario/listarUsuario"
+          name="Usuarios/index"
           options={{
             drawerLabel: 'Usuários',
             title: 'Usuários',
