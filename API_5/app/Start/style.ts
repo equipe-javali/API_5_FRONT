@@ -81,15 +81,6 @@ const styles = StyleSheet.create({
     chatContainer: {
         width: '100%'
     },
-    closeButton: {
-        alignItems: "center",
-        backgroundColor: cores.cor1,
-        borderColor: cores.cor9,
-        borderRadius: 5,
-        borderWidth: 1,
-        minWidth: 100,
-        padding: 10
-    },
     emptyContainer: {
         alignItems: "center",
         flex: 1,
@@ -144,21 +135,6 @@ const styles = StyleSheet.create({
     },
     logoutButton: {
         padding: 8
-    },
-    modalContainer: {
-        alignItems: "center",
-        backgroundColor: cores.cor1,
-        borderColor: cores.cor9,
-        borderRadius: 10,
-        borderWidth: 1,
-        padding: 20,
-        width: "80%"
-    },
-    modalOverlay: {
-        alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        flex: 1,
-        justifyContent: "center"
     },
     modalText: {
         color: cores.cor9,
