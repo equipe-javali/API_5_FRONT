@@ -31,6 +31,8 @@ export default function Register() {
     });
   };
 
+  const isSenhaValida = Object.values(senhaValida).every(value => value);
+
   const handleCadastro = async () => {
     if (!nome || !email || !senha) {
       setModalMessage('Por favor, preencha todos os campos.');
@@ -141,7 +143,11 @@ export default function Register() {
           {senhaValida.especial ? '✓' : '✗'} Pelo menos um caractere especial
         </Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
+      <TouchableOpacity style={[styles.button, (loading || !isSenhaValida) &&
+      {
+        backgroundColor: cores.cor3,
+        borderColor: cores.cor3
+      }]} onPress={handleCadastro} disabled={loading || !isSenhaValida}>
         {loading ? (
           <ActivityIndicator color={cores.cor8} />
         ) : (
