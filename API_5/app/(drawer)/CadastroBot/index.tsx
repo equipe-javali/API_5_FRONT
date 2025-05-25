@@ -103,7 +103,7 @@ export default function CadastrarBot() {
         setDescricao("");
 
         // Redirect to context registration screen
-        router.push("/CadastroContexto/cadastrarContexto");
+        router.push("/CadastroContexto");
       } else if (agenteResponse.status === 401) {
         setModalMessage("Sessão expirada. Por favor, faça login novamente.");
         setTimeout(() => router.push('/Start/login'), 2000);
