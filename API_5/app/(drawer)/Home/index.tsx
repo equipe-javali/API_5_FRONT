@@ -13,7 +13,7 @@ type HomeProps = {
 export default function Home({ }: HomeProps) {
   return (
     <BaseScreen>
-      <Link href="/MeusChatbots/meusChatbots" style={styles.card}>
+      <Link href="/Chatbots" style={styles.card}>
         <Icon name="robot" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Chatbots</Text>
       </Link>
@@ -25,6 +25,6 @@ export default function Home({ }: HomeProps) {
         <Icon name="chart-bar" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Dashboard</Text>
       </Link>
-    </BaseScreen >
+    </BaseScreen>
   );
 };

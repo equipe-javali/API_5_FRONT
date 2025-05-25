@@ -89,10 +89,10 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="MeusChatbots/meusChatbots"
+          name="Chatbots/index"
           options={{
-            drawerLabel: 'Meus Chatbots',
-            title: 'Meus Chatbots',
+            drawerLabel: 'Chatbots',
+            title: 'Chatbots',
             drawerIcon: ({ color }) => (
               <Ionicons name="chatbubbles" size={24} color={color} />
             ),
