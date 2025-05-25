@@ -2,9 +2,13 @@ import { StyleSheet } from "react-native";
 import { cores } from "../../styles";
 
 const styles = StyleSheet.create({
-    container: {
+    mainContainer: {
+        display: 'flex',
+        height: "100%",
         backgroundColor: cores.cor3,
-        minHeight: "100%"
+    },
+    container: {
+        flex: 1,
     },
     divContainer: {
         alignItems: 'center',

@@ -29,16 +29,18 @@ export default function BaseScreen({ children, header }: BaseScreenProps) {
     }, [Loaded])
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.mainContainer}>
             <StatusBar hidden />
             {header}
-            {Loaded ?
-                <View style={styles.divContainer}>
-                    {children}
-                </View> :
-                <Loading textLoading="fontes" />
-            }
-        </ScrollView>
+            <ScrollView style={styles.container}>
+                {Loaded ?
+                    <View style={styles.divContainer}>
+                        {children}
+                    </View> :
+                    <Loading textLoading="fontes" />
+                }
+            </ScrollView>
+        </View>
     );
 };
 
