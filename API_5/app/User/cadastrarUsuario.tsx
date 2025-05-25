@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
-import * as SplashScreen from "expo-splash-screen";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { makeAuthenticatedRequest } from "../../config/tokenService";
-import styles, { fontsLoaded } from "./style";
+import styles, { cores } from "./style";
+import { BaseScreen, Loading, Modal } from "../../components";
 
 export default function SignUpScreen() {
     const [name, setName] = useState("");
@@ -32,11 +32,6 @@ export default function SignUpScreen() {
             especial: /[@$!%*#?&]/.test(senha),
         });
     };
-
-    if (!fontsLoaded) {
-        SplashScreen.preventAutoHideAsync();
-        return null;
-    }
 
     const handleSignUp = async () => {
         if (!name || !email || !password) {
@@ -127,36 +122,32 @@ export default function SignUpScreen() {
         }
     };
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>
-                Cadastrar usuário
-            </Text>
+        <BaseScreen>
             <TextInput
                 style={styles.input}
                 placeholder="Nome"
-                placeholderTextColor="#B8B8B8"
+                placeholderTextColor={cores.cor6}
                 value={name}
                 onChangeText={setName}
             />
             <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#B8B8B8"
+                keyboardType="email-address"
+                placeholderTextColor={cores.cor6}
                 value={email}
                 onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
             />
             <TextInput
                 style={styles.input}
                 placeholder="Senha"
-                placeholderTextColor="#B8B8B8"
+                secureTextEntry
+                placeholderTextColor={cores.cor6}
                 value={password}
                 onChangeText={(text) => {
                     setPassword(text);
                     validarSenha(text);
                 }}
-                secureTextEntry
             />
             <View style={styles.senhaDicasContainer}>
                 <Text style={[styles.senhaDica, senhaValida.tamanho ? styles.valido : styles.invalido]}>
@@ -175,43 +166,29 @@ export default function SignUpScreen() {
                     {senhaValida.especial ? '✓' : '✗'} Pelo menos um caractere especial
                 </Text>
             </View>
-
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-                    <Text style={styles.buttonText}>Cadastrar</Text>
+                <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator color={cores.cor8} />
+                    ) : (
+                        <Text style={styles.buttonText}>Cadastrar</Text>
+                    )}
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/Usuarios')}>
                     <Text style={styles.cancelButtonText}>Cancelar</Text>
                 </TouchableOpacity>
             </View>
 
-
-            {loading && (
-                <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color="#fff" />
-                </View>
-            )}
+            {loading && <Loading />}
 
             <Modal
-                transparent={true}
-                animationType="fade"
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                show={modalVisible}
+                setShow={setModalVisible}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={[styles.modalText, isError ? styles.errorText : styles.successText]}>
-                            {modalMessage}
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Fechar</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <Text style={styles.modalText}>
+                    {modalMessage}
+                </Text>
             </Modal>
-        </View>
+        </BaseScreen>
     );
 };
