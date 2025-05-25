@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { fonts } from "../fonts";
-import { cores } from "..";
+import { cor3, cor4, cor9 } from "../colors";
 
 const stylesUsuarios = StyleSheet.create({
     actions: {
@@ -9,7 +9,7 @@ const stylesUsuarios = StyleSheet.create({
         gap: 20
     },
     addBtn: {
-        borderColor: cores.cor9,
+        borderColor: cor9,
         borderWidth: 1,
         borderRadius: 6,
         paddingVertical: 6,
@@ -23,24 +23,24 @@ const stylesUsuarios = StyleSheet.create({
         paddingVertical: 10,
     },
     iconBtn: {
-        backgroundColor: cores.cor4,
+        backgroundColor: cor4,
         borderRadius: 6,
         padding: 8,
     },
     item: {
         alignItems: 'center',
-        backgroundColor: cores.cor3,
+        backgroundColor: cor3,
         borderRadius: 8,
         flexDirection: 'row',
         gap: 10,
         justifyContent: 'space-between',
     },
     texts: {
-        color: cores.cor9,
+        color: cor9,
         ...fonts.text4
     },
     titulo: {
-        color: cores.cor9,
+        color: cor9,
         ...fonts.title
     },
 });
