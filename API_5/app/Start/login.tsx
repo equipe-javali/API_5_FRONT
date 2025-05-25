@@ -127,7 +127,7 @@ export default function Login() {
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
-        placeholderTextColor={cores.cor5}
+        placeholderTextColor={cores.cor6}
         value={email}
         onChangeText={setEmail}
       />
@@ -147,7 +147,7 @@ export default function Login() {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color={cores.cor7} />
+          <ActivityIndicator color={cores.cor8} />
         ) : (
           <Text style={styles.buttonText}>Entrar</Text>
         )}

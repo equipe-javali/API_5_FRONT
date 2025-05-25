@@ -29,7 +29,7 @@ export default function Modal({ children, loading, setLoading, setShow, show, se
                         {children}
                     </ScrollView>
                     {loading && <View style={styles.loadingOverlay}>
-                        <ActivityIndicator size="large" color={cores.cor8} />
+                        <ActivityIndicator size="large" color={cores.cor9} />
                     </View>}
                     <View style={styles.buttonsContainer}>
                         {secundaryButton && <TouchableOpacity

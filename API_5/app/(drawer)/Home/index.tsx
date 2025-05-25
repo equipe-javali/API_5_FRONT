@@ -14,15 +14,15 @@ export default function Home({ }: HomeProps) {
   return (
     <BaseScreen>
       <Link href="/MeusChatbots/meusChatbots" style={styles.card}>
-        <Icon name="robot" size={40} color={cores.cor8} />
+        <Icon name="robot" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Chatbots</Text>
       </Link>
       <Link href="/CadastroUsuario/listarUsuario" style={styles.card}>
-        <Icon name="users" size={40} color={cores.cor8} />
+        <Icon name="users" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Usuários</Text>
       </Link>
       <Link href="/Dashboard" style={styles.card}>
-        <Icon name="chart-bar" size={40} color={cores.cor8} />
+        <Icon name="chart-bar" size={40} color={cores.cor9} />
         <Text style={styles.cardText}>Dashboard</Text>
       </Link>
     </BaseScreen >

@@ -12,13 +12,13 @@ const styleDefault = StyleSheet.create({
 
 const styles = StyleSheet.create({
     buttonText: {
-        color: cores.cor7,
+        color: cores.cor8,
         gap: 10,
         textAlign: 'center',
         ...fonts.bigBotton
     },
     saveButton: {
-        backgroundColor: cores.cor2,
+        backgroundColor: cores.cor3,
         minWidth: 'auto',
         ...styleDefault.button
     },
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         backgroundColor: cores.cor1,
-        borderColor: cores.cor8,
+        borderColor: cores.cor9,
         borderWidth: 1,
         minWidth: 100,
         width: '55%',
@@ -46,14 +46,14 @@ const styles = StyleSheet.create({
     },
     loadingOverlay: {
         alignItems: "center",
-        backgroundColor: cores.cor13,
+        backgroundColor: cores.cor14,
         justifyContent: "center",
         ...StyleSheet.absoluteFillObject
     },
     modalContainer: {
         alignItems: "center",
         backgroundColor: cores.cor1,
-        borderColor: cores.cor8,
+        borderColor: cores.cor9,
         borderRadius: 10,
         borderWidth: 1,
         padding: 20,
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         alignItems: "center",
-        backgroundColor: cores.cor12,
+        backgroundColor: cores.cor13,
         display: 'flex',
         flex: 1,
         justifyContent: "center",
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     title: {
-        color: cores.cor8,
+        color: cores.cor9,
         marginVertical: 10,
         textAlign: "center",
         ...fonts.title

@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
-import { cor3, cor8 } from "../colors";
+import { cor2, cor9 } from "../colors";
 import { fonts } from "../fonts";
 
 const stylesHome = StyleSheet.create({
     card: {
         alignItems: 'center',
-        backgroundColor: cor3,
+        backgroundColor: cor2,
         borderRadius: 10,
         display: 'flex',
         marginBottom: 10,
@@ -15,7 +15,7 @@ const stylesHome = StyleSheet.create({
         width: '100%',
     },
     cardText: {
-        color: cor8,
+        color: cor9,
         ...fonts.text2
     }
 });

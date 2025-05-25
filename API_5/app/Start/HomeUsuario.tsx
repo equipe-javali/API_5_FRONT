@@ -40,7 +40,7 @@ export default function MeusChatbots() {
       <Text style={styles.headerTitle}>Meus Chatbots</Text>
 
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-        <Ionicons name="log-out-outline" size={24} color={cores.cor8} />
+        <Ionicons name="log-out-outline" size={24} color={cores.cor9} />
       </TouchableOpacity>
     </View>
   )
@@ -194,7 +194,7 @@ export default function MeusChatbots() {
   return (
     <BaseScreen header={renderHeader}>
       {loading ?
-        <ActivityIndicator size="large" color={cores.cor8} /> :
+        <ActivityIndicator size="large" color={cores.cor9} /> :
         chatbots.length === 0 ?
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
@@ -212,7 +212,7 @@ export default function MeusChatbots() {
                   <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
                   <View style={[
                     styles.chatbotBadge,
-                    { backgroundColor: item.tipo === 'rh' ? cores.cor10 : cores.cor11 }
+                    { backgroundColor: item.tipo === 'rh' ? cores.cor11 : cores.cor12 }
                   ]}>
                     <Text style={styles.chatbotBadgeText}>
                       {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
@@ -225,7 +225,7 @@ export default function MeusChatbots() {
                     style={styles.chatAction}
                     onPress={() => iniciarChat(item)}
                   >
-                    <Ionicons name="chatbubble-outline" size={18} color={cores.cor8} />
+                    <Ionicons name="chatbubble-outline" size={18} color={cores.cor9} />
                     <Text style={styles.chatActionText}>Conversar</Text>
                   </TouchableOpacity>
                 </View>

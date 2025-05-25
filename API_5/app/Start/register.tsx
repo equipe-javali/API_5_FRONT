@@ -101,7 +101,7 @@ export default function Register() {
       <TextInput
         style={styles.input}
         placeholder="Nome"
-        placeholderTextColor={cores.cor5}
+        placeholderTextColor={cores.cor6}
         value={nome}
         onChangeText={setNome}
       />
@@ -109,7 +109,7 @@ export default function Register() {
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
-        placeholderTextColor={cores.cor5}
+        placeholderTextColor={cores.cor6}
         value={email}
         onChangeText={setEmail}
       />
@@ -117,7 +117,7 @@ export default function Register() {
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
-        placeholderTextColor={cores.cor5}
+        placeholderTextColor={cores.cor6}
         value={senha}
         onChangeText={(text) => {
           setSenha(text);
@@ -143,7 +143,7 @@ export default function Register() {
       </View>
       <TouchableOpacity style={styles.button} onPress={handleCadastro} disabled={loading}>
         {loading ? (
-          <ActivityIndicator color={cores.cor7} />
+          <ActivityIndicator color={cores.cor8} />
         ) : (
           <Text style={styles.buttonText}>Cadastrar</Text>
         )}

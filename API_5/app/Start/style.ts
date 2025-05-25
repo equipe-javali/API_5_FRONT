@@ -4,8 +4,8 @@ import { cores, fonts } from "../../styles";
 const styles = StyleSheet.create({
     button: {
         alignItems: 'center',
-        backgroundColor: cores.cor2,
-        borderColor: cores.cor7,
+        backgroundColor: cores.cor3,
+        borderColor: cores.cor8,
         borderRadius: 10,
         borderWidth: 1,
         marginVertical: 20,
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     buttonText: {
-        color: cores.cor7,
+        color: cores.cor8,
         textAlign: 'center',
         ...fonts.bigBotton
     },
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10
     },
     chatbotBadgeText: {
-        color: cores.cor8,
+        color: cores.cor9,
         ...fonts.text5
     },
     chatbotCard: {
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         padding: 15
     },
     chatbotDescription: {
-        color: cores.cor6,
+        color: cores.cor7,
         marginTop: 5,
         ...fonts.text4
     },
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between"
     },
     chatbotName: {
-        color: cores.cor8,
+        color: cores.cor9,
         ...fonts.title
     },
     chatAction: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     chatActionText: {
-        color: cores.cor8,
+        color: cores.cor9,
         fontSize: 14,
         marginLeft: 5
     },
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     closeButton: {
         alignItems: "center",
         backgroundColor: cores.cor1,
-        borderColor: cores.cor8,
+        borderColor: cores.cor9,
         borderRadius: 5,
         borderWidth: 1,
         minWidth: 100,
@@ -96,14 +96,14 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     emptyText: {
-        color: cores.cor8,
+        color: cores.cor9,
         textAlign: "center",
         marginTop: 20,
         ...fonts.text2
     },
     header: {
         alignItems: "center",
-        backgroundColor: cores.cor3,
+        backgroundColor: cores.cor2,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 20,
@@ -116,17 +116,17 @@ const styles = StyleSheet.create({
         width: 32
     },
     headerTitle: {
-        color: cores.cor8,
+        color: cores.cor9,
         marginHorizontal: 'auto',
         ...fonts.title
     },
     input: {
         alignItems: 'center',
-        backgroundColor: cores.cor2,
-        borderColor: cores.cor7,
+        backgroundColor: cores.cor3,
+        borderColor: cores.cor8,
         borderRadius: 5,
         borderWidth: 1.1,
-        color: cores.cor8,
+        color: cores.cor9,
         marginBottom: 12,
         maxWidth: '100%',
         paddingHorizontal: 10,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         ...fonts.text
     },
     invalido: {
-        color: cores.cor6
+        color: cores.cor7
     },
     image: {
         maxHeight: 150,
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     modalContainer: {
         alignItems: "center",
         backgroundColor: cores.cor1,
-        borderColor: cores.cor8,
+        borderColor: cores.cor9,
         borderRadius: 10,
         borderWidth: 1,
         padding: 20,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     modalText: {
-        color: cores.cor8,
+        color: cores.cor9,
         marginBottom: 20,
         textAlign: "center",
         ...fonts.text
@@ -175,12 +175,12 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     registerLink: {
-        color: cores.cor5,
+        color: cores.cor6,
         textDecorationLine: 'underline',
         ...fonts.text3
     },
     registerText: {
-        color: cores.cor7,
+        color: cores.cor8,
         ...fonts.text3
     },
     senhaDicasContainer: {
@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto'
     },
     titleScreen: {
-        color: cores.cor8,
+        color: cores.cor9,
         marginHorizontal: 'auto',
         marginBottom: 10,
         ...fonts.title
     },
     valido: {
-        color: cores.cor9
+        color: cores.cor10
     }
 });
 

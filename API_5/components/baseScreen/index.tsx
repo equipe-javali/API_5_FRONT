@@ -56,7 +56,7 @@ export default function BaseScreen({ children, header, loading, textReloading }:
                     {children}
                 </View> :
                 <View style={styles.divContainer}>
-                    <ActivityIndicator size='large' color={cores.cor8} style={styles.iconLoading} />
+                    <ActivityIndicator size='large' color={cores.cor9} style={styles.iconLoading} />
                     {textLoading &&
                         <Text style={styles.textReload}>{textLoading}</Text>
                     }
