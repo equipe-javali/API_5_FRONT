@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useRouter } from 'expo-router';
-import { View, Text, FlatList, ActivityIndicator, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { makeAuthenticatedRequest } from '../../../config/tokenService';
 import styles from '../../../styles/listarUsuarioStyle';
+import { BaseScreen, Loading } from '../../../components';
 
 type Usuario = {
   id: number;
@@ -16,7 +17,6 @@ type Usuario = {
 export default function UserListScreen() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,17 +26,16 @@ export default function UserListScreen() {
   const carregarUsuarios = async () => {
     try {
       const response = await makeAuthenticatedRequest('/api/usuario/listagem-todos');
-      
+
       if (!response.ok) {
         throw new Error('Erro ao carregar usuários');
       }
-      
+
       const data = await response.json();
       console.log('Usuários carregados:', data);
       setUsuarios(data.usuarios);
     } catch (err) {
       console.error(err);
-      setErro('Erro ao carregar usuários.');
     } finally {
       setCarregando(false);
     }
@@ -77,10 +76,10 @@ export default function UserListScreen() {
       ]
     );
   };
-  
+
   const renderItem = ({ item }: { item: Usuario }) => (
     <View style={styles.item}>
-      <Text style={styles.nome}>{item.nome || '(Sem nome)'}</Text>
+      <Text style={styles.texts}>{item.nome || '(Sem nome)'}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.iconBtn}
@@ -104,39 +103,25 @@ export default function UserListScreen() {
       </View>
     </View>
   );
-  
 
-  if (carregando) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#1E90FF" />
-        <Text style={{ marginTop: 10, color: '#ccc' }}>Carregando usuários...</Text>
-      </View>
-    );
-  }
 
-  if (erro) {
-    return (
-      <View style={styles.loading}>
-        <Text style={{ color: '#F4F4F4' }}>{erro}</Text>
-      </View>
-    );
-  }
-
+  const header = (
+    <View style={styles.header}>
+      <Text style={styles.titulo}>Usuários</Text>
+      <Link href="/User/cadastrarUsuario" style={styles.addBtn}>
+        <Text style={styles.texts}>Adicionar</Text>
+      </Link>
+    </View>)
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.titulo}>Usuários</Text>
-        <Link href="/User/cadastrarUsuario" style={styles.addBtn}>
-          <Text style={styles.addBtnText}>Adicionar</Text>
-        </Link>
-      </View>
-      <FlatList
+    <BaseScreen header={header}>
+      {carregando ? <Loading textLoading='usuários' /> : <FlatList
         data={usuarios}
         keyExtractor={(item) => item.email}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
-    </SafeAreaView>
+        contentContainerStyle={{
+          gap: 20
+        }}
+      />}
+    </BaseScreen>
   );
 };

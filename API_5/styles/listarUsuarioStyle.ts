@@ -1,71 +1,49 @@
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { StyleSheet } from "react-native";
+import { fonts } from "./fonts";
+import { cores } from ".";
 
-export const [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-});
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 20,
-        backgroundColor: '#1c1c1e'
-    },
-    header: {
-        marginHorizontal: 10,
+    actions: {
+        display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20
-    },
-    titulo: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff'
+        gap: 20
     },
     addBtn: {
-        borderColor: '#fff',
+        borderColor: cores.cor9,
         borderWidth: 1,
         borderRadius: 6,
         paddingVertical: 6,
         paddingHorizontal: 12
     },
-    addBtnText: {
-        color: '#fff',
-        fontSize: 16
-    },
-    item: {
-        backgroundColor: '#2c2c2e',
-        padding: 14,
-        borderRadius: 8,
-        marginBottom: 12,
-        marginHorizontal: 10,
+    header: {
+        alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    nome: {
-        fontSize: 16,
-        color: '#fff'
-    },
-    actions: {
-        flexDirection: 'row',
-        gap: 12
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
     iconBtn: {
-        backgroundColor: '#3a3a3c',
-        padding: 8,
+        backgroundColor: cores.cor4,
         borderRadius: 6,
-        marginLeft: 8
+        padding: 8,
     },
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
+    item: {
         alignItems: 'center',
-        backgroundColor: '#1c1c1e'
-    }
+        backgroundColor: cores.cor3,
+        borderRadius: 8,
+        flexDirection: 'row',
+        gap: 10,
+        justifyContent: 'space-between',
+    },
+    texts: {
+        color: cores.cor9,
+        ...fonts.text4
+    },
+    titulo: {
+        color: cores.cor9,
+        ...fonts.title
+    },
 });
 
 export default styles;
