@@ -180,7 +180,7 @@ export default function SignUpScreen() {
                 <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                     <Text style={styles.buttonText}>Cadastrar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/CadastroUsuario/listarUsuario')}>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/Usuarios')}>
                     <Text style={styles.cancelButtonText}>Cancelar</Text>
                 </TouchableOpacity>
             </View>

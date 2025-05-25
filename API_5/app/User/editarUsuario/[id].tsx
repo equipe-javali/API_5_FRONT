@@ -255,7 +255,7 @@ export default function EditarUsuario() {
         
         // Sempre redirecionar após um tempo se as permissões foram atualizadas
         const timeoutRef = setTimeout(() => {
-          router.push('/CadastroUsuario/listarUsuario');
+          router.push('/Usuarios');
         }, 1500);
         
         setRedirectTimeout(timeoutRef);
@@ -342,7 +342,7 @@ export default function EditarUsuario() {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.cancelButton} 
-            onPress={() => router.push('/CadastroUsuario/listarUsuario')}
+            onPress={() => router.push('/Usuarios')}
           >
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
@@ -359,7 +359,7 @@ export default function EditarUsuario() {
       visible={modalVisible}
       onRequestClose={() => {
         if (!isError) {
-          router.push('/CadastroUsuario/listarUsuario');
+          router.push('/Usuarios');
         } else {
           setModalVisible(false);
         }
@@ -380,7 +380,7 @@ export default function EditarUsuario() {
               setModalVisible(false);
               if (!isError) {
                 // Se for sucesso, redireciona para a lista
-                router.push('/CadastroUsuario/listarUsuario');
+                router.push('/Usuarios');
               }
             }}
           >
