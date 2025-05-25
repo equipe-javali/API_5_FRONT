@@ -24,7 +24,7 @@ export default function Modal({ children, loading, setLoading, setShow, show, se
         >
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContainer}>
-                    {title && <Text style={styles.title}>Editar Contexto</Text>}
+                    {title && <Text style={styles.title}>{title}</Text>}
                     <ScrollView style={styles.modalScroll}>
                         {children}
                     </ScrollView>
