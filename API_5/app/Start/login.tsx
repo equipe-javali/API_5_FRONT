@@ -88,7 +88,7 @@ export default function Login() {
         await AsyncStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
 
         console.log('Tentando redirecionar para:', isAdmin ?
-          '/(drawer)/Home' : '/(drawer)/MeusChatbots/meusChatbots');
+          '/(drawer)/Home' : '/(drawer)/Chatbots');
 
         try {
           if (isAdmin) {
@@ -100,7 +100,7 @@ export default function Login() {
         } catch (error) {
           console.error('Erro no redirecionamento:', error);
           // Rotas alternativas como fallback
-          router.push(isAdmin ? '/Home' : '/MeusChatbots/meusChatbots');
+          router.push(isAdmin ? '/Home' : '/(drawer)/Chatbots');
         }
       } else {
         setModalMessage(data.msg || 'Credenciais inválidas.');
