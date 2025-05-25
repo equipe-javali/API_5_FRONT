@@ -1,20 +1,20 @@
 import React, { ReactNode, } from "react";
 import { Modal as ModalView, Text, TouchableOpacity, View } from "react-native";
-import styles from "./style";
+import styles, { cores } from "./style";
 import { ScrollView } from "react-native-gesture-handler";
+import { ActivityIndicator } from "react-native";
 
 interface BaseScreenProps {
     children: ReactNode;
     show: boolean;
     setShow: (status: boolean) => void;
-    mensageClose?: string;
-    secundaryButton?: {
-        text: string;
-        function: Function
-    };
+    secundaryButton?: () => void;
+    title?: string;
+    loading?: boolean;
+    setLoading?: (status: boolean) => void;
 };
 
-export default function Modal({ children, show, setShow, mensageClose, secundaryButton }: BaseScreenProps) {
+export default function Modal({ children, loading, setLoading, setShow, show, secundaryButton, title }: BaseScreenProps) {
     return (
         <ModalView
             transparent={true}
@@ -24,25 +24,28 @@ export default function Modal({ children, show, setShow, mensageClose, secundary
         >
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContainer}>
+                    {title && <Text style={styles.title}>Editar Contexto</Text>}
                     <ScrollView style={styles.modalScroll}>
                         {children}
                     </ScrollView>
+                    {loading && <View style={styles.loadingOverlay}>
+                        <ActivityIndicator size="large" color={cores.cor8} />
+                    </View>}
                     <View style={styles.buttonsContainer}>
                         {secundaryButton && <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => secundaryButton.function}
+                            style={styles.saveButton}
+                            onPress={secundaryButton}
                         >
                             <Text style={styles.buttonText}>
-                                {secundaryButton.text}
+                                Salvar
                             </Text>
-                        </TouchableOpacity>
-                        }
+                        </TouchableOpacity>}
                         <TouchableOpacity
-                            style={styles.closeButton}
+                            style={secundaryButton ? styles.cancelButton : styles.closeButton}
                             onPress={() => setShow(false)}
                         >
                             <Text style={styles.buttonText}>
-                                {mensageClose ?? 'Fechar'}
+                                {secundaryButton ? 'Voltar' : 'Fechar'}
                             </Text>
                         </TouchableOpacity>
                     </View>
