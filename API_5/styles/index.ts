@@ -1,7 +1,7 @@
-import { cor1, cor2, cor3, cor4, cor5, cor6, cor7, cor8, cor9, cor10, cor11, cor12 } from "./colors";
+import { cor1, cor2, cor3, cor4, cor5, cor6, cor7, cor8, cor9, cor10, cor11, cor12, cor13 } from "./colors";
 import { fonts } from "./fonts";
 import stylesHome from "./Home";
 
-const cores = { cor1, cor2, cor3, cor4, cor5, cor6, cor7, cor8, cor9, cor10, cor11, cor12};
+const cores = { cor1, cor2, cor3, cor4, cor5, cor6, cor7, cor8, cor9, cor10, cor11, cor12, cor13 };
 
 export { cores, fonts, stylesHome };
