@@ -3,7 +3,7 @@ import { Link, useRouter } from 'expo-router';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { makeAuthenticatedRequest } from '../../../config/tokenService';
-import styles from '../../../styles/listarUsuarioStyle';
+import { stylesUsuarios as styles } from '../../../styles';
 import { BaseScreen, Loading } from '../../../components';
 
 type Usuario = {

@@ -1,9 +1,8 @@
 import { StyleSheet } from "react-native";
-import { fonts } from "./fonts";
-import { cores } from ".";
+import { fonts } from "../fonts";
+import { cores } from "..";
 
-
-const styles = StyleSheet.create({
+const stylesUsuarios = StyleSheet.create({
     actions: {
         display: 'flex',
         flexDirection: 'row',
@@ -46,4 +45,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default styles;
+export default stylesUsuarios;
