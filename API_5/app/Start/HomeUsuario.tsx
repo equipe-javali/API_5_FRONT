@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { apiCall } from "../../config/api";
 import { Ionicons } from "@expo/vector-icons";
 import { makeAuthenticatedRequest } from "../../config/tokenService";
+import styles, { cores } from "./style";
+import { BaseScreen } from "../../components";
 
-// Defina a interface com tipos explícitos para garantir consistência
 interface Chatbot {
   id: number;
   nome: string;
@@ -14,22 +14,12 @@ interface Chatbot {
   tipo: string;
 }
 
-interface Usuario {
-  id: number;
-  nome: string;
-  email: string;
-  admin: boolean;
-  permissoes: number[];
-}
-
-const MeusChatbots = () => {
+export default function MeusChatbots() {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Função de logout
   const handleLogout = async () => {
-    // Limpa armazenamento (tokens, userId etc.)
     await AsyncStorage.multiRemove([
       "access_token",
       "refresh_token",
@@ -38,24 +28,22 @@ const MeusChatbots = () => {
       "currentChatbotId",
       "currentChatbotName",
     ]);
-    // Redireciona para login
     router.replace("/Start/login");
   };
 
-  // Header customizado
-  const renderHeader = () => (
+  const renderHeader = (
     <View style={styles.header}>
       <TouchableOpacity style={styles.headerIconPlaceholder} disabled>
-        <Ionicons name="chatbubbles-outline" size={24} color="#444" />
+        <Ionicons name="chatbubbles-outline" size={24} color={cores.cor4} />
       </TouchableOpacity>
 
       <Text style={styles.headerTitle}>Meus Chatbots</Text>
 
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-        <Ionicons name="log-out-outline" size={24} color="#fff" />
+        <Ionicons name="log-out-outline" size={24} color={cores.cor9} />
       </TouchableOpacity>
     </View>
-  );
+  )
 
   useEffect(() => {
     const fetchChatbotsComPermissao = async () => {
@@ -104,7 +92,7 @@ const MeusChatbots = () => {
 
             if (currentUserData && currentUserData.id) {
               userId = currentUserData.id.toString();
-              await AsyncStorage.setItem('userId', userId);
+              await AsyncStorage.setItem('userId', userId ?? '');
               console.log("ID do usuário salvo:", userId);
             } else {
               throw new Error("ID não encontrado na resposta de usuario/current");
@@ -181,7 +169,6 @@ const MeusChatbots = () => {
     fetchChatbotsComPermissao();
   }, []);
 
-  // Resto do código permanece igual...
   const iniciarChat = async (chatbot: Chatbot) => {
     try {
       // Garantir que chatbot.id existe antes de usar toString()
@@ -204,216 +191,49 @@ const MeusChatbots = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        {renderHeader()}
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    );
-  }
-
-  if (chatbots.length === 0) {
-    return (
-      <View style={styles.container}>
-        {renderHeader()}
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
-          {/* <TouchableOpacity style={styles.button} onPress={() => router.push("/Chat")}>
-            <Text style={styles.buttonText}>Criar Chatbot</Text>
-          </TouchableOpacity>         */}
-        </View>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      {renderHeader()}
-
-      <FlatList
-        data={chatbots}
-        keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.chatbotCard}
-            onPress={() => iniciarChat(item)}
-          >
-            <View style={styles.chatbotHeader}>
-              <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
-              <View style={[
-                styles.chatbotBadge,
-                { backgroundColor: item.tipo === 'rh' ? '#007BFF' : '#FF9500' }
-              ]}>
-                <Text style={styles.chatbotBadgeText}>
-                  {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.chatbotDescription}>{item.descricao || "Sem descrição"}</Text>
-            <View style={styles.chatActions}>
+    <BaseScreen header={renderHeader}>
+      {loading ?
+        <ActivityIndicator size="large" color={cores.cor9} /> :
+        chatbots.length === 0 ?
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Você ainda não possui nenhum chatbot. Peça para algum administrador liberar um chat para você utilizar!</Text>
+          </View> :
+          <FlatList
+            style={styles.chatContainer}
+            data={chatbots}
+            scrollEnabled={false}
+            keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.chatAction}
+                style={styles.chatbotCard}
                 onPress={() => iniciarChat(item)}
               >
-                <Ionicons name="chatbubble-outline" size={18} color="#fff" />
-                <Text style={styles.chatActionText}>Conversar</Text>
+                <View style={styles.chatbotHeader}>
+                  <Text style={styles.chatbotName}>{item.nome || "Sem nome"}</Text>
+                  <View style={[
+                    styles.chatbotBadge,
+                    { backgroundColor: item.tipo === 'rh' ? cores.cor11 : cores.cor12 }
+                  ]}>
+                    <Text style={styles.chatbotBadgeText}>
+                      {item.tipo === 'rh' ? 'RH' : 'Contabilidade'}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.chatbotDescription}>{item.descricao || "Sem descrição"}</Text>
+                <View style={styles.chatActions}>
+                  <TouchableOpacity
+                    style={styles.chatAction}
+                    onPress={() => iniciarChat(item)}
+                  >
+                    <Ionicons name="chatbubble-outline" size={18} color={cores.cor9} />
+                    <Text style={styles.chatActionText}>Conversar</Text>
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
-      {/* <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => router.push("/CadastroBot/cadastrarBot")}
-      >
-        <Ionicons name="add" size={24} color="#fff" />
-      </TouchableOpacity> */}
-    </View>
+            )}
+          />
+      }
+    </BaseScreen>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#282828",
-    paddingHorizontal: 20      // mantém o padding para o conteúdo
-  },
-  content: {
-    flex: 1,
-    padding: 20
-  },
-  title: { fontSize: 24, color: "#fff", textAlign: "center", marginVertical: 10 },
-  itemContainer: {
-    backgroundColor: "#444",
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  itemHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  itemTitle: { fontSize: 20, color: "#fff", fontWeight: "bold" },
-  itemFrases: { fontSize: 16, color: "#ccc", marginTop: 5 },
-  itemDetails: { marginTop: 10, borderTopWidth: 1, borderTopColor: "#666", paddingTop: 10 },
-  itemText: { fontSize: 14, color: "#ccc", marginTop: 3 },
-  emptyText: { fontSize: 18, color: "gray", textAlign: "center", marginTop: 20 },
-  chatButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007BFF",
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 10,
-    alignSelf: "flex-start",
-  },
-  chatButtonText: { color: "#fff", marginLeft: 5, fontSize: 14 },
-
-  chatbotCard: {
-    backgroundColor: "#444",
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  chatbotHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  chatbotName: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  chatbotBadge: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  chatbotBadgeText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  chatbotDescription: {
-    fontSize: 16,
-    color: "#ccc",
-    marginTop: 5,
-  },
-  chatActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  chatActionText: {
-    color: "#fff",
-    marginLeft: 5,
-    fontSize: 14,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#007BFF",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    alignItems: "center",
-    minWidth: 150,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  chatAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007BFF",
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 10,
-    alignSelf: "flex-start",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#1e1e1e",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    marginHorizontal: -20,
-    marginBottom: 10,
-    marginTop: 0
-  },
-  headerTitle: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  logoutButton: {
-    padding: 8,
-  },
-  headerIconPlaceholder: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-  }
-});
-
-export default MeusChatbots;

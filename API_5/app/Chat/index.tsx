@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
-  TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, SectionList
-} from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, TextInput, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, SectionList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiCall } from '../../config/api';
 import { makeAuthenticatedRequest } from '../../config/tokenService';
+import { BaseScreen, Loading } from '../../components';
+import styles, { cores } from './style';
 
 export default function Chat() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  
   // Parâmetros e estados
   const agenteId = params.agenteId ? Number(params.agenteId) : null;
   const chatbotName = params.chatbotName as string;
@@ -22,7 +20,6 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false); // Estado para controlar respostas em processamento
   const flatListRef = useRef<FlatList>(null);
-  
   // Iniciar chat - sem alterações, já funciona para iniciar a conversa
   useEffect(() => {
     const startChat = async () => {
@@ -54,7 +51,7 @@ export default function Chat() {
         const response = await apiCall("/api/chat/iniciar-conversa", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             agenteId,
             usuarioId
           }),
@@ -91,17 +88,13 @@ export default function Chat() {
         setLoading(false);
       }
     };
-    
     startChat();
   }, [agenteId]);
-  
   // Enviar mensagem - modificado para processar respostas do Gemini
   const sendMessage = async () => {
     if (!inputText.trim() || !chatId || isProcessing) return;
-    
     // Salva o texto antes de limpar o input
     const messageText = inputText;
-    
     // Adiciona mensagem do usuário
     const newUserMessage = {
       id: Date.now().toString(),
@@ -109,11 +102,9 @@ export default function Chat() {
       sender: 'user',
       timestamp: new Date()
     };
-    
     setMessages(currentMessages => [...currentMessages, newUserMessage]);
     setInputText('');
     setIsProcessing(true); // Inicia processamento
-    
     // Indicador visual temporário de processamento
     const processingId = `processing-${Date.now()}`;
     setMessages(msgs => [...msgs, {
@@ -122,7 +113,6 @@ export default function Chat() {
       sender: 'bot',
       timestamp: new Date()
     }]);
-    
     try {
       const response = await apiCall("/api/chat/enviar-mensagem", {
         method: "POST",
@@ -133,13 +123,10 @@ export default function Chat() {
           usuario: true,
         }),
       });
-      
       // Remove o indicador de processamento
       setMessages(msgs => msgs.filter(m => m.id !== processingId));
-      
       if (response.ok) {
         const data = await response.json();
-        
         if (data.ai_message) {
           const botMessage = {
             id: (Date.now() + 1).toString(),
@@ -147,7 +134,6 @@ export default function Chat() {
             sender: 'bot',
             timestamp: new Date()
           };
-          
           setMessages(currentMessages => [...currentMessages, botMessage]);
         } else if (data.error) {
           // Feedback em caso de erro específico do backend
@@ -166,7 +152,6 @@ export default function Chat() {
       setIsProcessing(false); // Finaliza processamento
     }
   };
-  
   // Função para lidar com mensagens de erro
   const handleErrorMessage = (errorText: string) => {
     setMessages(currentMessages => [...currentMessages, {
@@ -176,11 +161,10 @@ export default function Chat() {
       timestamp: new Date()
     }]);
   };
-  
   // Renderizar item da mensagem - modificado para exibir estado de processamento
   const renderMessageItem = ({ item }: { item: { id: string; text: string; sender: string; timestamp: Date } }) => (
     <View style={[
-      styles.messageBubble, 
+      styles.messageBubble,
       item.sender === 'user' ? styles.userMessage : styles.botMessage
     ]}>
       <Text style={styles.dateLabel}>
@@ -191,36 +175,31 @@ export default function Chat() {
       </Text>
 
       {item.text === "Processando..." ? (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={styles.messageText}>Processando</Text>
-          <ActivityIndicator size="small" color="#F5F5F5" style={{marginLeft: 8}} />
-        </View>
+        <Loading textLoading='Escrevendo'/>
       ) : (
         <Text style={styles.messageText}>{item.text}</Text>
       )}
     </View>
   );
-  
   const renderHeader = () => (
     <View style={styles.header}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.backButton}
         onPress={() => router.push('/Start/HomeUsuario')}
       >
-        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Ionicons name="arrow-back" size={24} color={cores.cor9} />
       </TouchableOpacity>
       <Text style={styles.headerTitle}>{chatbotName || "Chat"}</Text>
       <View style={styles.placeholder} />
     </View>
   );
-  
   // Agrupa as mensagens por dia
   const sections = useMemo(() => {
     const groups = messages.reduce((acc, msg) => {
       const day = msg.timestamp.toLocaleDateString('pt-BR', {
-        day:   '2-digit',
+        day: '2-digit',
         month: '2-digit',
-        year:  'numeric'
+        year: 'numeric'
       });
       if (!acc[day]) acc[day] = []
       acc[day].push(msg)
@@ -229,10 +208,10 @@ export default function Chat() {
     return Object
       .entries(groups)
       .map(([title, data]) => ({ title, data }))
-      .sort((a, b) => 
-         //datas mais antigas primeiro
-         new Date(a.title.split('/').reverse().join('-')).getTime() -
-         new Date(b.title.split('/').reverse().join('-')).getTime()
+      .sort((a, b) =>
+        //datas mais antigas primeiro
+        new Date(a.title.split('/').reverse().join('-')).getTime() -
+        new Date(b.title.split('/').reverse().join('-')).getTime()
       )
   }, [messages])
 
@@ -246,16 +225,11 @@ export default function Chat() {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      {renderHeader()}
-      
+    <BaseScreen alternative header={renderHeader()}>
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007bff" />
-          <Text style={styles.loadingText}>Conectando...</Text>
-        </View>
+        <Loading textLoading="Conectando" />
       ) : (
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           style={styles.chatContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={80}
@@ -269,138 +243,29 @@ export default function Chat() {
             onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
             onLayout={() => flatListRef.current?.scrollToEnd()}
           />
-          
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={inputText}
               onChangeText={setInputText}
               placeholder="Digite sua mensagem..."
-              placeholderTextColor="#999"
+              placeholderTextColor={cores.cor6}
               editable={!isProcessing}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.sendButton,
-                (!inputText.trim() || !chatId || isProcessing) && 
-                  {backgroundColor: '#555'}
+                (!inputText.trim() || !chatId || isProcessing) &&
+                { backgroundColor: cores.cor5 }
               ]}
               onPress={sendMessage}
               disabled={!inputText.trim() || !chatId || isProcessing}
             >
-              <Ionicons name="send" size={24} color="#fff" />
+              <Ionicons name="send" size={24} color={cores.cor9} />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       )}
-    </SafeAreaView>
+    </BaseScreen>
   );
-}
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1,
-    backgroundColor: '#282828',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#444',
-    padding: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-  },
-  placeholder: {
-    width: 40,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#ccc',
-    fontSize: 16,
-    marginTop: 12,
-  },
-  chatContainer: {
-    flex: 1,
-  },
-  messagesContainer: {
-    padding: 10,
-    paddingBottom: 16,
-  },
-  messageBubble: {
-    padding: 12,
-    borderRadius: 16,
-    marginVertical: 4,
-    maxWidth: '80%',
-    borderWidth: 1,
-  },
-  userMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#282828',
-    borderColor: '#B8B8B8',
-  },
-  botMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#212121',
-    borderColor: '#333',
-  },
-  messageText: {
-    color: '#F5F5F5',
-    fontSize: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 8,
-    backgroundColor: '#333',
-    borderTopWidth: 1,
-    borderTopColor: '#444',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#222',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    color: '#fff',
-    marginRight: 8,
-  },
-  sendButton: {
-    backgroundColor: '#007bff',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sectionHeaderContainer: {
-    alignItems: 'center',
-    marginVertical: 8
-  },
-  sectionHeader: {
-    backgroundColor: '#555',
-    color: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
-    fontSize: 12
-  },
-  dateLabel: {
-    fontSize:      10,
-    color:         '#888',
-    marginBottom:  4,
-    alignSelf:     'flex-end'
-  },
-});
+};

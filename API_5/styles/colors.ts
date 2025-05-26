@@ -1,0 +1,14 @@
+export const cor1  = "rgb(0, 0, 0)";
+export const cor2  = "rgb(30, 30, 30)";
+export const cor3  = "rgb(40, 40, 40)";
+export const cor4  = "rgb(68, 68, 68)";
+export const cor5  = "rgb(85, 85, 85)";
+export const cor6  = "rgb(173, 173, 173)";
+export const cor7  = "rgb(204, 204, 204)";
+export const cor8  = "rgb(245, 245, 245)";
+export const cor9  = "rgb(255, 255, 255)";
+export const cor10 = "rgb(144, 238, 144)";
+export const cor11 = "rgb(0, 123, 255)";
+export const cor12 = "rgb(255, 149, 0)";
+export const cor13 = "rgba(0, 0, 0, 0.5)";
+export const cor14 = "rgba(0, 0, 0, 0.7)";

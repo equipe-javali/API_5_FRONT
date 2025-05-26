@@ -2,7 +2,7 @@ import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Image, StyleSheet, View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
@@ -24,7 +24,7 @@ export default function Layout() {
 
         <View style={styles.logoutContainer}>
           <Pressable onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={20} color="white" />
+            <Icon name="door-open" size={20} color="white" />
             <Text style={styles.logoutText}>Sair</Text>
           </Pressable>
         </View>
@@ -61,40 +61,40 @@ export default function Layout() {
             drawerLabel: 'Página inicial',
             title: 'Página inicial',
             drawerIcon: ({ color }) => (
-              <Ionicons name="home" size={24} color={color} />
+              <Icon name="home" size={24} color={color} />
             ),
           }}
         />
 
         <Drawer.Screen
-          name="CadastroUsuario/listarUsuario"
+          name="Usuarios/index"
           options={{
             drawerLabel: 'Usuários',
             title: 'Usuários',
             drawerIcon: ({ color }) => (
-              <Ionicons name="person" size={24} color={color} />
+              <Icon name="users" size={24} color={color} />
             ),
           }}
         />
 
         <Drawer.Screen
-          name="CadastroBot/cadastrarBot"
+          name="CadastroBot/index"
           options={{
             drawerLabel: 'Cadastrar Bot',
             title: 'Cadastrar Bot',
             drawerIcon: ({ color }) => (
-              <Ionicons name="logo-reddit" size={24} color={color} />
+              <Icon name="plus" size={24} color={color} />
             ),
           }}
         />
 
         <Drawer.Screen
-          name="MeusChatbots/meusChatbots"
+          name="Chatbots/index"
           options={{
-            drawerLabel: 'Meus Chatbots',
-            title: 'Meus Chatbots',
+            drawerLabel: 'Chatbots',
+            title: 'Chatbots',
             drawerIcon: ({ color }) => (
-              <Ionicons name="chatbubbles" size={24} color={color} />
+              <Icon name="robot" size={24} color={color} />
             ),
           }}
         />
@@ -105,7 +105,7 @@ export default function Layout() {
             drawerLabel: 'Dashboard',
             title: 'Dashboard',            
             drawerIcon: ({ color }) => (
-              <Ionicons name="bar-chart-outline" size={24} color={color} />
+              <Icon name="chart-bar" size={24} color={color} />
             ),
           }}
         />

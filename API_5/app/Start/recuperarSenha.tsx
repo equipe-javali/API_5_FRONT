@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { apiCall } from '../../config/api';
+import styles from './style';
+import { BaseScreen } from '../../components';
 
 const RecuperarSenha: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -39,9 +41,14 @@ const RecuperarSenha: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <Text style={styles.title}>Recuperar Senha</Text>
+    <BaseScreen>
+      <Image
+        source={require('../../assets/project_images/logotipo.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
+
+      <Text style={styles.headerTitle}>Recuperar Senha</Text>
 
       <TextInput
         style={styles.input}
@@ -53,69 +60,21 @@ const RecuperarSenha: React.FC = () => {
         onChangeText={setEmail}
       />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#F5F5F5" style={{ marginBottom: 20 }} />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={handleEnviar}>
-          <Text style={styles.buttonText}>Enviar</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.buttonContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#F5F5F5" style={{ marginBottom: 20 }} />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={handleEnviar}>
+            <Text style={styles.buttonText}>Enviar</Text>
+          </TouchableOpacity>
+        )}
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>Voltar</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+          <Text style={styles.buttonText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+    </BaseScreen>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2E2E2E',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 24,
-    color: '#F5F5F5',
-    marginBottom: 20,
-    fontFamily: 'Roboto',
-  },
-  input: {
-    width: '100%',
-    backgroundColor: '#F5F5F5',
-    color: '#111',
-    borderRadius: 5,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    fontSize: 18,
-    fontFamily: 'Roboto',
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#282828',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: '#F5F5F5',
-    fontSize: 20,
-    fontFamily: 'Roboto',
-  },
-  backButton: {
-    padding: 10,
-  },
-  backButtonText: {
-    color: '#B8B8B8',
-    fontSize: 16,
-    fontFamily: 'Roboto',
-    textDecorationLine: 'underline',
-  },
-});
 
 export default RecuperarSenha;
