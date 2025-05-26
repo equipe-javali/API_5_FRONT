@@ -388,12 +388,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#444",
     overflow: "hidden",
+    
   },
   picker: {
     color: "#fff",
     backgroundColor: "#333",
-    width: "100%",
-    height: 44,
+    width: "100%",    
+    minHeight: 50,
   },
   dateRow: { flexDirection: "row", alignItems: "center", marginBottom: 10},
   dateInput: {

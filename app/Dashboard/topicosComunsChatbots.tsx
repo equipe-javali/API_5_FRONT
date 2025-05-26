@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     backgroundColor: "#333",
     width: "100%",
-    height: 44,
+    minHeight: 50,
   },
   dateRow: { flexDirection: "row", alignItems: "center", marginBottom: 10},
   dateInput: {

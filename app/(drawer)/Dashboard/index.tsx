@@ -4,45 +4,59 @@ import { Ionicons } from "@expo/vector-icons";
 import DesempenhoChatbot from "../../Dashboard/desempenhoChatbot";
 import MediaMensagemChatbot from "../../Dashboard/mediaMensagemChatbot";
 import TopicosComunsChatbot from "../../Dashboard/topicosComunsChatbots";
+import { ScrollView } from "react-native-gesture-handler";
 
 // Definições das métricas
 const metricas = [
   {
     id: "tempo",
     nome: "Tempo de Resposta",
-    descricao: "Analise o tempo médio que os chatbots levam para responder às mensagens dos usuários. Identifique quais chatbots são mais eficientes e rápidos nas respostas.",
-    icone: "time-outline"
+    descricao:
+      "Analise o tempo médio que os chatbots levam para responder às mensagens dos usuários. Identifique quais chatbots são mais eficientes e rápidos nas respostas.",
+    icone: "time-outline",
   },
   {
     id: "media",
     nome: "Média de Mensagens",
-    descricao: "Visualize a média de mensagens trocadas por conversa para cada chatbot. Identifique padrões de uso e quais chatbots estão gerando maior engajamento.",
-    icone: "chatbubbles-outline"
+    descricao:
+      "Visualize a média de mensagens trocadas por conversa para cada chatbot. Identifique padrões de uso e quais chatbots estão gerando maior engajamento.",
+    icone: "chatbubbles-outline",
   },
   {
     id: "topicos",
     nome: "Tópicos Comuns",
-    descricao: "Descubra quais são os tópicos mais frequentemente discutidos em cada chatbot. Identifique as principais dúvidas e interesses dos usuários.",
-    icone: "list-outline"
-  }
+    descricao:
+      "Descubra quais são os tópicos mais frequentemente discutidos em cada chatbot. Identifique as principais dúvidas e interesses dos usuários.",
+    icone: "list-outline",
+  },
 ];
 
 export default function Dashboard() {
-  const [metricaSelecionada, setMetricaSelecionada] = useState<string | null>(null);
+  const [metricaSelecionada, setMetricaSelecionada] = useState<string | null>(
+    null
+  );
 
   // Renderiza o seletor de métricas
   const renderSeletorMetricas = () => (
-    <View style={styles.metricsSelector}>
+    <ScrollView
+      style={styles.metricsSelector}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.instrucao}>Selecione uma métrica para analisar:</Text>
-      
-      {metricas.map(metrica => (
+
+      {metricas.map((metrica) => (
         <TouchableOpacity
           key={metrica.id}
           style={styles.metricaCard}
           onPress={() => setMetricaSelecionada(metrica.id)}
         >
           <View style={styles.metricaHeader}>
-            <Ionicons name={metrica.icone as any} size={24} color="#fff" style={styles.metricaIcone} />
+            <Ionicons
+              name={metrica.icone as any}
+              size={24}
+              color="#fff"
+              style={styles.metricaIcone}
+            />
             <Text style={styles.metricaTitulo}>{metrica.nome}</Text>
           </View>
           <Text style={styles.metricaDescricao}>{metrica.descricao}</Text>
@@ -52,7 +66,7 @@ export default function Dashboard() {
           </View>
         </TouchableOpacity>
       ))}
-    </View>
+    </ScrollView>
   );
 
   // Renderiza o componente da métrica selecionada
@@ -61,8 +75,10 @@ export default function Dashboard() {
       case "tempo":
         return (
           <View style={styles.metricaContainer}>
-            <DesempenhoChatbot />
-            <TouchableOpacity 
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <DesempenhoChatbot />
+            </ScrollView>
+            <TouchableOpacity
               style={styles.botaoVoltar}
               onPress={() => setMetricaSelecionada(null)}
             >
@@ -74,9 +90,10 @@ export default function Dashboard() {
       case "media":
         return (
           <View style={styles.metricaContainer}>
-            
-            <MediaMensagemChatbot />
-            <TouchableOpacity 
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <MediaMensagemChatbot />
+            </ScrollView>
+            <TouchableOpacity
               style={styles.botaoVoltar}
               onPress={() => setMetricaSelecionada(null)}
             >
@@ -88,8 +105,10 @@ export default function Dashboard() {
       case "topicos":
         return (
           <View style={styles.metricaContainer}>
-            <TopicosComunsChatbot />
-            <TouchableOpacity 
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <TopicosComunsChatbot />
+            </ScrollView>
+            <TouchableOpacity
               style={styles.botaoVoltar}
               onPress={() => setMetricaSelecionada(null)}
             >
@@ -103,17 +122,15 @@ export default function Dashboard() {
     }
   };
 
-  return (
-    <View style={styles.container}>     
-      {renderMetricaAtiva()}
-    </View>
-  );
+  return <View style={styles.container}>{renderMetricaAtiva()}</View>;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#222",
+    alignItems: "center",
+    width: "100%",    
   },
   title: {
     fontSize: 26,
@@ -125,6 +142,8 @@ const styles = StyleSheet.create({
   metricsSelector: {
     flex: 1,
     padding: 16,
+    width: "100%",
+    maxWidth: 500,
   },
   instrucao: {
     fontSize: 18,
@@ -139,25 +158,34 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: "#444",
+    width: "100%",
+    alignSelf: "center",
   },
   metricaHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
+    justifyContent: "flex-start",
+
   },
   metricaIcone: {
     marginRight: 10,
+    width: 24,
+    height: 24,
+    textAlign: "center",
   },
   metricaTitulo: {
     fontSize: 18,
     color: "#fff",
     fontWeight: "bold",
+    flexShrink: 1,
   },
   metricaDescricao: {
     color: "#B8B8B8",
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 16,
+    textAlign: "left",
   },
   metricaFooter: {
     flexDirection: "row",
@@ -172,12 +200,21 @@ const styles = StyleSheet.create({
   },
   metricaContainer: {
     flex: 1,
+    position: "relative",
+    width: "100%",
   },
   botaoVoltar: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(34, 34, 34, 0.8)",
+    width: "100%",
+    zIndex: 1,
+    elevation: 5,
   },
   botaoVoltarTexto: {
     color: "#fff",

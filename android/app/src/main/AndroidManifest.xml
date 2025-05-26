@@ -25,6 +25,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="br.com.fatecsp.omni"/>
+        <data android:scheme="exp+omni"/>
       </intent-filter>
     </activity>
   </application>

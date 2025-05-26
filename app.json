@@ -2,8 +2,8 @@
   "expo": {
     "name": "Omni",
     "slug": "omni",
-    "version": "1.0.0",
-    "orientation": "portrait",    
+    "version": "1.0.1",
+    "orientation": "portrait",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
