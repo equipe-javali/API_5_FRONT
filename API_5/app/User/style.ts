@@ -8,14 +8,14 @@ const styles = StyleSheet.create({
         borderColor: cores.cor8,
         borderRadius: 10,
         borderWidth: 1,
-        marginVertical: 20,
         maxWidth: "100%",
         paddingHorizontal: 50,
         paddingVertical: 12,
-        width: 150
+        width: 200
     },
     buttonContainer: {
         alignItems: 'center',
+        gap: 20,
         display: "flex",
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -33,11 +33,10 @@ const styles = StyleSheet.create({
         borderColor: cores.cor6,
         borderRadius: 10,
         borderWidth: 1,
-        marginVertical: 20,
         maxWidth: "100%",
         paddingHorizontal: 50,
         paddingVertical: 12,
-        width: 150
+        width: 200
     },
     cancelButtonText: {
         color: cores.cor6,
