@@ -8,11 +8,16 @@ const stylesHome = StyleSheet.create({
         backgroundColor: cor2,
         borderRadius: 10,
         display: 'flex',
-        marginBottom: 10,
         gap: 10,
         height: 120,
         justifyContent: 'center',
         width: '100%',
+    },
+    cardContainers: {
+        alignItems: 'center',
+        display: 'flex',
+        gap: 10,
+        justifyContent: 'center',
     },
     cardText: {
         color: cor9,
