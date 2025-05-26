@@ -43,7 +43,9 @@ const styles = StyleSheet.create({
         marginTop: 12
     },
     chatContainer: {
-        flex: 1
+        backgroundColor: 'red',
+        height: '100%',
+        flex: 1,
     },
     messagesContainer: {
         padding: 10,

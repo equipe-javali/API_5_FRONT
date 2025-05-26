@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { SafeAreaView, ScrollView, View } from "react-native";
 import styles from "./style";
 import { StatusBar } from "react-native";
 import * as Font from 'expo-font';
@@ -24,18 +24,18 @@ export default function BaseScreen({ children, header }: BaseScreenProps) {
     }, []);
 
     return (
-        <View style={styles.mainContainer}>
+        <SafeAreaView style={styles.mainContainer}>
             <StatusBar hidden />
-            {header}
+            {header}            
             <ScrollView style={styles.container}>
                 {Loaded ?
                     <View style={styles.divContainer}>
                         {children}
                     </View> :
-                    <Loading textLoading="fontes" />
+                    <Loading textLoading="Carregando fontes" />
                 }
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 

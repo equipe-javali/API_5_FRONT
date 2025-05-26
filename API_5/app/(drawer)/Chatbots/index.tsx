@@ -395,8 +395,9 @@ export default function Chatbots() {
 
   return (
     <BaseScreen>
-      {loading ? <Loading textLoading="chatbots" /> : <FlatList
+      {loading ? <Loading textLoading="Carregando chatbots" /> : <FlatList
         data={chatbots}
+        scrollEnabled={false}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <ChatbotItem item={item} />}
         ListEmptyComponent={

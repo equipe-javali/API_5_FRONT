@@ -11,7 +11,7 @@ export default function Loading({ textLoading }: LoadingProps) {
         <View style={styles.divContainer}>
             <ActivityIndicator size='large' color={cores.cor9} style={styles.iconLoading} />
             {textLoading &&
-                <Text style={styles.textReload}>Carregando {textLoading}...</Text>
+                <Text style={styles.textReload}>{textLoading}...</Text>
             }
         </View>
     );

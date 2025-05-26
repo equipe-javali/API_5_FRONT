@@ -1,7 +1,6 @@
 import React, { ReactNode, } from "react";
 import { Modal as ModalView, Text, TouchableOpacity, View } from "react-native";
 import styles, { cores } from "./style";
-import { ScrollView } from "react-native-gesture-handler";
 import { ActivityIndicator } from "react-native";
 
 interface BaseScreenProps {

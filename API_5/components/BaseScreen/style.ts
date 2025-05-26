@@ -3,9 +3,9 @@ import { cores } from "../../styles";
 
 const styles = StyleSheet.create({
     mainContainer: {
-        display: 'flex',
-        height: "100%",
         backgroundColor: cores.cor3,
+        display: 'flex',
+        height: "100%"
     },
     container: {
         flex: 1,

@@ -114,8 +114,9 @@ export default function UserListScreen() {
     </View>)
   return (
     <BaseScreen header={header}>
-      {carregando ? <Loading textLoading='usuários' /> : <FlatList
+      {carregando ? <Loading textLoading='Carregando usuários' /> : <FlatList
         data={usuarios}
+        scrollEnabled={false}
         keyExtractor={(item) => item.email}
         renderItem={renderItem}
         contentContainerStyle={{

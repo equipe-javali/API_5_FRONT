@@ -145,7 +145,7 @@ export default function CadastrarBot() {
       </TouchableOpacity>
 
       <Modal show={loading} setShow={setLoading}>
-        <Loading textLoading="novo cadastro" />
+        <Loading textLoading="Cadastrando" />
       </Modal>
 
       <Modal

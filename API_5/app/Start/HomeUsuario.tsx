@@ -202,6 +202,7 @@ export default function MeusChatbots() {
           <FlatList
             style={styles.chatContainer}
             data={chatbots}
+            scrollEnabled={false}
             keyExtractor={(item) => `chatbot-${item.id || Math.random().toString()}`}
             renderItem={({ item }) => (
               <TouchableOpacity
