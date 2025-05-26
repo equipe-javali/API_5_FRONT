@@ -1,55 +1,54 @@
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
-import { StyleSheet } from "react-native";
-
-
-export const [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-});
+import { StyleSheet } from 'react-native';
+import { cores, fonts } from '../../styles';
 
 const styles = StyleSheet.create({
-    container: {
+    backButton: {
+        padding: 8
+    },
+    botMessage: {
+        alignSelf: 'flex-start',
+        backgroundColor: cores.cor2,
+        borderColor: cores.cor4
+    },
+    chatContainer: {
+        height: '100%',
         flex: 1,
-        backgroundColor: '#282828'
+    },
+    dateLabel: {
+        alignSelf: 'flex-end',
+        color: cores.cor6,
+        marginBottom: 4,
+        ...fonts.text5
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#444',
+        backgroundColor: cores.cor2,
         padding: 16
     },
-    backButton: {
-        padding: 8
-    },
     headerTitle: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
+        color: cores.cor9,
         flex: 1,
-        textAlign: 'center'
+        textAlign: 'center',
+        ...fonts.title
     },
-    placeholder: {
-        width: 40
-    },
-    loadingContainer: {
+    input: {
+        backgroundColor: cores.cor2,
+        borderRadius: 20,
+        color: cores.cor9,
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        marginRight: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        ...fonts.text5
     },
-    loadingText: {
-        color: '#ccc',
-        fontSize: 16,
-        marginTop: 12
-    },
-    chatContainer: {
-        backgroundColor: 'red',
-        height: '100%',
-        flex: 1,
-    },
-    messagesContainer: {
-        padding: 10,
-        paddingBottom: 16
+    inputContainer: {
+        flexDirection: 'row',
+        padding: 8,
+        backgroundColor: cores.cor3,
+        borderTopWidth: 1,
+        borderTopColor: cores.cor4
     },
     messageBubble: {
         padding: 12,
@@ -58,62 +57,43 @@ const styles = StyleSheet.create({
         maxWidth: '80%',
         borderWidth: 1
     },
-    userMessage: {
-        alignSelf: 'flex-end',
-        backgroundColor: '#282828',
-        borderColor: '#B8B8B8'
-    },
-    botMessage: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#212121',
-        borderColor: '#333'
+    messagesContainer: {
+        padding: 10,
+        paddingBottom: 16
     },
     messageText: {
-        color: '#F5F5F5',
-        fontSize: 16
+        color: cores.cor8,
+        ...fonts.text4
     },
-    inputContainer: {
-        flexDirection: 'row',
-        padding: 8,
-        backgroundColor: '#333',
-        borderTopWidth: 1,
-        borderTopColor: '#444'
-    },
-    input: {
-        flex: 1,
-        backgroundColor: '#222',
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        color: '#fff',
-        marginRight: 8
+    placeholder: {
+        width: 40
     },
     sendButton: {
-        backgroundColor: '#007bff',
-        width: 44,
+        alignItems: 'center',
+        backgroundColor: cores.cor11,
+        borderRadius: 44,
         height: 44,
-        borderRadius: 22,
         justifyContent: 'center',
-        alignItems: 'center'
+        width: 44,
+    },
+    sectionHeader: {
+        backgroundColor: cores.cor5,
+        borderRadius: 8,
+        color: cores.cor9,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        ...fonts.text5
     },
     sectionHeaderContainer: {
         alignItems: 'center',
         marginVertical: 8
     },
-    sectionHeader: {
-        backgroundColor: '#555',
-        color: '#fff',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 8,
-        fontSize: 12
-    },
-    dateLabel: {
-        fontSize: 10,
-        color: '#888',
-        marginBottom: 4,
-        alignSelf: 'flex-end'
+    userMessage: {
+        alignSelf: 'flex-end',
+        backgroundColor: cores.cor3,
+        borderColor: cores.cor6
     }
 });
 
+export { cores };
 export default styles;
