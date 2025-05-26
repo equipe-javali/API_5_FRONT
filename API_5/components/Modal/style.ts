@@ -1,15 +1,6 @@
 import { StyleSheet } from "react-native";
 import { cores, fonts } from "../../styles";
 
-const styleDefault = StyleSheet.create({
-    button: {
-        alignItems: "center",
-        borderRadius: 5,
-        flex: 1,
-        padding: 10
-    }
-});
-
 const styles = StyleSheet.create({
     buttonText: {
         color: cores.cor8,
@@ -18,22 +9,31 @@ const styles = StyleSheet.create({
         ...fonts.bigBotton
     },
     saveButton: {
+        alignItems: "center",
+        borderRadius: 5,
         backgroundColor: cores.cor3,
+        flex: 1,
         minWidth: 80,
-        ...styleDefault.button
+        padding: 10
     },
     cancelButton: {
+        alignItems: "center",
         backgroundColor: cores.cor4,
+        borderRadius: 5,
+        flex: 1,
         minWidth: '55%',
-        ...styleDefault.button
+        padding: 10
     },
     closeButton: {
+        alignItems: "center",
         backgroundColor: cores.cor1,
         borderColor: cores.cor9,
         borderWidth: 1,
+        borderRadius: 5,
+        flex: 1,
         minWidth: 100,
+        padding: 10,
         width: '55%',
-        ...styleDefault.button
     },
     buttonsContainer: {
         alignItems: 'center',
