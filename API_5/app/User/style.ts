@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
         maxWidth: "100%",
         paddingHorizontal: 50,
         paddingVertical: 12,
-        width: 200
+        width: 210
     },
     buttonContainer: {
         alignItems: 'center',
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'space-evenly',
         width: '100%'
     },
     buttonText: {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
         maxWidth: "100%",
         paddingHorizontal: 50,
         paddingVertical: 12,
-        width: 200
+        width: 210
     },
     cancelButtonText: {
         color: cores.cor6,
