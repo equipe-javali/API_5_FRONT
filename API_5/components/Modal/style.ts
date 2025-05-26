@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         backgroundColor: cores.cor3,
-        minWidth: 'auto',
+        minWidth: 80,
         ...styleDefault.button
     },
     cancelButton: {
