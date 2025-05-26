@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
         maxWidth: "100%",
         paddingHorizontal: 50,
         paddingVertical: 12,
-        width: 150
+        width: 300
     },
     buttonContainer: {
         alignItems: 'center',

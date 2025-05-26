@@ -116,7 +116,7 @@ export default function Login() {
   };
 
   return (
-    <BaseScreen >
+    <BaseScreen>
       <Image
         source={require('../../assets/project_images/logotipo.png')}
         style={styles.image}
@@ -136,7 +136,7 @@ export default function Login() {
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
-        placeholderTextColor={cores.cor1}
+        placeholderTextColor={cores.cor6}
         value={senha}
         onChangeText={setSenha}
       />
