@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Omni",
+    "slug": "omni",
+    "version": "1.0.0",
+    "orientation": "portrait",    
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "br.com.fatecsp.omni",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8ee5ce4d-3c9c-47a0-a7ff-ddd0a57b3529"
+      }
+    },
+    "owner": "katiane"
+  }
+}
