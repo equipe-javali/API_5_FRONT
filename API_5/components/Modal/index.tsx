@@ -14,7 +14,7 @@ interface BaseScreenProps {
     setLoading?: (status: boolean) => void;
 };
 
-export default function Modal({ children, loading, setLoading, setShow, show, secundaryButton, title }: BaseScreenProps) {
+export default function Modal({ children, loading, setShow, show, secundaryButton, title }: BaseScreenProps) {
     return (
         <ModalView
             transparent={true}
@@ -25,9 +25,7 @@ export default function Modal({ children, loading, setLoading, setShow, show, se
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContainer}>
                     {title && <Text style={styles.title}>{title}</Text>}
-                    <ScrollView style={styles.modalScroll}>
-                        {children}
-                    </ScrollView>
+                    {children}
                     {loading && <View style={styles.loadingOverlay}>
                         <ActivityIndicator size="large" color={cores.cor9} />
                     </View>}
