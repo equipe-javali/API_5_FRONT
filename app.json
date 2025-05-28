@@ -2,25 +2,33 @@
   "expo": {
     "name": "Omni",
     "slug": "omni",
-    "version": "1.0.1",
+    "version": "1.0.4",
     "orientation": "portrait",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
+      "networkSecurityConfig": {
+        "cleartextTrafficPermitted": true
+      },
       "package": "br.com.fatecsp.omni",
       "versionCode": 1
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },

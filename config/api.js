@@ -46,6 +46,14 @@ export const apiCall = async (endpoint, options = {}) => {
   } catch (error) {
     if (__DEV__) {
       console.error(`[API] Erro: ${error.message}`);
+      console.error(`[API] Detalhes do erro:`, JSON.stringify(error, null, 2));
+      console.error(`[API] Stack:`, error.stack);
+      
+      // Testes de rede para diagnóstico
+      console.log(`[API] Testando conectividade...`);
+      fetch('https://www.google.com')
+        .then(() => console.log('[API] Teste de conexão com Google: OK'))
+        .catch(e => console.log('[API] Teste de conexão com Google falhou:', e.message));
     }
     throw error;
   }

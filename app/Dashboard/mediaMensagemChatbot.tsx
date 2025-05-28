@@ -1,14 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Platform, ScrollView, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Platform,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { makeAuthenticatedRequest } from "../../config/tokenService";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
-import { BarChart } from "react-native-chart-kit";
+import SimpleBarChart from "./simpleBarChart";
 
 export default function MediaMensagemChatbot() {
-  const [agentes, setAgentes] = useState<{ id: number | string; nome: string }[]>([]);
-  const [agenteSelecionado, setAgenteSelecionado] = useState<string | null>(null);
+  const [agentes, setAgentes] = useState<
+    { id: number | string; nome: string }[]
+  >([]);
+  const [agenteSelecionado, setAgenteSelecionado] = useState<string | null>(
+    null
+  );
   const [inicio, setInicio] = useState<Date | null>(null);
   const [fim, setFim] = useState<Date | null>(null);
   const [showInicio, setShowInicio] = useState(false);
@@ -25,7 +38,9 @@ export default function MediaMensagemChatbot() {
   const [showCompararFim, setShowCompararFim] = useState(false);
   const [metricasComparacao, setMetricasComparacao] = useState<any[]>([]);
   const [loadingComparar, setLoadingComparar] = useState(false);
-  const [mensagemErroComparacao, setMensagemErroComparacao] = useState<string | null>(null);
+  const [mensagemErroComparacao, setMensagemErroComparacao] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     (async () => {
@@ -37,52 +52,54 @@ export default function MediaMensagemChatbot() {
     })();
   }, []);
 
-   
   const buscarMetricas = async () => {
     setMensagemErro(null);
-  
+
     if (!inicio || !fim) {
       setMetricas([]);
       setMensagemErro("Por favor, selecione um período.");
       return;
     }
-    
+
     if (!agenteSelecionado) {
       setMetricas([]);
       setMensagemErro("Por favor, selecione um chatbot para buscar os dados.");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       let url = `/api/dashboard/media_mensagens_por_agente/?`;
       url += `agente_id=${agenteSelecionado}&`;
       if (inicio) url += `inicio=${inicio.toISOString().slice(0, 10)}&`;
       if (fim) url += `fim=${fim.toISOString().slice(0, 10)}`;
-      
+
       console.log("Buscando dados de:", url);
-      
+
       // Tenta buscar os dados normalmente
       const resp = await makeAuthenticatedRequest(url);
-      
+
       if (resp.ok) {
         const data = await resp.json();
         processarDadosRecebidos(data);
       } else if (resp.status === 500) {
-        console.log("Erro 500 detectado, possivelmente divisão por zero. Retornando dados vazios.");
-        
-        
+        console.log(
+          "Erro 500 detectado, possivelmente divisão por zero. Retornando dados vazios."
+        );
+
         const dadoSimulado = {
           agentes: {
             [agenteSelecionado]: {
-              media_de_mensagens_por_usuario: 0
-            }
-          }
+              media_de_mensagens_por_usuario: 0,
+            },
+          },
         };
-        
+
         processarDadosRecebidos(dadoSimulado);
-        setMensagemErro("Não há mensagens para este chatbot no período selecionado.");
+        setMensagemErro(
+          "Não há mensagens para este chatbot no período selecionado."
+        );
       } else {
         console.error("Erro na requisição:", resp.status);
         setMetricas([]);
@@ -96,7 +113,7 @@ export default function MediaMensagemChatbot() {
       setLoading(false);
     }
   };
-  
+
   // Função auxiliar para processar os dados recebidos
   const processarDadosRecebidos = (data: any) => {
     if (
@@ -108,19 +125,25 @@ export default function MediaMensagemChatbot() {
       const agenteDados = data.agentes[agenteSelecionado];
       const metricaFormatada = {
         agente_id: agenteSelecionado,
-        agente_nome: agentes.find((a: any) => a.id.toString() === agenteSelecionado)?.nome || "Chatbot",
-        media_mensagens: agenteDados.media_de_mensagens_por_usuario
+        agente_nome:
+          agentes.find((a: any) => a.id.toString() === agenteSelecionado)
+            ?.nome || "Chatbot",
+        media_mensagens: agenteDados.media_de_mensagens_por_usuario,
       };
-      
+
       setMetricas([metricaFormatada]);
-      
+
       // Feedback se a média for zero
       if (metricaFormatada.media_mensagens === 0) {
-        setMensagemErro("Não há mensagens para este chatbot no período selecionado.");
+        setMensagemErro(
+          "Não há mensagens para este chatbot no período selecionado."
+        );
       }
     } else {
       setMetricas([]);
-      setMensagemErro("Não foram encontrados dados para este chatbot no período selecionado.");
+      setMensagemErro(
+        "Não foram encontrados dados para este chatbot no período selecionado."
+      );
     }
   };
 
@@ -132,7 +155,8 @@ export default function MediaMensagemChatbot() {
           key={agente.id}
           style={[
             styles.multiSelectItem,
-            agentesSelecionados.includes(agente.id.toString()) && styles.multiSelectItemSelected,
+            agentesSelecionados.includes(agente.id.toString()) &&
+              styles.multiSelectItemSelected,
           ]}
           onPress={() => {
             setAgentesSelecionados((prev) =>
@@ -143,7 +167,11 @@ export default function MediaMensagemChatbot() {
           }}
         >
           <Ionicons
-            name={agentesSelecionados.includes(agente.id.toString()) ? "checkbox" : "square-outline"}
+            name={
+              agentesSelecionados.includes(agente.id.toString())
+                ? "checkbox"
+                : "square-outline"
+            }
             size={18}
             color="#fff"
             style={{ marginRight: 6 }}
@@ -152,21 +180,22 @@ export default function MediaMensagemChatbot() {
         </TouchableOpacity>
       ))}
     </View>
-  ); 
+  );
 
   // DatePicker para comparação
   const renderCompararDatePicker = (type: "inicio" | "fim") => {
     const value = type === "inicio" ? compararInicio : compararFim;
     const setValue = type === "inicio" ? setCompararInicio : setCompararFim;
     const show = type === "inicio" ? showCompararInicio : showCompararFim;
-    const setShow = type === "inicio" ? setShowCompararInicio : setShowCompararFim;
+    const setShow =
+      type === "inicio" ? setShowCompararInicio : setShowCompararFim;
     const label = type === "inicio" ? "Início" : "Fim";
     if (Platform.OS === "web") {
       return (
         <input
           type="date"
           value={value ? value.toISOString().slice(0, 10) : ""}
-          onChange={e => {
+          onChange={(e) => {
             const date = e.target.value ? new Date(e.target.value) : null;
             setValue(date);
           }}
@@ -189,7 +218,12 @@ export default function MediaMensagemChatbot() {
             style={styles.dateInput}
             onPress={() => setShow(true)}
           >
-            <Ionicons name="calendar-outline" size={18} color="#B8B8B8" style={{ marginRight: 6 }} />
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color="#B8B8B8"
+              style={{ marginRight: 6 }}
+            />
             <Text style={styles.dateInputText}>
               {value ? value.toLocaleDateString("pt-BR") : label}
             </Text>
@@ -215,47 +249,60 @@ export default function MediaMensagemChatbot() {
     // Exige pelo menos dois chatbots
     if (agentesSelecionados.length < 2) {
       setMetricasComparacao([]);
-      setMensagemErroComparacao("Por favor, selecione pelo menos dois chatbots para comparar.");
+      setMensagemErroComparacao(
+        "Por favor, selecione pelo menos dois chatbots para comparar."
+      );
       return;
     }
     // Verifica se período foi selecionado
     if (!compararInicio || !compararFim) {
       setMetricasComparacao([]);
-      setMensagemErroComparacao("Por favor, selecione o período de comparação.");
+      setMensagemErroComparacao(
+        "Por favor, selecione o período de comparação."
+      );
       return;
     }
-    
+
     setLoadingComparar(true);
     let url = `/api/dashboard/media_mensagens_por_agente/?`;
-    
+
     try {
       // Buscar dados para cada agente selecionado
       const resultados = [];
-      
+
       for (const agenteId of agentesSelecionados) {
-        const urlAgente = `${url}agente_id=${agenteId}&inicio=${compararInicio.toISOString().slice(0, 10)}&fim=${compararFim.toISOString().slice(0, 10)}`;
+        const urlAgente = `${url}agente_id=${agenteId}&inicio=${compararInicio
+          .toISOString()
+          .slice(0, 10)}&fim=${compararFim.toISOString().slice(0, 10)}`;
         const resp = await makeAuthenticatedRequest(urlAgente);
-        
+
         if (resp.ok) {
           const data = await resp.json();
           if (data && data.agentes && data.agentes[agenteId]) {
-            const agenteNome = agentes.find((a: any) => a.id.toString() === agenteId)?.nome || `Chatbot ${agenteId}`;
+            const agenteNome =
+              agentes.find((a: any) => a.id.toString() === agenteId)?.nome ||
+              `Chatbot ${agenteId}`;
             resultados.push({
               agente_id: agenteId,
               agente_nome: agenteNome,
-              media_mensagens: data.agentes[agenteId].media_de_mensagens_por_usuario
+              media_mensagens:
+                data.agentes[agenteId].media_de_mensagens_por_usuario,
             });
           }
         }
       }
-      
+
       setMetricasComparacao(resultados);
       if (resultados.length === 0) {
-        setMensagemErroComparacao("Não foram encontrados dados para os chatbots selecionados no período indicado.");
+        setMensagemErroComparacao(
+          "Não foram encontrados dados para os chatbots selecionados no período indicado."
+        );
       }
     } catch (error) {
       console.error("Erro ao buscar comparação:", error);
-      setMensagemErroComparacao("Ocorreu um erro ao buscar os dados para comparação.");
+      setMensagemErroComparacao(
+        "Ocorreu um erro ao buscar os dados para comparação."
+      );
     } finally {
       setLoadingComparar(false);
     }
@@ -264,7 +311,9 @@ export default function MediaMensagemChatbot() {
   // Dados para gráfico de comparação
   const chartDataComparacao = React.useMemo(() => {
     if (!metricasComparacao || metricasComparacao.length === 0) return null;
-    const labels = metricasComparacao.map((m: any) => m.agente_nome || `Chatbot ${m.agente_id}`);
+    const labels = metricasComparacao.map(
+      (m: any) => m.agente_nome || `Chatbot ${m.agente_id}`
+    );
     const data = metricasComparacao.map((m: any) => m.media_mensagens);
     return {
       labels,
@@ -284,7 +333,7 @@ export default function MediaMensagemChatbot() {
         <input
           type="date"
           value={value ? value.toISOString().slice(0, 10) : ""}
-          onChange={e => {
+          onChange={(e) => {
             const date = e.target.value ? new Date(e.target.value) : null;
             setValue(date);
           }}
@@ -306,7 +355,12 @@ export default function MediaMensagemChatbot() {
             style={styles.dateInput}
             onPress={() => setShow(true)}
           >
-            <Ionicons name="calendar-outline" size={18} color="#B8B8B8" style={{ marginRight: 6 }} />
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color="#B8B8B8"
+              style={{ marginRight: 6 }}
+            />
             <Text style={styles.dateInputText}>
               {value ? value.toLocaleDateString("pt-BR") : label}
             </Text>
@@ -341,7 +395,11 @@ export default function MediaMensagemChatbot() {
           >
             <Picker.Item label="Selecione um chatbot" value={null} />
             {agentes.map((agente: any) => (
-              <Picker.Item key={agente.id} label={agente.nome} value={agente.id.toString()} />
+              <Picker.Item
+                key={agente.id}
+                label={agente.nome}
+                value={agente.id.toString()}
+              />
             ))}
           </Picker>
         </View>
@@ -351,12 +409,21 @@ export default function MediaMensagemChatbot() {
           <Text style={styles.dateSeparator}>até</Text>
           {renderDatePicker("fim")}
         </View>
-        <TouchableOpacity style={styles.button} onPress={buscarMetricas} disabled={loading}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={buscarMetricas}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Ionicons name="search" size={18} color="#fff" style={{ marginRight: 6 }} />
+              <Ionicons
+                name="search"
+                size={18}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
               <Text style={styles.buttonText}>Buscar</Text>
             </>
           )}
@@ -368,13 +435,18 @@ export default function MediaMensagemChatbot() {
         ) : mensagemErro ? (
           <Text style={styles.emptyText}>{mensagemErro}</Text>
         ) : metricas.length === 0 ? (
-          <Text style={styles.emptyText}>Faça as seleções para buscar os dados.</Text>
+          <Text style={styles.emptyText}>
+            Faça as seleções para buscar os dados.
+          </Text>
         ) : (
           metricas.map((m, idx) => (
             <View key={idx} style={styles.metricItem}>
-              <Text style={styles.metricDate}>{m.agente_nome || `Chatbot ${m.agente_id}`}</Text>
+              <Text style={styles.metricDate}>
+                {m.agente_nome || `Chatbot ${m.agente_id}`}
+              </Text>
               <Text style={styles.metricLabel}>
-                Média de mensagens por usuário: <Text style={styles.metricValue}>{m.media_mensagens}</Text>
+                Média de mensagens por usuário:{" "}
+                <Text style={styles.metricValue}>{m.media_mensagens}</Text>
               </Text>
             </View>
           ))
@@ -401,7 +473,12 @@ export default function MediaMensagemChatbot() {
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Ionicons name="analytics" size={18} color="#fff" style={{ marginRight: 6 }} />
+              <Ionicons
+                name="analytics"
+                size={18}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
               <Text style={styles.buttonText}>Comparar</Text>
             </>
           )}
@@ -414,33 +491,23 @@ export default function MediaMensagemChatbot() {
         ) : mensagemErroComparacao ? (
           <Text style={styles.emptyText}>{mensagemErroComparacao}</Text>
         ) : metricasComparacao.length === 0 ? (
-          <Text style={styles.emptyText}>Faça as seleções para comparar os chatbots.</Text>
+          <Text style={styles.emptyText}>
+            Faça as seleções para comparar os chatbots.
+          </Text>
         ) : null}
       </View>
 
       {/* Gráfico de comparação */}
       {chartDataComparacao && (
         <View style={{ marginTop: 24 }}>
-          <Text style={styles.chartTitle}>Gráfico de Comparação de Média de Mensagens</Text>
-          <BarChart
+          <Text style={styles.chartTitle}>
+            Gráfico de Comparação de Média de Mensagens
+          </Text>
+          <SimpleBarChart
             data={chartDataComparacao}
             width={Dimensions.get("window").width - 40}
             height={220}
-            yAxisLabel=""
-            yAxisSuffix=" msg"
-            chartConfig={{
-              backgroundColor: "#212121",
-              backgroundGradientFrom: "#212121",
-              backgroundGradientTo: "#212121",
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(0, 204, 102, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255,255,255,${opacity})`,
-              style: { borderRadius: 16 },
-              propsForBackgroundLines: { stroke: "#444" },
-            }}
-            style={{ borderRadius: 12 }}
-            fromZero
-            showValuesOnTopOfBars
+            yAxisSuffix="s"
           />
         </View>
       )}
@@ -450,9 +517,26 @@ export default function MediaMensagemChatbot() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#282828", padding: 20 },
-  title: { fontSize: 24, color: "#fff", marginBottom: 20, fontWeight: "bold", alignSelf: "center" },
-  filtros: { marginBottom: 20, backgroundColor: "#212121", borderRadius: 10, padding: 16 },
-  label: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 6, marginTop: 10 },
+  title: {
+    fontSize: 24,
+    color: "#fff",
+    marginBottom: 20,
+    fontWeight: "bold",
+    alignSelf: "center",
+  },
+  filtros: {
+    marginBottom: 20,
+    backgroundColor: "#212121",
+    borderRadius: 10,
+    padding: 16,
+  },
+  label: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 6,
+    marginTop: 10,
+  },
   pickerContainer: {
     backgroundColor: "#333",
     borderRadius: 5,
@@ -464,10 +548,10 @@ const styles = StyleSheet.create({
   picker: {
     color: "#fff",
     backgroundColor: "#333",
-    width: "100%",    
+    width: "100%",
     minHeight: 50,
   },
-  dateRow: { flexDirection: "row", alignItems: "center", marginBottom: 10},
+  dateRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   dateInput: {
     flexDirection: "row",
     alignItems: "center",
@@ -477,7 +561,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     minWidth: 120,
     borderWidth: 1,
-    borderColor: "#444"
+    borderColor: "#444",
   },
   dateInputText: { color: "#fff", fontSize: 16 },
   dateSeparator: { color: "#fff", marginHorizontal: 8, fontSize: 16 },
@@ -503,9 +587,19 @@ const styles = StyleSheet.create({
   metricDate: { color: "#fff", fontSize: 16, marginBottom: 4 },
   metricLabel: { color: "#fff", fontSize: 16 },
   metricValue: { color: "#B8B8B8", fontWeight: "bold" },
-  emptyText: { color: "#ccc", fontSize: 16, textAlign: "center", marginTop: 0, marginBottom: 5 },
+  emptyText: {
+    color: "#ccc",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 0,
+    marginBottom: 5,
+  },
 
-  multiSelectContainer: { flexDirection: "row", flexWrap: "wrap", marginBottom: 10 },
+  multiSelectContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 10,
+  },
   multiSelectItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -530,5 +624,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#444",
   },
-  chartTitle: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 12, alignSelf: "center" },
+  chartTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    alignSelf: "center",
+  },
 });

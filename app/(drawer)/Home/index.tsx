@@ -41,18 +41,23 @@ export default function Home({ navigation }: HomeProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#282828',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 50,
+    backgroundColor: '#282828',   
+    flexWrap: 'wrap',   
+    flexDirection: 'row',    
+    paddingBlockStart: 20,
   },
   grid: {
     width: '100%', 
-    paddingHorizontal: 20, 
+    paddingHorizontal: '20%',
+    paddingVertical: '5%',
+         
+    
   },
   link: {
-    width: '100%',
+    width: '100%',    
     marginBottom: 15, 
+        
+    
   },
   card: {
     backgroundColor: '#212121', 
@@ -60,7 +65,8 @@ const styles = StyleSheet.create({
     height: 120, 
     marginBottom: 10, 
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent:'center',
+    flexDirection: 'column',
     borderRadius: 10, 
   },
   cardText: {

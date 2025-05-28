@@ -175,7 +175,7 @@ const Login = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.registerContainer}>
-        <TouchableOpacity onPress={() => router.push('/Start/register')}>
+        <TouchableOpacity onPress={() => router.push('/Start/recuperarSenha')}>
           <Text style={styles.registerLink}>Esqueci minha senha</Text>
         </TouchableOpacity>
       </View>
