@@ -110,9 +110,8 @@ const Chatbots = () => {
               id: selectedChatbot.id,
             });
             // Identificar o ID correto do agente
-            const agenteId =              
-              selectedChatbot.id;
-            
+            const agenteId = selectedChatbot.id;
+
             if (!agenteId) {
               window.alert("ID do agente não encontrado");
               setDeleteTriggered(false);
@@ -130,14 +129,17 @@ const Chatbots = () => {
 
             if (response.ok) {
               const respData = await response.json();
-              window.alert(respData.message || "Chatbot excluído com sucesso!");
 
-              setChatbots(
-                chatbots.filter(
-                  (bot) =>                    
-                    bot.id !== agenteId
-                )
-              );
+              // PRIMEIRO: Limpar os estados
+              const chatbotId = agenteId;
+              setSelectedChatbot(null);
+              setDeleteTriggered(false);
+
+              // DEPOIS: Atualizar a lista
+              setChatbots((prev) => prev.filter((bot) => bot.id !== chatbotId));
+
+              // Por último: Mostrar alerta
+              window.alert(respData.message || "Chatbot excluído com sucesso!");
             } else {
               try {
                 const errorData = await response.json();
@@ -172,8 +174,7 @@ const Chatbots = () => {
               onPress: async () => {
                 try {
                   // Identificar o ID correto do agente
-                  const agenteId =                    
-                    selectedChatbot.id;
+                  const agenteId = selectedChatbot.id;
 
                   if (!agenteId) {
                     Alert.alert("Erro", "ID do agente não encontrado");
@@ -192,16 +193,21 @@ const Chatbots = () => {
 
                   if (response.ok) {
                     const respData = await response.json();
+
+                    // PRIMEIRO: Limpar os estados
+                    const chatbotId = agenteId;
+                    setSelectedChatbot(null);
+                    setDeleteTriggered(false);
+
+                    // DEPOIS: Atualizar a lista e mostrar mensagem
+                    setChatbots((prev) =>
+                      prev.filter((bot) => bot.id !== chatbotId)
+                    );
+
+                    // Por último: Mostrar alerta
                     Alert.alert(
                       "Sucesso",
                       respData.message || "Chatbot excluído com sucesso!"
-                    );
-
-                    setChatbots(
-                      chatbots.filter(
-                        (bot) =>                          
-                          bot.id !== agenteId
-                      )
                     );
                   } else {
                     try {
